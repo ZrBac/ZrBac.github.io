@@ -4,30 +4,11 @@
   
     
     <entry>
-      <title>python学习笔记</title>
-      <link href="/2019/09/23/python%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
-      <url>/2019/09/23/python%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
-      
-        <content type="html"><![CDATA[]]></content>
-      
-      
-      
-        <tags>
-            
-            <tag> Python </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>Linux学习笔记</title>
       <link href="/2019/09/23/Linux%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/"/>
       <url>/2019/09/23/Linux%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/</url>
       
-        <content type="html"><![CDATA[<h2 id="Linux常用命令"><a href="#Linux常用命令" class="headerlink" title="Linux常用命令"></a>Linux常用命令</h2><h3 id="文件处理命令"><a href="#文件处理命令" class="headerlink" title="文件处理命令"></a>文件处理命令</h3><hr><blockquote><p>ls       // <em>list 显示目录文件</em></p><p>ls -a  // <em>显示所有文件，包括隐藏文件</em></p><p>ls -l   // <em>详细信息显示</em></p><p>ls -d  // <em>查看目录属性</em></p></blockquote><p>``</p><p>文件类型说明</p><blockquote><p>-rw-r–r–  // <em>-开头代表文件 d为目录 l为软连接文件</em></p><p>rw- r– r–  // <em>每三位是一个组别，依次为 u所有者 g所属组 o其他人</em></p><p>-rw-r–r–   // <em>r(read)表示读权限 w(write)写 权限 x(execute)执行权限</em></p></blockquote><hr><blockquote><p>mkdir [目录]    // <em>make directiories 创建目录</em></p><p>mkdir -p [目录] // <em>递归创建目录</em></p><p>rmdir [目录]   // <em>remove empty directories 删除空目录</em></p><p>rm -rf [文件或目录] // <em>remove 删除文件 -r删除目录 -f强制执行</em></p></blockquote><hr><blockquote><p>pwd // <em>print working directory 显示当前目录</em></p><p>cd [目录]    // <em>change directory 切换目录</em></p><p>cp -rp [原文件或目录] [目标目录]  // <em>copy 复制文件或目录 -r复制目录 -p保留属性</em></p><p>mv [原文件或目录] [目标目录/新名称]  // <em>move 剪切文件、改名</em></p></blockquote>]]></content>
+        <content type="html"><![CDATA[<h2 id="Linux常用命令"><a href="#Linux常用命令" class="headerlink" title="Linux常用命令"></a>Linux常用命令</h2><h3 id="文件处理命令"><a href="#文件处理命令" class="headerlink" title="文件处理命令"></a>文件处理命令</h3><hr><blockquote><p>ls       // <em>list 显示目录文件</em></p><p>ls -a  // <em>显示所有文件，包括隐藏文件</em></p><p>ls -l   // <em>详细信息显示</em></p><p>ls -d  // <em>查看目录属性</em></p></blockquote><a id="more"></a><p>文件类型说明</p><blockquote><p>-rw-r–r–  // <em>-开头代表文件 d为目录 l为软连接文件</em></p><p>rw- r– r–  // <em>每三位是一个组别，依次为 u所有者 g所属组 o其他人</em></p><p>-rw-r–r–   // <em>r(read)表示读权限 w(write)写 权限 x(execute)执行权限</em></p></blockquote><hr><blockquote><p>mkdir [目录]    // <em>make directiories 创建目录</em></p><p>mkdir -p [目录] // <em>递归创建目录</em></p><p>rmdir [目录]   // <em>remove empty directories 删除空目录</em></p><p>rm -rf [文件或目录] // <em>remove 删除文件 -r删除目录 -f强制执行</em></p></blockquote><hr><blockquote><p>pwd // <em>print working directory 显示当前目录</em></p><p>cd [目录]    // <em>change directory 切换目录</em></p><p>cp -rp [原文件或目录] [目标目录]  // <em>copy 复制文件或目录 -r复制目录 -p保留属性</em></p><p>mv [原文件或目录] [目标目录/新名称]  // <em>move 剪切文件、改名</em></p></blockquote>]]></content>
       
       
       <categories>
@@ -40,33 +21,6 @@
         <tags>
             
             <tag> Linux </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>blogtest</title>
-      <link href="/2019/09/22/blogtest/"/>
-      <url>/2019/09/22/blogtest/</url>
-      
-        <content type="html"><![CDATA[]]></content>
-      
-      
-      <categories>
-          
-          <category> hexo </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> hexo </tag>
-            
-            <tag> test </tag>
             
         </tags>
       
