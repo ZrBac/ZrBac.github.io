@@ -19,6 +19,8 @@ categories: 学习笔记
 
 ---
 
+<!--more-->
+
 ## 工具方面
 
 - 操作系统: Linux(CentOS\Ubuntu\Fedora...)

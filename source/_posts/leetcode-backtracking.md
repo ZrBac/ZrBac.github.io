@@ -11,7 +11,7 @@ categoties: leetcode
 
 This structure might apply to many other backtracking questions,here are just some examples to demonstrate `Subsets`, `Permutations`, and `Combination Sum`.  
 
-
+<!--more-->
 
 `Subsets`:https://leetcode.com/problems/subsets/
 

@@ -16,6 +16,7 @@ categories: 学习笔记
 - 仓库区(Repository): 分为本地和远程仓库
 - 代码提交步骤: `git add`, `git commit`, `git push`
 
+<!--more-->
 
 ### Git 基本操作
 
