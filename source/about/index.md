@@ -5,4 +5,4 @@ type: "about"
 comments: false
 ---
 
-I'm a huge fan of you, Mr.ZrBac
+Avicii Forever.

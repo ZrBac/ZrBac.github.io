@@ -125,8 +125,11 @@ $ git checkout -- .
 # 重置暂存区指定文件，但与上次commit保持一致，工作区不变
 $ git reset <file>
 
-# 重置暂存区与工作区，与上次commit一致
-$ git reset --hard
+# 重置暂存区与工作区，HEAD^上一版本，~n上n版本
+$ git reset --hard HEAD^
+$ git reset --hard HEAD~100
+$ git reset --hard <commitID>
+
 ```
 
 #### 查询操作
@@ -144,8 +147,8 @@ $ git diff --cached <file>
 # 查看版本库修改记录
 $ git log
 
-# 查看版本库修改记录
-$ git log
+# 查看命令记录
+$ git relog
 
 # 查看某人提交记录
 $ git log --author=someone
