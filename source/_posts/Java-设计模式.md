@@ -3,7 +3,7 @@ title: Java 设计模式
 date: 2019-11-25 10:47:05
 tags:
 - Java
-- categories: 学习笔记
+categories: 学习笔记
 ---
 
 ### Java设计模式
@@ -40,7 +40,4 @@ tags:
 - 合成复用原则
   - 尽量使用合成/聚合的方式，而不是使用继承
 
-![avatar](Java-设计模式/the-relationship-between-design-patterns.jpg)
-
-
-
+![design patterns](https://user-images.githubusercontent.com/33156501/69926648-4163fd80-14f0-11ea-8165-dc7f52930ba4.jpg)

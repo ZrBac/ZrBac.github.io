@@ -3,7 +3,7 @@ title: leetcode backtracking
 date: 2019-11-25 10:05:08
 tags:
 - Java
-categoties: leetcode
+categories: leetcode
 ---
 
 ### A general approcach to backtracking questions in Java
