@@ -128,7 +128,9 @@ $ git reset <file>
 # 重置暂存区与工作区，HEAD^上一版本，~n上n版本
 $ git reset --hard HEAD^
 $ git reset --hard HEAD~100
+$ git reset HEAD <filename>
 $ git reset --hard <commitID>
+
 
 ```
 
