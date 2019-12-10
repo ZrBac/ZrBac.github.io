@@ -21,6 +21,8 @@ public NewsProvider(NewsListener newsListener,NewsPublisher newsPublisher){
 }
 ```
 
+<!--more-->
+
 #### setter方法注入
 
 为当前对象所依赖对象对应的属性添加setter方法，通过setter方法将相应的依赖对象设置到被注入对象中。
