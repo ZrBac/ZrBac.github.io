@@ -20,6 +20,8 @@ Explanation: The first 1's next greater number is 2; The number 2 can't find nex
 
 ---
 
+<!--more-->
+
 #### solution one 
 
 `brute force`

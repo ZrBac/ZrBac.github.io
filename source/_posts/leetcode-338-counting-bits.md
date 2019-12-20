@@ -26,6 +26,8 @@ Output: [0,1,1,2,1,2]
 
 ---
 
+<!--more-->
+
 #### solution one
 
 `easy to come up with`

@@ -25,6 +25,8 @@ Output: [1,3,2]
 
 ---
 
+<!--more-->
+
 ####  solution one
 
 `Recursive Approach`

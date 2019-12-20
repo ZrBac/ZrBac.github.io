@@ -32,6 +32,8 @@ Explanation: Six palindromic strings: "a", "a", "a", "aa", "aa", "aaa".
 
 ---
 
+<!--more-->
+
 #### solution one
 
 `expand around center`
