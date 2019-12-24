@@ -15,6 +15,8 @@ HashMap时常用的Java集合之一，是基于哈希表的Map接口的实现。
 
 在jdk1.8之后，解决哈希冲突的方式有了较大变化，当链表长度大于阈值(默认为8)时，将链表转化为红黑树，以减少搜索时间，原本Map.Entry接口的实现类Entry改名为Node，转化为红黑树时改用另一种实现TreeNode。
 
+<!--more-->
+
 **Node类**
 ```java
 static class Node<K,V> implements Map.Entry<K,V> {
