@@ -63,3 +63,10 @@ public class NewsProvider{
 表达式层面
 注册bean定义层面
 表达依赖注入关系层面
+
+
+
+
+
+
+

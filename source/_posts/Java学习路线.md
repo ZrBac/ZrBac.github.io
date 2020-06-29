@@ -77,3 +77,4 @@ categories: 学习笔记
 - JVM 细节与排错
 - 高并发/高可用
 
+![java_path](blog_images/java-path.jpg)

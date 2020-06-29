@@ -143,7 +143,7 @@ public static void main(String[] args) {
 
 操作过程如下：
 
-![avatar](https://img-blog.csdn.net/20151225163849880?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQv/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center)
+![avatar](https://user-images.githubusercontent.com/33156501/75601530-f8274800-5af6-11ea-9d6c-b6ba32c7e5b7.gif)
 
 ---
 
@@ -216,7 +216,7 @@ IDEA Windows快捷键
 - 快速生成for循环： object.for Enter
 ---
 
-POJO: plain old java object
+POJO: plain old java object(简单java对象)
 
 ---
 
@@ -244,4 +244,37 @@ CoC: Convention over Configutation
 
 ---
 
+
+`int`和`Integer`
+
+- ```int是java的基本数据类型```
+
+- ```Integer继承了Object类，是对象类型，为int的包装类```
+
+区别
+- 值存储：int存储在栈中；Integer对象的引用存储在栈空间中，对象的数据存储在堆空间中。
+- 初始化：int初始化值为0；Integer初始化值为null。
+- 传参：int为值传递，栈中数据不可变；Integer对象为引用传递，引用 不可变，但引用指向的堆空间地址中的值是可以改变的。
+- 泛型：泛型不支持int，支持Integer。
+- 运算：int可直接做运算，为类的特性；Integer的对象可以调用该类的方法，但是在拆箱之前不能进行运算，需要转化为基本类型int。
+
+相同值下int与Integer的比较
+- 两个通过new生成的变量，结果为false。
+- int和Integer的值比较，若值相等，为true。
+  - 比较时，Integer会自动拆箱为int类型再比较
+- new的Integer与非new的Integer比较，为false。
+  - new 生成的Integer变量的值在堆空间中，非new 生成的Integer变量的值在在常量池中;
+  - 非new生成的Integer变量，会先判断常量池中是否有该对象，若有则共享，若无则在常量池中放入该对象,也叫享元模式
+- 两个非new 生成的Integer对象比较，则结果为true。
+  - 前提：值的范围在 -128 ~ 127 之间。
+  - 涉及到java对 int 与 Integer 的自动装箱和拆箱的一种模式：享元模式—flyweight，为了加强对简单数字的重复利用。
+  - 在赋值时，其实是执行了Integer的valueOf()方法。
+当值在 -128 ~ 127之间时，java会进行自动装箱，然后会对值进行缓存，如果下次再有相同的值，会直接在缓存中取出使用。缓存是通过Integer的内部类IntegerCache来完成的。当值超出此范围，会在堆中new出一个对象来存储。
+- 内部类IntegerCache
+  - 通过此类可以缓存简单数字。
+  - 缓存的数大小可以由 -XX：AutoBoxCacheMax = 控制。
+  - jvm初始化时，java.lang.Integer.IntegerCache.high属性可以设置并保存在私有系统属性中。规定了low属性的值：-128
+
+
+---
 
