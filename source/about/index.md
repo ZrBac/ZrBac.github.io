@@ -76,3 +76,4 @@ Guess I won't be coming to church on Sunday
 I'll be waiting for love, waiting for love
 我会等待爱的到来，等待爱
 To cover on
+让我痊愈
