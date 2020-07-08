@@ -95,8 +95,8 @@
 <meta property="og:description" content="面向对象基本数据类型和引用数据类型传参的区别 Java内存空间栈区：  每个线程包含一个栈区，栈中只保存基础数据类型的值和对象的引用，当一段代码或一个方法调用完毕后，栈中为这段代码提供的基本数据类型或对象的引用被立即释放。 每个栈中的数据(原始类型和对象引用)私有，其他栈不能访问。 栈分为3个部分：基本类型变量区、执行环境上下文、操作指令去(存放操作指令)。  堆区：  存储的都是对象，每个对象都">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://user-images.githubusercontent.com/33156501/81540262-f655ec80-93a3-11ea-9879-0c45124a433c.png">
-<meta property="og:image" content="http://yoursite.com/2020/05/11/Java-面向对象/blog_images/%E7%BB%A7%E6%89%BF.png">
-<meta property="og:updated_time" content="2020-07-01T03:34:02.437Z">
+<meta property="og:image" content="https://user-images.githubusercontent.com/33156501/86781847-febf6080-c090-11ea-8086-f678faf02c2a.png">
+<meta property="og:updated_time" content="2020-07-07T12:33:31.843Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java-面向对象">
 <meta name="twitter:description" content="面向对象基本数据类型和引用数据类型传参的区别 Java内存空间栈区：  每个线程包含一个栈区，栈中只保存基础数据类型的值和对象的引用，当一段代码或一个方法调用完毕后，栈中为这段代码提供的基本数据类型或对象的引用被立即释放。 每个栈中的数据(原始类型和对象引用)私有，其他栈不能访问。 栈分为3个部分：基本类型变量区、执行环境上下文、操作指令去(存放操作指令)。  堆区：  存储的都是对象，每个对象都">
@@ -369,8 +369,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-07-01T11:34:02+08:00">
-                2020-07-01
+              <time title="更新于" itemprop="dateModified" datetime="2020-07-07T20:33:31+08:00">
+                2020-07-07
               </time>
             
           </span>
@@ -481,7 +481,7 @@
 <p><strong>yes表示该权限修饰符所修饰的成员可被该处访问</strong></p>
 <p>修饰符 | 类内部 | 同包 | 子类 | 任何地方<br>:-: | :-: | :-: | :-: | :-: | :-:<br>private | yes |<br>default | yes | yes |<br>protected | yes | yes | yes |<br>public  | yes | yes | yes | yes |</p>
 <h3 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h3><p>继承(Inheritance)是一种联结类与类的层次模型。指的是一个类(称为子类、子接口)继承另外的一个类(称为父类、父接口)的功能，并可以增加它自己的新功能的能力，继承是类与类或者接口与接口之间最常见的关系；继承是一种is-a关系。</p>
-<p><img src="blog_images/%E7%BB%A7%E6%89%BF.png" alt="继承"></p>
+<p><img src="https://user-images.githubusercontent.com/33156501/86781847-febf6080-c090-11ea-8086-f678faf02c2a.png" alt="继承"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Student s = <span class="keyword">new</span> Student(<span class="string">"Xiao Ming"</span>, <span class="number">12</span>, <span class="number">89</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> String name;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">int</span> age;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">int</span> score;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Student</span><span class="params">(String name, <span class="keyword">int</span> age, <span class="keyword">int</span> score)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(name,age);        <span class="comment">//父类的构造器有参数，需要显式调用。默认时为super(),不含参数。</span></span><br><span class="line">        <span class="keyword">this</span>.score = score;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>子类是不继承父类的构造器（构造方法或者构造函数）的，它只是调用（隐式或显式）。如果父类的构造器带有参数，则必须在子类的构造器中显式地通过<strong>super</strong>关键字调用父类的构造器并配以适当的参数列表。如果父类构造器没有参数，则在子类的构造器中不需要使用<strong>super</strong>关键字调用父类构造器，系统会自动调用父类的无参构造器。</p>

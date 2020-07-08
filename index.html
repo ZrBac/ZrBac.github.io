@@ -367,8 +367,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-07-01T11:34:02+08:00">
-                2020-07-01
+              <time title="更新于" itemprop="dateModified" datetime="2020-07-07T20:33:31+08:00">
+                2020-07-07
               </time>
             
           </span>
@@ -551,8 +551,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2019-12-24T20:36:23+08:00">
-                2019-12-24
+              <time title="更新于" itemprop="dateModified" datetime="2020-07-08T10:49:02+08:00">
+                2020-07-08
               </time>
             
           </span>
@@ -608,9 +608,17 @@
 
       
         
-          
-          
-          
+          <h3 id="红黑树"><a href="#红黑树" class="headerlink" title="红黑树"></a>红黑树</h3><p>Red-Black Tree，整体较平衡的二叉查找树，查找性能较高。</p>
+<p>五个重要特性：</p>
+<ul>
+<li>节点为红色或黑色</li>
+<li>根为黑色</li>
+<li>叶子（NIL节点）节点为黑色</li>
+<li>每个红色节点必须有两个黑色子节点（从每个叶子到跟的所有路径上不能有连续的两个红色节点）</li>
+<li>从任一节点到其每个叶子的所有简单路径都包含相同数目的黑色节点</li>
+</ul>
+<p>以上性质保证了红黑树具有：<br><strong>从根到叶子的最长可能路径不多于最短可能路径的两倍</strong>（因为红黑树中最短可能路径都是黑色节点，最长可能路径为红黑节点交替，而两者由于性质4具有相同数量的黑色节点）<br>这一特征。从而使其在大致上是平衡的，插入、删除、查找操作的最坏情况与树的高度成比例，不会出现左右子树极其失衡的情况</p>
+<p>下图为一红黑树：<br><img src="https://user-images.githubusercontent.com/33156501/86772988-9a4bd380-c087-11ea-8715-677b69c67d4e.png" alt="红黑树示例"></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/12/24/红黑树算法、原理分析/#more" rel="contents">
