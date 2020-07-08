@@ -67,11 +67,12 @@ protected | yes | yes | yes |
 public  | yes | yes | yes | yes |
 
 
+
 ### 继承
 
 继承(Inheritance)是一种联结类与类的层次模型。指的是一个类(称为子类、子接口)继承另外的一个类(称为父类、父接口)的功能，并可以增加它自己的新功能的能力，继承是类与类或者接口与接口之间最常见的关系；继承是一种is-a关系。
 
-![继承](blog_images/继承.png)
+![继承](https://user-images.githubusercontent.com/33156501/86781847-febf6080-c090-11ea-8086-f678faf02c2a.png)
 
 
 ```java
