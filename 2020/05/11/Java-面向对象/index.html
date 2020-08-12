@@ -96,7 +96,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://user-images.githubusercontent.com/33156501/81540262-f655ec80-93a3-11ea-9879-0c45124a433c.png">
 <meta property="og:image" content="https://user-images.githubusercontent.com/33156501/86781847-febf6080-c090-11ea-8086-f678faf02c2a.png">
-<meta property="og:updated_time" content="2020-07-07T12:33:31.843Z">
+<meta property="og:updated_time" content="2020-07-21T09:47:28.324Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java-面向对象">
 <meta name="twitter:description" content="面向对象基本数据类型和引用数据类型传参的区别 Java内存空间栈区：  每个线程包含一个栈区，栈中只保存基础数据类型的值和对象的引用，当一段代码或一个方法调用完毕后，栈中为这段代码提供的基本数据类型或对象的引用被立即释放。 每个栈中的数据(原始类型和对象引用)私有，其他栈不能访问。 栈分为3个部分：基本类型变量区、执行环境上下文、操作指令去(存放操作指令)。  堆区：  存储的都是对象，每个对象都">
@@ -369,8 +369,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-07-07T20:33:31+08:00">
-                2020-07-07
+              <time title="更新于" itemprop="dateModified" datetime="2020-07-21T17:47:28+08:00">
+                2020-07-21
               </time>
             
           </span>
@@ -479,7 +479,7 @@
 <li>默认权限即同包权限，同包权限的元素只能在定义它们的类中，以及同包的类中被调用。</li>
 </ul>
 <p><strong>yes表示该权限修饰符所修饰的成员可被该处访问</strong></p>
-<p>修饰符 | 类内部 | 同包 | 子类 | 任何地方<br>:-: | :-: | :-: | :-: | :-: | :-:<br>private | yes |<br>default | yes | yes |<br>protected | yes | yes | yes |<br>public  | yes | yes | yes | yes |</p>
+<p> 修饰符 | 类内部 | 同包 | 子类 | 任何地方<br> :-: | :-: | :-: | :-: | :-: | :-:<br>private | yes |<br>default | yes | yes |<br>protected | yes | yes | yes |<br>public  | yes | yes | yes | yes |</p>
 <h3 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h3><p>继承(Inheritance)是一种联结类与类的层次模型。指的是一个类(称为子类、子接口)继承另外的一个类(称为父类、父接口)的功能，并可以增加它自己的新功能的能力，继承是类与类或者接口与接口之间最常见的关系；继承是一种is-a关系。</p>
 <p><img src="https://user-images.githubusercontent.com/33156501/86781847-febf6080-c090-11ea-8086-f678faf02c2a.png" alt="继承"></p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Student s = <span class="keyword">new</span> Student(<span class="string">"Xiao Ming"</span>, <span class="number">12</span>, <span class="number">89</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> String name;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">int</span> age;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Student</span> <span class="keyword">extends</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">protected</span> <span class="keyword">int</span> score;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Student</span><span class="params">(String name, <span class="keyword">int</span> age, <span class="keyword">int</span> score)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>(name,age);        <span class="comment">//父类的构造器有参数，需要显式调用。默认时为super(),不含参数。</span></span><br><span class="line">        <span class="keyword">this</span>.score = score;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -581,6 +581,10 @@
 
           <div class="post-nav-prev post-nav-item">
             
+              <a href="/2020/07/15/Java后端常面为题/" rel="prev" title="Java后端常面问题">
+                Java后端常面问题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
           </div>
         </div>
       
@@ -665,7 +669,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-count">18</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -676,7 +680,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">4</span>
+                  <span class="site-state-item-count">5</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
