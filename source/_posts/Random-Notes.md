@@ -214,6 +214,10 @@ IDEA Windows快捷键
 - 跳转到选择变量所在文件：Ctrl + B
 - 复制光标所在行并将复制内容插入光标下面一行：Ctrl + D
 - 快速生成for循环： object.for Enter
+- 当前方法展开、折叠：Ctrl + '+/-'
+- 全部展开、折叠： Ctrl + Shift + '+/-'
+- 注释当前行 Ctrl + /
+- 选中注释 Ctrl + Shift + /
 ---
 
 POJO: plain old java object(简单java对象)
