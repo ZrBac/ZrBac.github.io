@@ -216,8 +216,9 @@ IDEA Windows快捷键
 - 快速生成for循环： object.for Enter
 - 当前方法展开、折叠：Ctrl + '+/-'
 - 全部展开、折叠： Ctrl + Shift + '+/-'
-- 注释当前行 Ctrl + /
-- 选中注释 Ctrl + Shift + /
+- 注释当前行： Ctrl + /
+- 选中注释： Ctrl + Shift + /
+- 去除无用引入： Ctrl + alt + O
 ---
 
 POJO: plain old java object(简单java对象)
