@@ -33,6 +33,7 @@ categories: 面试
 
 <!--more-->
 
+
 #### Q3：JDK 和 JRE 的区别？
 
 **JDK：** Java Development Kit，开发工具包。提供了编译运行 Java 程序的各种工具，包括编译器、JRE 及常用类库，是 JAVA 核心。
@@ -2105,7 +2106,17 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `insertionSort(``int``[] nums) {``  ``for` `(``int` `i = ``1``; i < nums.length; i++) {``    ``int` `insertNum = nums[i];``    ``int` `insertIndex;``    ``for` `(insertIndex = i - ``1``; insertIndex >= ``0` `&& nums[insertIndex] > insertNum; insertIndex--) {``      ``nums[insertIndex + ``1``] = nums[insertIndex];``    ``}``    ``nums[insertIndex + ``1``] = insertNum;``  ``}``}`
+public void insertionSort(int[] nums) {
+    for (int i = 1; i < nums.length; i++) {
+        int insertNum = nums[i];
+        int insertIndex;
+        for (insertIndex = i - 1; insertIndex >= 0 &&
+		nums[insertIndex] > insertNum; insertIndex--) {
+            nums[insertIndex + 1] = nums[insertIndex];
+        }
+        nums[insertIndex + 1] = insertNum;
+    }
+}
 ```
 
 直接插入没有利用到要插入的序列已有序的特点，插入第 i 个元素时可以通过二分查找找到插入位置 insertIndex，再把 i~insertIndex 之间的所有元素后移一位，把第 i 个元素放在插入位置上。
@@ -2113,7 +2124,30 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `binaryInsertionSort(``int``[] nums) {``  ``for` `(``int` `i = ``1``; i < nums.length; i++) {``    ``int` `insertNum = nums[i];``    ``int` `insertIndex = -``1``;``    ``int` `start = ``0``;``    ``int` `end = i - ``1``;``    ``while` `(start <= end) {``      ``int` `mid = start + (end - start) / ``2``;``      ``if` `(insertNum > nums[mid])``        ``start = mid + ``1``;``      ``else` `if` `(insertNum < nums[mid])``        ``end = mid - ``1``;``      ``else` `{``        ``insertIndex = mid + ``1``;``        ``break``;``      ``}``    ``}``    ``if` `(insertIndex == -``1``)``      ``insertIndex = start;``    ``if` `(i - insertIndex >= ``0``)``      ``System.arraycopy(nums, insertIndex, nums, insertIndex + ``1``, i - insertIndex);``    ``nums[insertIndex] = insertNum;``  ``}``}`
+public void binaryInsertionSort(int[] nums) {
+    for (int i = 1; i < nums.length; i++) {
+        int insertNum = nums[i];
+        int insertIndex = -1;
+        int start = 0;
+        int end = i - 1;
+        while (start <= end) {
+            int mid = start + (end - start) / 2;
+            if (insertNum > nums[mid])
+                start = mid + 1;
+            else if (insertNum < nums[mid])
+                end = mid - 1;
+            else {
+                insertIndex = mid + 1;
+                break;
+            }
+        }
+        if (insertIndex == -1)
+            insertIndex = start;
+        if (i - insertIndex >= 0)
+            System.arraycopy(nums, insertIndex, nums, insertIndex + 1, i - insertIndex);
+        nums[insertIndex] = insertNum;
+    }
+}
 ```
 
 ------
@@ -2127,7 +2161,18 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `shellSort(``int``[] nums) {``  ``for` `(``int` `d = nums.length / ``2``; d > ``0` `; d /= ``2``) {``    ``for` `(``int` `i = d; i < nums.length; i++) {``      ``int` `insertNum = nums[i];``      ``int` `insertIndex;``      ``for` `(insertIndex = i - d; insertIndex >= ``0` `&& nums[insertIndex] > insertNum; insertIndex -= d) {``        ``nums[insertIndex + d] = nums[insertIndex];``      ``}``      ``nums[insertIndex + d] = insertNum;``    ``}``  ``}``}`
+public void shellSort(int[] nums) {
+    for (int d = nums.length / 2; d > 0 ; d /= 2) {
+        for (int i = d; i < nums.length; i++) {
+            int insertNum = nums[i];
+            int insertIndex;
+            for (insertIndex = i - d; insertIndex >= 0 && nums[insertIndex] > insertNum; insertIndex -= d) {
+                nums[insertIndex + d] = nums[insertIndex];
+            }
+            nums[insertIndex + d] = insertNum;
+        }
+    }
+}
 ```
 
 ------
@@ -2141,7 +2186,19 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `selectSort(``int``[] nums) {``  ``int` `minIndex;``  ``for` `(``int` `index = ``0``; index < nums.length - ``1``; index++){``    ``minIndex = index;``    ``for` `(``int` `i = index + ``1``;i < nums.length; i++){``      ``if``(nums[i] < nums[minIndex]) ``        ``minIndex = i;``    ``}``    ``if` `(index != minIndex){``      ``swap(nums, index, minIndex);``    ``}``  ``}``}`
+public void selectSort(int[] nums) {
+    int minIndex;
+    for (int index = 0; index < nums.length - 1; index++){
+        minIndex = index;
+        for (int i = index + 1;i < nums.length; i++){
+            if(nums[i] < nums[minIndex]) 
+                minIndex = i;
+        }
+        if (index != minIndex){
+            swap(nums, index, minIndex);
+        }
+    }
+}
 ```
 
 ------
@@ -2157,7 +2214,36 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `add(``int``[] nums, ``int` `i, ``int` `num){``  ``nums[i] = num;``  ``int` `curIndex = i;``  ``while` `(curIndex > ``0``) {``    ``int` `parentIndex = (curIndex - ``1``) / ``2``;``    ``if` `(nums[parentIndex] < nums[curIndex]) ``      ``swap(nums, parentIndex, curIndex);``    ``else` `break``;``    ``curIndex = parentIndex;``  ``}``}` `public` `int` `remove(``int``[] nums, ``int` `size){``  ``int` `result = nums[``0``];``  ``nums[``0``] = nums[size - ``1``];``  ``int` `curIndex = ``0``;``  ``while` `(``true``) {``    ``int` `leftIndex = curIndex * ``2` `+ ``1``;``    ``int` `rightIndex = curIndex * ``2` `+ ``2``;``    ``if` `(leftIndex >= size) ``break``;``    ``int` `maxIndex = leftIndex;``    ``if` `(rightIndex < size && nums[maxIndex] < nums[rightIndex])``      ``maxIndex = rightIndex;``    ``if` `(nums[curIndex] < nums[maxIndex])``      ``swap(nums, curIndex, maxIndex);``    ``else` `break``;``    ``curIndex = maxIndex;``  ``}``  ``return` `result;``}`
+public void add(int[] nums, int i, int num){
+    nums[i] = num;
+    int curIndex = i;
+    while (curIndex > 0) {
+        int parentIndex = (curIndex - 1) / 2;
+        if (nums[parentIndex] < nums[curIndex]) 
+            swap(nums, parentIndex, curIndex);
+        else break;
+        curIndex = parentIndex;
+    }
+}
+
+public int remove(int[] nums, int size){
+    int result = nums[0];
+    nums[0] = nums[size - 1];
+    int curIndex = 0;
+    while (true) {
+        int leftIndex = curIndex * 2 + 1;
+        int rightIndex = curIndex * 2 + 2;
+        if (leftIndex >= size) break;
+        int maxIndex = leftIndex;
+        if (rightIndex < size && nums[maxIndex] < nums[rightIndex])
+            maxIndex = rightIndex;
+        if (nums[curIndex] < nums[maxIndex])
+            swap(nums, curIndex, maxIndex);
+        else break;
+        curIndex = maxIndex;
+    }
+    return result;
+}
 ```
 
 ------
@@ -2171,7 +2257,14 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `bubbleSort(``int``[] nums) {``  ``for` `(``int` `i = ``0``; i < nums.length - ``1``; i++) {``    ``for` `(``int` `index = ``0``; index < nums.length - ``1` `- i; index++) {``      ``if` `(nums[index] > nums[index + ``1``]) ``        ``swap(nums, index, index + ``1``)``    ``}``  ``}``}`
+public void bubbleSort(int[] nums) {
+    for (int i = 0; i < nums.length - 1; i++) {
+        for (int index = 0; index < nums.length - 1 - i; index++) {
+            if (nums[index] > nums[index + 1]) 
+                swap(nums, index, index + 1)
+        }
+    }
+}
 ```
 
 当序列已经有序时仍会进行不必要的比较，可以设置一个标志记录是否有元素交换，如果没有直接结束比较。
@@ -2179,7 +2272,19 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `betterBubbleSort(``int``[] nums) {``  ``boolean` `swap;``  ``for` `(``int` `i = ``0``; i < nums.length - ``1``; i++) {``    ``swap = ``true``;``    ``for` `(``int` `index = ``0``; index < nums.length - ``1` `- i; index++) {``      ``if` `(nums[index] > nums[index + ``1``]) {``        ``swap(nums, index ,index + ``1``);``        ``swap = ``false``;``      ``}``    ``}``    ``if` `(swap) ``break``;``  ``}``}`
+public void betterBubbleSort(int[] nums) {
+    boolean swap;
+    for (int i = 0; i < nums.length - 1; i++) {
+        swap = true;
+        for (int index = 0; index < nums.length - 1 - i; index++) {
+            if (nums[index] > nums[index + 1]) {
+                swap(nums, index ,index + 1);
+                swap = false;
+            }
+        }
+        if (swap) break;
+    }
+}
 ```
 
 ------
@@ -2199,7 +2304,29 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`public` `void` `quickSort(``int``[] nums, ``int` `start, ``int` `end) {``  ``if` `(start < end) {``    ``int` `pivotIndex = getPivotIndex(nums, start, end);``    ``quickSort(nums, start, pivotIndex - ``1``);``    ``quickSort(nums, pivotIndex + ``1``, end);``  ``}``}` `public` `int` `getPivotIndex(``int``[] nums, ``int` `start, ``int` `end) {``  ``int` `pivot = nums[start];``  ``int` `low = start;``  ``int` `high = end;``  ``while` `(low < high) {``    ``while` `(low <= high && nums[low] <= pivot) ``      ``low++;``    ``while` `(low <= high && nums[high] > pivot) ``      ``high--;``    ``if` `(low < high) ``      ``swap(nums, low, high);``  ``}``  ``swap(nums, start, high);``  ``return` `high;``}`
+public void quickSort(int[] nums, int start, int end) {
+    if (start < end) {
+        int pivotIndex = getPivotIndex(nums, start, end);
+        quickSort(nums, start, pivotIndex - 1);
+        quickSort(nums, pivotIndex + 1, end);
+    }
+}
+
+public int getPivotIndex(int[] nums, int start, int end) {
+    int pivot = nums[start];
+    int low = start;
+    int high = end;
+    while (low < high) {
+        while (low <= high && nums[low] <= pivot) 
+            low++;
+        while (low <= high && nums[high] > pivot) 
+            high--;
+        if (low < high) 
+            swap(nums, low, high);
+    }
+    swap(nums, start, high);
+    return high;
+}
 ```
 
 **优化：**当规模足够小时，例如 `end - start < 10` 时，采用直接插入排序。
@@ -2217,7 +2344,35 @@ B+ 树的优点在于：① 由于 B+ 树在非叶子节点上不含数据信息
 [复制代码](#)
 
 ```
-`int``[] help;` `public` `void` `mergeSort(``int``[] arr) {``  ``int``[] help = ``new` `int``[arr.length];``  ``sort(arr, ``0``, arr.length - ``1``);``}` `public` `void` `sort(``int``[] arr, ``int` `start, ``int` `end) {``  ``if` `(start == end) ``return``;``  ``int` `mid = start + (end - start) / ``2``;``  ``sort(arr, start, mid);``  ``sort(arr, mid + ``1``, end);``  ``merge(arr, start, mid, end);``}` `public` `void` `merge(``int``[] arr, ``int` `start, ``int` `mid, ``int` `end) {``  ``if` `(end + ``1` `- start >= ``0``) System.arraycopy(arr, start, help, start, end + ``1` `- start);``  ``int` `p = start;``  ``int` `q = mid + ``1``;``  ``int` `index = start;``  ``while` `(p <= mid && q <= end) {``    ``if` `(help[p] < help[q]) ``      ``arr[index++] = help[p++];``    ``else``      ``arr[index++] = help[q++];``  ``}``  ``while` `(p <= mid) arr[index++] = help[p++];``  ``while` `(q <= end) arr[index++] = help[q++];``}`
+int[] help;
+
+public void mergeSort(int[] arr) {
+    int[] help = new int[arr.length];
+    sort(arr, 0, arr.length - 1);
+}
+
+public void sort(int[] arr, int start, int end) {
+    if (start == end) return;
+    int mid = start + (end - start) / 2;
+    sort(arr, start, mid);
+    sort(arr, mid + 1, end);
+    merge(arr, start, mid, end);
+}
+
+public void merge(int[] arr, int start, int mid, int end) {
+    if (end + 1 - start >= 0) System.arraycopy(arr, start, help, start, end + 1 - start);
+    int p = start;
+    int q = mid + 1;
+    int index = start;
+    while (p <= mid && q <= end) {
+        if (help[p] < help[q]) 
+            arr[index++] = help[p++];
+        else 
+            arr[index++] = help[q++];
+    }
+    while (p <= mid) arr[index++] = help[p++];
+    while (q <= end) arr[index++] = help[q++];
+}
 ```
 
 ------
@@ -2315,7 +2470,15 @@ Spring 的 ApplicationContext 创建的 Bean 实例都是单例对象，还有 S
 [复制代码](#)
 
 ```
-`public` `class` `HungrySingleton {``  ``private` `HungrySingleton(){}` `  ``private` `static` `HungrySingleton instance = ``new` `HungrySingleton();` `  ``public` `static` `HungrySingleton getInstance() {``    ``return` `instance;``  ``}``}`
+public class HungrySingleton {
+    private HungrySingleton(){}
+
+    private static HungrySingleton instance = new HungrySingleton();
+
+    public static HungrySingleton getInstance() {
+        return instance;
+    }
+}
 ```
 
 **懒汉式：**在外部调用时才会加载，线程不安全，可以加锁保证线程安全但效率低。
@@ -2323,7 +2486,18 @@ Spring 的 ApplicationContext 创建的 Bean 实例都是单例对象，还有 S
 [复制代码](#)
 
 ```
-`public` `class` `LazySingleton {``  ``private` `LazySingleton(){}` `  ``private` `static` `LazySingleton instance;` `  ``public` `static` `LazySingleton getInstance() {``    ``if``(instance == ``null``) {``      ``instance = ``new` `LazySingleton();``    ``}``    ``return` `instance;``  ``}``}`
+public class LazySingleton {
+    private LazySingleton(){}
+
+    private static LazySingleton instance;
+
+    public static LazySingleton getInstance() {
+        if(instance == null) {
+            instance = new LazySingleton();
+        }
+        return instance;
+    }
+}
 ```
 
 **双重检查锁：**使用 volatile 以及多重检查来减小锁范围，提升效率。
@@ -2331,7 +2505,22 @@ Spring 的 ApplicationContext 创建的 Bean 实例都是单例对象，还有 S
 [复制代码](#)
 
 ```
-`public` `class` `DoubleCheckSingleton {``  ``private` `DoubleCheckSingleton(){}` `  ``private` `volatile` `static` `DoubleCheckSingleton instance;` `  ``public` `static` `DoubleCheckSingleton getInstance() {``    ``if``(instance == ``null``) {``      ``synchronized` `(DoubleCheckSingleton.``class``) {``        ``if` `(instance == ``null``) {``          ``instance = ``new` `DoubleCheckSingleton();``        ``}``      ``}``    ``}``    ``return` `instance;``  ``}``}`
+public class DoubleCheckSingleton {
+    private DoubleCheckSingleton(){}
+
+    private volatile static DoubleCheckSingleton instance;
+
+    public static DoubleCheckSingleton getInstance() {
+        if(instance == null) {
+            synchronized (DoubleCheckSingleton.class) {
+                if (instance == null) {
+                    instance = new DoubleCheckSingleton();
+                }
+            }
+        }
+        return instance;
+    }
+}
 ```
 
 **静态内部类：**同时解决饿汉式的内存浪费问题和懒汉式的线程安全问题。
@@ -2339,7 +2528,17 @@ Spring 的 ApplicationContext 创建的 Bean 实例都是单例对象，还有 S
 [复制代码](#)
 
 ```
-`public` `class` `StaticSingleton {``  ``private` `StaticSingleton(){}` `  ``public` `static` `StaticSingleton getInstance() {``    ``return` `StaticClass.instance;``  ``}` `  ``private` `static` `class` `StaticClass {``    ``private` `static` `final` `StaticSingleton instance = ``new` `StaticSingleton();``  ``}``}`
+public class StaticSingleton {
+    private StaticSingleton(){}
+
+    public static StaticSingleton getInstance() {
+        return StaticClass.instance;
+    }
+
+    private static class StaticClass {
+        private static final StaticSingleton instance = new StaticSingleton();
+    }
+}
 ```
 
 **枚举：**《Effective Java》提倡的方式，不仅能避免线程安全问题，还能防止反序列化重新创建新的对象，绝对防止多次实例化，也能防止反射破解单例的问题。
@@ -2347,7 +2546,9 @@ Spring 的 ApplicationContext 创建的 Bean 实例都是单例对象，还有 S
 [复制代码](#)
 
 ```
-`public` `enum` `EnumSingleton {``  ``INSTANCE;``}`
+public enum EnumSingleton {
+    INSTANCE;
+}
 ```
 
 ------
@@ -3009,7 +3210,8 @@ hlen key
 [复制代码](#)
 
 ```
-`hmget key field [field...]``hmset key field value [field value...]`
+hmget key field [field...]
+hmset key field value [field value...]
 ```
 
 **判断 field 是否存在**
