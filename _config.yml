@@ -3,8 +3,8 @@
 ## Source: https://github.com/hexojs/hexo/
 
 # Site
-title: Everything Will Just Work Out Fine
-subtitle: try to be a man of focus,commitment and sheer will
+title: Everything Will Work Out Just Fine
+subtitle: later equals never
 description: postgraduate sutdent
 keywords: 
 author: ZrBac
@@ -54,7 +54,7 @@ index_generator:
   order_by: -date
   
 # Category & Tag
-default_category: uncategorized
+default_category: categorized
 category_map:
 tag_map:
 
