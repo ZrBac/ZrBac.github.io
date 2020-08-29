@@ -86,18 +86,43 @@
 
 
 
-<meta name="description" content="IoC的基本概念依赖注入构造方法注入(constructor injection)被注入对象可通过在其构造方法中声明依赖对象的参数列表，让外部(IoC容器)知道它需要哪些依赖对象。 1234public NewsProvider(NewsListener newsListener,NewsPublisher newsPublisher)&amp;#123;    this.newsListener = n">
+<meta name="description" content="序列化是干啥用的？序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：  序列化：把Java对象转换为字节序列。 反序列化：把字节序列恢复为原先的Java对象。   而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平">
 <meta name="keywords" content="Java">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Spring Boot Tutorial">
-<meta property="og:url" content="http://yoursite.com/2019/12/02/Spring-Boot-Tutorial/index.html">
+<meta property="og:title" content="序列化和反序列化">
+<meta property="og:url" content="http://yoursite.com/2020/08/28/序列化和反序列化/index.html">
 <meta property="og:site_name" content="Everything Will Work Out Just Fine">
-<meta property="og:description" content="IoC的基本概念依赖注入构造方法注入(constructor injection)被注入对象可通过在其构造方法中声明依赖对象的参数列表，让外部(IoC容器)知道它需要哪些依赖对象。 1234public NewsProvider(NewsListener newsListener,NewsPublisher newsPublisher)&amp;#123;    this.newsListener = n">
+<meta property="og:description" content="序列化是干啥用的？序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：  序列化：把Java对象转换为字节序列。 反序列化：把字节序列恢复为原先的Java对象。   而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-06-05T11:07:58.895Z">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/8469626c4d45bea2ebf49679b5d814457d4fef85.png@1320w_608h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/d7bcfed9002453c6f39fab1a24962c7226403fe9.png@1320w_628h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/ed81a71fd3f1b520e7b95b031cdc088e9616f28f.png@1320w_1172h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/41ade4204eaa2f756963a575a834f4465b907b6f.png@1320w_748h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/1242c7c35935acc8b2ab2126791eb721837a9446.png@1320w_468h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/a99078edc4fc395db373ce8a0d992d4bb95267b2.png@1320w_560h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/c3ad48f484f306684c6f4c2f31cb138c1321b4db.png@1320w_1090h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/73b3999a97a8605d254a0d56ec3f9b55b83e9685.png@1320w_324h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/9d90e23e037974adc27ed39950c7443d5493ba73.png@1320w_968h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/40892b697d85b16ef659faf6a2487f911d9c34d3.png@1320w_168h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/bd2f6d47c2aea42dfed58793e8a9f271ba1b27ce.png@1320w_614h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/1e3760481c884871040a70ae1bd8dcd4a38090ea.png@1320w_534h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/06d8b766b0dbb627837c934a974df0e255329ca7.png@1320w_470h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/8b9203293f9b6436a0262341bba90815949d1caf.png@1320w_622h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/545d565bf8750a2b4e9016d20eff2bd517d86d03.png@1320w_598h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/b464d0e3351a67e1dcd1268fd74f3165c64c5c9d.png@1320w_506h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/bd283be1015fb3950eb0e8531e3746a06d6ec46f.png@1320w_656h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/744163a802ca9fe8870326dad1ab5ad6afd29d3e.png@1320w_434h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/f007bea84a2982951796f2a3555db883619ccdb1.png@1320w_450h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/2efb8d5429692b79c6db1e27dd6d2c58b8f71991.png@1320w_808h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/eba81b8fc8ec4e5fe811efa6964aabf4b2d48c1e.png@1320w_836h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/7a5dfa5e577ba091d25c7f5e9dc4c481ef0e9f33.png@1320w_1098h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/e2328d25f92fa2d7bac4a2ef0b12c33a8e1f016d.png@1320w_360h.webp">
+<meta property="og:image" content="https://i0.hdslb.com/bfs/article/0e24263c094ddea1f3db44af4090011a8b6c8ea1.png@1320w_904h.webp">
+<meta property="og:updated_time" content="2020-08-28T12:00:07.784Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Spring Boot Tutorial">
-<meta name="twitter:description" content="IoC的基本概念依赖注入构造方法注入(constructor injection)被注入对象可通过在其构造方法中声明依赖对象的参数列表，让外部(IoC容器)知道它需要哪些依赖对象。 1234public NewsProvider(NewsListener newsListener,NewsPublisher newsPublisher)&amp;#123;    this.newsListener = n">
+<meta name="twitter:title" content="序列化和反序列化">
+<meta name="twitter:description" content="序列化是干啥用的？序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：  序列化：把Java对象转换为字节序列。 反序列化：把字节序列恢复为原先的Java对象。   而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平">
+<meta name="twitter:image" content="https://i0.hdslb.com/bfs/article/8469626c4d45bea2ebf49679b5d814457d4fef85.png@1320w_608h.webp">
 
 
 
@@ -127,13 +152,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2019/12/02/Spring-Boot-Tutorial/">
+  <link rel="canonical" href="http://yoursite.com/2020/08/28/序列化和反序列化/">
 
 
 
 
 
-  <title>Spring Boot Tutorial | Everything Will Work Out Just Fine</title>
+  <title>序列化和反序列化 | Everything Will Work Out Just Fine</title>
   
 
 
@@ -321,7 +346,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/12/02/Spring-Boot-Tutorial/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/08/28/序列化和反序列化/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="ZrBac">
@@ -338,7 +363,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Spring Boot Tutorial</h1>
+          <h1 class="post-title" itemprop="name headline">序列化和反序列化</h1>
         
 
         <div class="post-meta">
@@ -350,8 +375,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-02T14:33:35+08:00">
-                2019-12-02
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-08-28T19:51:42+08:00">
+                2020-08-28
               </time>
             
 
@@ -366,8 +391,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-06-05T19:07:58+08:00">
-                2020-06-05
+              <time title="更新于" itemprop="dateModified" datetime="2020-08-28T20:00:07+08:00">
+                2020-08-28
               </time>
             
           </span>
@@ -427,21 +452,96 @@
       
 
       
-        <h3 id="IoC的基本概念"><a href="#IoC的基本概念" class="headerlink" title="IoC的基本概念"></a>IoC的基本概念</h3><h4 id="依赖注入"><a href="#依赖注入" class="headerlink" title="依赖注入"></a>依赖注入</h4><h4 id="构造方法注入-constructor-injection"><a href="#构造方法注入-constructor-injection" class="headerlink" title="构造方法注入(constructor injection)"></a>构造方法注入(constructor injection)</h4><p>被注入对象可通过在其构造方法中声明依赖对象的参数列表，让外部(IoC容器)知道它需要哪些依赖对象。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">NewsProvider</span><span class="params">(NewsListener newsListener,NewsPublisher newsPublisher)</span></span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.newsListener = newsListener;</span><br><span class="line">    <span class="keyword">this</span>.NewsPublisher = newsPublisher;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+        <h1 id="序列化是干啥用的？"><a href="#序列化是干啥用的？" class="headerlink" title="序列化是干啥用的？"></a>序列化是干啥用的？</h1><p>序列化的原本意图是希望对一个Java对象作一下“变换”，变成字节序列，这样一来方便持久化存储到磁盘，避免程序运行结束后对象就从内存里消失，另外变换成字节序列也更便于网络运输和传播，所以概念上很好理解：</p>
+<ul>
+<li><strong>序列化</strong>：把Java对象转换为字节序列。</li>
+<li><strong>反序列化</strong>：把字节序列恢复为原先的Java对象。</li>
+</ul>
+<p><img src="https://i0.hdslb.com/bfs/article/8469626c4d45bea2ebf49679b5d814457d4fef85.png@1320w_608h.webp" alt="img"></p>
+<p>而且序列化机制从某种意义上来说也弥补了平台化的一些差异，毕竟转换后的字节流可以在其他平台上进行反序列化来恢复对象。</p>
+<p>事情就是那么个事情，看起来很简单，不过后面的东西还不少，请往下看。</p>
 <a id="more"></a>
 
-<h4 id="setter方法注入"><a href="#setter方法注入" class="headerlink" title="setter方法注入"></a>setter方法注入</h4><p>为当前对象所依赖对象对应的属性添加setter方法，通过setter方法将相应的依赖对象设置到被注入对象中。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NewsProvider</span></span>&#123;</span><br><span class="line">    <span class="keyword">private</span> NewsListener newsListener;</span><br><span class="line">    <span class="keyword">private</span> NewsPublisher newsPublisher;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> NewsListener <span class="title">getNewsListener</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> newsListener;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNewsListener</span><span class="params">(NewsListener newsListener)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.newsListener = newsListener;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> NewsPublisher <span class="title">getNewsPublisher</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="keyword">return</span> newsPublisher;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setNewsPublisher</span><span class="params">(NewsPublisher newsPublisher)</span></span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.newsPublisher = newsPublisher;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h4 id="接口注入"><a href="#接口注入" class="headerlink" title="接口注入"></a>接口注入</h4><p>被注入对象如果想要IoC Service Provider为其注入对象，就必须实现某个接口。该接口提供一个方法，用来为其注入依赖对象，IoC Service Provider最终通过这些接口来了解应该为被注入对象注入什么依赖对象。<br>接口注入比较死板和烦琐。</p>
-<h4 id="三种方法比较"><a href="#三种方法比较" class="headerlink" title="三种方法比较"></a>三种方法比较</h4><ul>
-<li>接口注入：现已不提倡使用，因为它强制被注入对象实现不必要的接口，带有侵入性。</li>
-<li>构造方法注入：优点，对象在构造完成后，即可马上使用。缺点，当依赖对象比较多时，构造方法参数列表会比较长，而通过反射构造对象时，对相同类型的参数处理会比较困难，不利于维护和使用。</li>
-<li>setter方法注入：方法可以命名，所以setter方法注入在描述性上要比构造方法注入好，且setter方法可被继承，允许设置默认值，具有良好的IDE支持。缺点，对象无法在构造完成后马上进入就绪状态。</li>
+<h1 id="对象如何序列化？"><a href="#对象如何序列化？" class="headerlink" title="对象如何序列化？"></a>对象如何序列化？</h1><p>然而Java目前并没有一个关键字可以直接去定义一个所谓的“可持久化”对象。</p>
+<p>对象的持久化和反持久化需要靠程序员在代码里手动<strong>显式地</strong>进行序列化和反序列化还原的动作。</p>
+<p>举个例子，假如我们要对<strong><code>Student</code></strong>类对象序列化到一个名为<strong><code>student.txt</code></strong>的文本文件中，然后再通过文本文件反序列化成<strong><code>Student</code></strong>类对象：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/d7bcfed9002453c6f39fab1a24962c7226403fe9.png@1320w_628h.webp" alt="img"></p>
+<p><strong>1、Student类定义</strong></p>
+<p><img src="https://i0.hdslb.com/bfs/article/ed81a71fd3f1b520e7b95b031cdc088e9616f28f.png@1320w_1172h.webp" alt="img"></p>
+<p><strong>2、序列化</strong></p>
+<p><img src="https://i0.hdslb.com/bfs/article/41ade4204eaa2f756963a575a834f4465b907b6f.png@1320w_748h.webp" alt="img"></p>
+<p><strong>3、反序列化</strong></p>
+<p><img src="https://i0.hdslb.com/bfs/article/1242c7c35935acc8b2ab2126791eb721837a9446.png@1320w_468h.webp" alt="img"></p>
+<p><strong>4、运行结果</strong></p>
+<p><img src="https://i0.hdslb.com/bfs/article/a99078edc4fc395db373ce8a0d992d4bb95267b2.png@1320w_560h.webp" alt="img"></p>
+<h1 id="Serializable接口有何用？"><a href="#Serializable接口有何用？" class="headerlink" title="Serializable接口有何用？"></a>Serializable接口有何用？</h1><p>上面在定义<code>Student</code>类时，实现了一个<strong><code>Serializable</code></strong>接口，然而当我们点进<code>Serializable</code>接口内部查看，发现它<strong>竟然是一个空接口</strong>，并没有包含任何方法！</p>
+<p><img src="https://i0.hdslb.com/bfs/article/c3ad48f484f306684c6f4c2f31cb138c1321b4db.png@1320w_1090h.webp" alt="img"></p>
+<p>试想，如果上面在定义<code>Student</code>类时忘了加<strong><code>implements Serializable</code></strong>时会发生什么呢？</p>
+<p>实验结果是：此时的程序运行<strong>会报错</strong>，并抛出<strong><code>NotSerializableException</code></strong>异常：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/73b3999a97a8605d254a0d56ec3f9b55b83e9685.png@1320w_324h.webp" alt="img"></p>
+<p>我们按照错误提示，由源码一直跟到<strong><code>ObjectOutputStream</code></strong>的<strong><code>writeObject0()</code></strong>方法底层一看，才恍然大悟：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/9d90e23e037974adc27ed39950c7443d5493ba73.png@1320w_968h.webp" alt="img"></p>
+<p>如果一个对象既不是<strong>字符串</strong>、<strong>数组</strong>、<strong>枚举</strong>，而且也没有实现<strong><code>Serializable</code></strong>接口的话，在序列化时就会抛出<strong><code>NotSerializableException</code></strong>异常！</p>
+<p>哦，我明白了！</p>
+<p>原来<code>Serializable</code>接口也<strong>仅仅只是做一个标记用！！！</strong></p>
+<p>它告诉代码只要是实现了<code>Serializable</code>接口的类都是可以被序列化的！然而真正的序列化动作不需要靠它完成。</p>
+<h1 id="serialVersionUID号有何用？"><a href="#serialVersionUID号有何用？" class="headerlink" title="serialVersionUID号有何用？"></a><code>serialVersionUID</code>号有何用？</h1><p>相信你一定经常看到有些类中定义了如下代码行，即定义了一个名为<strong><code>serialVersionUID</code></strong>的字段：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/40892b697d85b16ef659faf6a2487f911d9c34d3.png@1320w_168h.webp" alt="img"></p>
+<p><strong>你知道这句声明的含义吗？为什么要搞一个名为<code>serialVersionUID</code>的序列号？</strong></p>
+<p>继续来做一个简单实验，还拿上面的<code>Student</code>类为例，我们并没有人为在里面显式地声明一个<strong><code>serialVersionUID</code></strong>字段。</p>
+<p>我们首先还是调用上面的<strong><code>serialize()</code></strong>方法，将一个<code>Student</code>对象序列化到本地磁盘上的<code>student.txt</code>文件：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/bd2f6d47c2aea42dfed58793e8a9f271ba1b27ce.png@1320w_614h.webp" alt="img"></p>
+<p>接下来我们在<code>Student</code>类里面动点手脚，比如在里面再增加一个名为<strong><code>studentID</code></strong>的字段，表示学生学号：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/1e3760481c884871040a70ae1bd8dcd4a38090ea.png@1320w_534h.webp" alt="img"></p>
+<p>这时候，我们拿刚才已经序列化到本地的<code>student.txt</code>文件，还用如下代码进行反序列化，试图还原出刚才那个<code>Student</code>对象：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/06d8b766b0dbb627837c934a974df0e255329ca7.png@1320w_470h.webp" alt="img"></p>
+<p>运行发现<strong>报错了</strong>，并且抛出了<strong><code>InvalidClassException</code></strong>异常：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/8b9203293f9b6436a0262341bba90815949d1caf.png@1320w_622h.webp" alt="img"></p>
+<p>这地方提示的信息非常明确了：序列化前后的<code>serialVersionUID</code>号码不兼容！</p>
+<p>从这地方最起码可以得出<strong>两个</strong>重要信息：</p>
+<ul>
+<li><strong>1、serialVersionUID是序列化前后的唯一标识符</strong></li>
+<li><strong>2、默认如果没有人为显式定义过**</strong><code>serialVersionUID</code>，那编译器会为它自动声明一个！**</li>
 </ul>
-<h3 id="IoC容器BeanFactory"><a href="#IoC容器BeanFactory" class="headerlink" title="IoC容器BeanFactory"></a>IoC容器BeanFactory</h3><p>表达式层面<br>注册bean定义层面<br>表达依赖注入关系层面</p>
+<p><strong>第1个问题**</strong>：** <code>serialVersionUID</code>序列化ID，可以看成是序列化和反序列化过程中的“暗号”，在反序列化时，JVM会把字节流中的序列号ID和被序列化类中的序列号ID做比对，只有两者一致，才能重新反序列化，否则就会报异常来终止反序列化的过程。</p>
+<p><strong>第2个问题**</strong>：** 如果在定义一个可序列化的类时，没有人为显式地给它定义一个<code>serialVersionUID</code>的话，则Java运行时环境会根据该类的各方面信息自动地为它生成一个默认的<code>serialVersionUID</code>，一旦像上面一样更改了类的结构或者信息，则类的<code>serialVersionUID</code>也会跟着变化！</p>
+<p>所以，为了<code>serialVersionUID</code>的确定性，写代码时还是建议，凡是<code>implements Serializable</code>的类，都最好人为显式地为它声明一个<code>serialVersionUID</code>明确值！</p>
+<p>当然，如果不想手动赋值，你也可以借助IDE的自动添加功能，比如我使用的<code>IntelliJ IDEA</code>，按<code>alt + enter</code>就可以为类自动生成和添加<code>serialVersionUID</code>字段，十分方便：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/545d565bf8750a2b4e9016d20eff2bd517d86d03.png@1320w_598h.webp" alt="img"></p>
+<h1 id="两种特殊情况"><a href="#两种特殊情况" class="headerlink" title="两种特殊情况"></a>两种特殊情况</h1><ul>
+<li>1、凡是被<code>static</code>修饰的字段是不会被序列化的</li>
+<li>2、凡是被<code>transient</code>修饰符修饰的字段也是不会被序列化的</li>
+</ul>
+<p><strong>对于第一点</strong>，因为序列化保存的是<strong>对象的状态</strong>而非类的状态，所以会忽略<code>static</code>静态域也是理所应当的。</p>
+<p><strong>对于第二点</strong>，就需要了解一下<code>transient</code>修饰符的作用了。</p>
+<p>如果在序列化某个类的对象时，就是不希望某个字段被序列化（比如这个字段存放的是隐私值，如：<code>密码</code>等），那这时就可以用<code>transient</code>修饰符来修饰该字段。</p>
+<p>比如在之前定义的<code>Student</code>类中，加入一个<strong>密码字段</strong>，但是不希望序列化到<code>txt</code>文本，则可以：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/b464d0e3351a67e1dcd1268fd74f3165c64c5c9d.png@1320w_506h.webp" alt="img"></p>
+<p>这样在序列化<code>Student</code>类对象时，<code>password</code>字段会设置为默认值<code>null</code>，这一点可以从反序列化所得到的结果来看出：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/bd283be1015fb3950eb0e8531e3746a06d6ec46f.png@1320w_656h.webp" alt="img"></p>
+<h1 id="序列化的受控和加强"><a href="#序列化的受控和加强" class="headerlink" title="序列化的受控和加强"></a>序列化的受控和加强</h1><h1 id="约束性加持"><a href="#约束性加持" class="headerlink" title="约束性加持"></a>约束性加持</h1><p>从上面的过程可以看出，序列化和反序列化的过程其实是<strong>有漏洞的</strong>，因为从序列化到反序列化是有中间过程的，如果被别人拿到了中间字节流，然后加以伪造或者篡改，那反序列化出来的对象就会有一定风险了。</p>
+<p>毕竟反序列化也相当于一种 <strong>“隐式的”对象构造</strong> ，因此我们希望在反序列化时，进行<strong>受控的</strong>对象反序列化动作。</p>
+<p>那怎么个受控法呢？</p>
+<p><strong>答案就是：</strong> 自行编写<strong><code>readObject()</code></strong>函数，用于对象的反序列化构造，从而提供约束性。</p>
+<p>既然自行编写<code>readObject()</code>函数，那就可以做很多可控的事情：比如各种判断工作。</p>
+<p>还以上面的<code>Student</code>类为例，一般来说学生的成绩应该在<code>0 ~ 100</code>之间，我们为了防止学生的考试成绩在反序列化时被别人篡改成一个奇葩值，我们可以自行编写<code>readObject()</code>函数用于反序列化的控制：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/744163a802ca9fe8870326dad1ab5ad6afd29d3e.png@1320w_434h.webp" alt="img"></p>
+<p>比如我故意将学生的分数改为<code>101</code>，此时反序列化立马终止并且报错：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/f007bea84a2982951796f2a3555db883619ccdb1.png@1320w_450h.webp" alt="img"></p>
+<p>对于上面的代码，有些小伙伴可能会好奇，为什么自定义的<code>private</code>的<code>readObject()</code>方法可以被自动调用，这就需要你跟一下底层源码来一探究竟了，我帮你跟到了<code>ObjectStreamClass</code>类的最底层，看到这里我相信你一定恍然大悟：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/2efb8d5429692b79c6db1e27dd6d2c58b8f71991.png@1320w_808h.webp" alt="img"></p>
+<p>又是反射机制在起作用！是的，在Java里，果然万物皆可“反射”（滑稽），即使是类中定义的<code>private</code>私有方法，也能被抠出来执行了，简直引起舒适了。</p>
+<h1 id="单例模式增强"><a href="#单例模式增强" class="headerlink" title="单例模式增强"></a>单例模式增强</h1><p>一个容易被忽略的问题是：<strong>可序列化的单例类有可能并不单例</strong>！</p>
+<p>举个代码小例子就清楚了。</p>
+<p>比如这里我们先用<code>java</code>写一个常见的「静态内部类」方式的单例模式实现：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/eba81b8fc8ec4e5fe811efa6964aabf4b2d48c1e.png@1320w_836h.webp" alt="img"></p>
+<p>然后写一个验证主函数：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/7a5dfa5e577ba091d25c7f5e9dc4c481ef0e9f33.png@1320w_1098h.webp" alt="img"></p>
+<p>运行后我们发现：<strong>反序列化后的单例对象和原单例对象并不相等</strong>了，这无疑没有达到我们的目标。</p>
+<p><strong>解决办法是</strong>：在单例类中手写<strong><code>readResolve()</code></strong>函数，直接返回单例对象，来规避之：</p>
+<p><img src="https://i0.hdslb.com/bfs/article/e2328d25f92fa2d7bac4a2ef0b12c33a8e1f016d.png@1320w_360h.webp" alt="img"></p>
+<p><img src="https://i0.hdslb.com/bfs/article/0e24263c094ddea1f3db44af4090011a8b6c8ea1.png@1320w_904h.webp" alt="img"></p>
+<p>这样一来，当反序列化从流中读取对象时，<code>readResolve()</code>会被调用，用其中返回的对象替代反序列化新建的对象。</p>
 
       
     </div>
@@ -482,8 +582,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/11/25/Git-操作指南/" rel="next" title="Git 操作指南">
-                <i class="fa fa-chevron-left"></i> Git 操作指南
+              <a href="/2020/08/27/剑指Offer题解/" rel="next" title="剑指Offer题解（3-40）">
+                <i class="fa fa-chevron-left"></i> 剑指Offer题解（3-40）
               </a>
             
           </div>
@@ -491,10 +591,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/12/10/Random-Notes/" rel="prev" title="Random Notes">
-                Random Notes <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -652,7 +748,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#IoC的基本概念"><span class="nav-number">1.</span> <span class="nav-text">IoC的基本概念</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#依赖注入"><span class="nav-number">1.1.</span> <span class="nav-text">依赖注入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#构造方法注入-constructor-injection"><span class="nav-number">1.2.</span> <span class="nav-text">构造方法注入(constructor injection)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#setter方法注入"><span class="nav-number">1.3.</span> <span class="nav-text">setter方法注入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#接口注入"><span class="nav-number">1.4.</span> <span class="nav-text">接口注入</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#三种方法比较"><span class="nav-number">1.5.</span> <span class="nav-text">三种方法比较</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#IoC容器BeanFactory"><span class="nav-number">2.</span> <span class="nav-text">IoC容器BeanFactory</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#序列化是干啥用的？"><span class="nav-number">1.</span> <span class="nav-text">序列化是干啥用的？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对象如何序列化？"><span class="nav-number">2.</span> <span class="nav-text">对象如何序列化？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Serializable接口有何用？"><span class="nav-number">3.</span> <span class="nav-text">Serializable接口有何用？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#serialVersionUID号有何用？"><span class="nav-number">4.</span> <span class="nav-text">serialVersionUID号有何用？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#两种特殊情况"><span class="nav-number">5.</span> <span class="nav-text">两种特殊情况</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#序列化的受控和加强"><span class="nav-number">6.</span> <span class="nav-text">序列化的受控和加强</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#约束性加持"><span class="nav-number">7.</span> <span class="nav-text">约束性加持</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#单例模式增强"><span class="nav-number">8.</span> <span class="nav-text">单例模式增强</span></a></li></ol></div>
             
 
           </div>
