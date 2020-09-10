@@ -96,7 +96,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://user-images.githubusercontent.com/33156501/75601530-f8274800-5af6-11ea-9d6c-b6ba32c7e5b7.gif">
 <meta property="og:image" content="https://stackify.com/wp-content/uploads/2017/05/Java-Garbage-Collection.png">
-<meta property="og:updated_time" content="2020-08-20T03:24:46.080Z">
+<meta property="og:updated_time" content="2020-09-09T09:57:09.004Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Random Notes">
 <meta name="twitter:description" content="notes 抽象类  如果父类方法无需实现功能，仅仅是为了定义签名，目的是让子类去覆写，那么可以把父类的方法声明为抽象方法。  含有抽象方法的类必须定义为抽象类，无法实例化。  抽象类本身被设计成只能继承，因此，抽象类可以强迫子类实现其定义的抽象方法，否则编译会报错，相当于定义了规范。">
@@ -369,8 +369,8 @@
               
                 <span class="post-meta-item-text">更新于&#58;</span>
               
-              <time title="更新于" itemprop="dateModified" datetime="2020-08-20T11:24:46+08:00">
-                2020-08-20
+              <time title="更新于" itemprop="dateModified" datetime="2020-09-09T17:57:09+08:00">
+                2020-09-09
               </time>
             
           </span>
@@ -577,6 +577,10 @@
 </ul>
 </li>
 </ul>
+<hr>
+<h3 id="如何判断两个字符串是由相同字符组成"><a href="#如何判断两个字符串是由相同字符组成" class="headerlink" title="如何判断两个字符串是由相同字符组成"></a>如何判断两个字符串是由相同字符组成</h3><p>通过辅助数组，统计待比较字符串每个字符的出现次数，然后循环另一个字符串，判断遍历的字符是否出现过。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">boolean</span> <span class="title">sameCompose</span><span class="params">(String s, String t)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(s.length() != t.length())</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    <span class="keyword">int</span>[] count = <span class="keyword">new</span> <span class="keyword">int</span>[<span class="number">256</span>];</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">char</span> c:s.toCharArray())</span><br><span class="line">        count[c]++;</span><br><span class="line">    <span class="keyword">for</span>(<span class="keyword">char</span> c:t.toCharArray()) &#123;</span><br><span class="line">        <span class="keyword">if</span>(--count[c] &lt; <span class="number">0</span>)</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <hr>
 
       
@@ -788,7 +792,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#notes"><span class="nav-number">1.</span> <span class="nav-text">notes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-GC-Java-Garbage-Collection"><span class="nav-number">2.</span> <span class="nav-text">Java GC: Java Garbage Collection</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#How-Java-GC-Works"><span class="nav-number">2.1.</span> <span class="nav-text">How Java GC Works</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-GC-Heap"><span class="nav-number">2.2.</span> <span class="nav-text">The GC Heap</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#notes"><span class="nav-number">1.</span> <span class="nav-text">notes</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Java-GC-Java-Garbage-Collection"><span class="nav-number">2.</span> <span class="nav-text">Java GC: Java Garbage Collection</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#How-Java-GC-Works"><span class="nav-number">2.1.</span> <span class="nav-text">How Java GC Works</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#The-GC-Heap"><span class="nav-number">2.2.</span> <span class="nav-text">The GC Heap</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何判断两个字符串是由相同字符组成"><span class="nav-number">3.</span> <span class="nav-text">如何判断两个字符串是由相同字符组成</span></a></li></ol></div>
             
 
           </div>
