@@ -283,3 +283,26 @@ CoC: Convention over Configutation
 
 ---
 
+
+
+### 如何判断两个字符串是由相同字符组成
+
+通过辅助数组，统计待比较字符串每个字符的出现次数，然后循环另一个字符串，判断遍历的字符是否出现过。
+
+```java
+public static boolean sameCompose(String s, String t) {
+    if(s.length() != t.length())
+        return false;
+    int[] count = new int[256];
+    for(char c:s.toCharArray())
+        count[c]++;
+    for(char c:t.toCharArray()) {
+        if(--count[c] < 0)
+            return false;
+    }
+    return true;
+}
+```
+
+
+---
