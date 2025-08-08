@@ -5,3 +5,4 @@ tools
 - https://refactoringguru.cn/design-patterns/decorator
 - https://csdiy.wiki/
 - https://happy.alang.run/#/
+- https://lab.magiconch.com/
