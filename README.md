@@ -7,6 +7,6 @@ tools
 - https://lab.magiconch.com/
 
 tizi
-jxdy.top
-k-spped.top
-www.knfast.com
+- jxdy.top
+- k-spped.top
+- www.knfast.com
