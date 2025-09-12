@@ -5,3 +5,8 @@ tools
 - https://csdiy.wiki/
 - https://happy.alang.run/#/
 - https://lab.magiconch.com/
+
+tizi
+jxdy.top
+k-spped.top
+www.knfast.com
