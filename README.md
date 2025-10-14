@@ -17,3 +17,6 @@ tizi
 media
 - https://www.kdocs.cn/l/cnrcmOcyYrae
 - https://radio.garden/visit/nanjing/KQCeQG1O
+
+card
+- https://172.lot-ml.com/Product/Index/1
