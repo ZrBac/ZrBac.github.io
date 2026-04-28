@@ -16,6 +16,7 @@ airplane
 - https://pqjc.site/
 - https://www.v2ny.com
 - https://www.ermao.net/posts/vpn/
+- https://www.duyaoss.com/
 
 media
 - https://www.kdocs.cn/l/cnrcmOcyYrae
