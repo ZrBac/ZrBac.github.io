@@ -198,11 +198,7 @@
           )
         : state.data.articles;
     if (state.filter !== "all")
-      articles = articles.filter((a) =>
-        state.filter === "tech"
-          ? ["tech", "ai"].includes(a.category)
-          : a.category === state.filter,
-      );
+      articles = articles.filter((a) => a.category === state.filter);
     if (state.source !== "all")
       articles = articles.filter((a) => a.sourceId === state.source);
     if (state.date)
@@ -228,7 +224,7 @@
     const titles = {
       all: "最新资讯",
       general: "综合热点",
-      tech: "AI / 科技动态",
+      tech: "科技动态",
       ai: "人工智能",
       entertainment: "文娱",
       brief: "每日速览",

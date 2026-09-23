@@ -20,6 +20,26 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await page.click("#load-more");
     assert.equal(await page.locator(".article").count(), 24);
 
+    const news = await (await page.request.get(base + "/data/news.json")).json();
+    const aiUrls = new Set(
+      news.articles.filter((a) => a.category === "ai").map((a) => a.url),
+    );
+    assert(aiUrls.size > 0);
+    await page.click('[data-filter="tech"]');
+    await page.reload({ waitUntil: "networkidle" });
+    assert.equal(await page.locator("#section-title").innerText(), "科技动态");
+    while (await page.locator("#load-more").isVisible())
+      await page.click("#load-more");
+    const techUrls = await page.locator(".article h3 a").evaluateAll(
+      (links) => links.map((a) => a.getAttribute("href")),
+    );
+    assert(techUrls.length > 0);
+    assert.equal(
+      techUrls.length,
+      news.articles.filter((a) => a.category === "tech").length,
+    );
+    assert(techUrls.every((url) => !aiUrls.has(url)));
+
     await page.click('[data-filter="ai"]');
     assert(
       (await page.locator(".article .category-label").allTextContents()).every(
