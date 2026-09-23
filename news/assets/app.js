@@ -403,10 +403,10 @@
     weekday: "long",
   }).format(new Date());
   $("#year").textContent = new Date().getFullYear();
-  $("#search-trigger").addEventListener("click", () => {
+  function focusSearch() {
     $("#news-content").scrollIntoView({ behavior: "smooth" });
     $("#search").focus({ preventScroll: true });
-  });
+  }
   document.addEventListener("keydown", (e) => {
     if (
       (e.key === "k" && (e.ctrlKey || e.metaKey)) ||
@@ -415,7 +415,7 @@
         !$("#info-dialog").open)
     ) {
       e.preventDefault();
-      $("#search-trigger").click();
+      focusSearch();
     }
   });
   $("#search").addEventListener("input", (e) => {
