@@ -350,11 +350,15 @@
         .join("");
     const ok = state.data.sources.filter((s) => s.status === "ok").length;
     const stale =
-      Date.now() - Date.parse(state.data.updatedAt) > 3 * 3600 * 1000;
+      Date.now() - Date.parse(state.data.updatedAt) > 2 * 3600 * 1000;
+    const latestPublished = state.data.articles.reduce(
+      (date, a) => Math.max(date, Date.parse(a.publishedAt)),
+      0,
+    );
     $("#update-status").textContent =
-      `${stale ? "更新可能延迟 · " : ""}${formatTime(state.data.updatedAt)} 更新 · ${ok}/${state.data.sources.length} 个来源可用`;
+      `${stale ? "检查已延迟 · " : ""}最近检查 ${formatTime(state.data.updatedAt)} · 最新文章 ${latestPublished ? formatTime(latestPublished) : "暂无"} · ${ok}/${state.data.sources.length} 个来源可用`;
     $("#update-status").title =
-      "计划每小时更新；GitHub Actions 可能延迟。时间均为北京时间。";
+      "最近检查为资讯源抓取时间，最新文章为已收录文章的发布时间。计划每小时检查，可能延迟；时间均为北京时间。";
     const dates = state.data.articles.map((a) => dayOf(a.publishedAt)).sort();
     if (dates.length) $("#date-filter").min = dates[0];
     $("#date-filter").max = dayOf(Date.now());
@@ -378,7 +382,7 @@
   function showAbout() {
     $("#dialog-title").textContent = "关于本站";
     $("#dialog-content").innerHTML =
-      '<p>ZrBac 的个人新闻订阅页，汇总综合新闻和科技资讯，每小时更新。</p><h3>排序与分类</h3><p>新闻按来源标注的发布时间排列，AI 分类依据标题关键词。每日速览从不同分类与来源中选取最多 10 条，不代表热度排名。</p><h3>内容与收藏</h3><p>标题及短摘要来自对应资讯源，点击标题阅读原文。收藏仅保存在当前浏览器，不会跨设备同步。</p><p><a href="/blog/">博客归档</a> · <a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">问题反馈</a></p>';
+      '<p>个人新闻订阅页，汇总综合新闻、科技、AI 和文娱资讯，计划每小时检查更新。</p><h3>排序与分类</h3><p>新闻按来源标注的发布时间排列，AI 分类依据标题关键词及来源。每日速览从不同分类与来源中选取最多 10 条，不代表热度排名。</p><h3>内容与收藏</h3><p>标题及短摘要来自对应资讯源，点击标题阅读原文。收藏仅保存在当前浏览器，不会跨设备同步。</p><p><a href="/blog/">博客归档</a> · <a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">问题反馈</a></p>';
     $("#info-dialog").showModal();
   }
   function theme(value) {

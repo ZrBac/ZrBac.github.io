@@ -16,6 +16,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(base, { waitUntil: "networkidle" });
     await page.locator(".article").first().waitFor();
+    assert.match(await page.locator("#update-status").innerText(), /最近检查 .*最新文章/);
     assert.equal(await page.locator(".article").count(), 12);
     await page.click("#load-more");
     assert.equal(await page.locator(".article").count(), 24);
@@ -192,10 +193,12 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     fixture.articles[0].title = '<img src=x onerror="window.injected=true">';
     fixture.articles[0].excerpt = "<script>window.injected=true</script>";
     fixture.articles[1].url = "javascript:window.injected=true";
+    fixture.updatedAt = new Date(Date.now() - 3 * 3600 * 1000).toISOString();
     await page.route("**/data/news.json", (route) =>
       route.fulfill({ json: fixture }),
     );
     await page.reload({ waitUntil: "networkidle" });
+    assert.match(await page.locator("#update-status").innerText(), /检查已延迟/);
     assert.equal(await page.locator(".article img,.article script").count(), 0);
     assert.equal(await page.locator('a[href^="javascript:"]').count(), 0);
     assert.equal(await page.evaluate(() => window.injected), undefined);

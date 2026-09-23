@@ -7,6 +7,7 @@ import html
 import json
 import re
 import sys
+import time
 import urllib.parse
 import urllib.error
 import urllib.request
@@ -118,15 +119,17 @@ def parse_feed(data, source, now):
 def collect(source, now):
     status = {k: source[k] for k in ('id', 'name', 'home', 'category', 'color')}
     status['checkedAt'] = iso(now)
+    started = time.monotonic()
     try:
         articles = parse_feed(fetch(source['url']), source, now)
         if not articles:
             raise ValueError('No dated articles from the last 30 days')
-        status.update(status='ok', fetchedCount=len(articles), latestAt=max(a['publishedAt'] for a in articles))
+        status.update(status='ok', fetchedCount=len(articles), latestAt=max(a['publishedAt'] for a in articles),
+                      durationMs=round((time.monotonic() - started) * 1000))
         return articles, status
     except Exception as exc:
         print(f"Source {source['id']} unavailable: {exc}", file=sys.stderr)
-        status.update(status='unavailable', fetchedCount=0)
+        status.update(status='unavailable', fetchedCount=0, durationMs=round((time.monotonic() - started) * 1000))
         return [], status
 
 
@@ -180,9 +183,14 @@ def main():
         for articles, status in pool.map(lambda source: collect(source, now), sources):
             incoming.extend(articles)
             statuses.append(status)
+    articles = merge_articles(previous, incoming, now, {s['id'] for s in sources})
+    previous_urls = {safe_url(a.get('url')) for a in previous if isinstance(a, dict)}
+    for status in statuses:
+        status['newCount'] = sum(a['sourceId'] == status['id'] and a['url'] not in previous_urls for a in articles)
+        print('SOURCE_METRIC ' + json.dumps({k: status[k] for k in
+              ('id', 'checkedAt', 'status', 'fetchedCount', 'newCount', 'durationMs')}))
     if not incoming:
         raise SystemExit('All feeds unavailable. Keep the last successful deployment; do not publish an empty site.')
-    articles = merge_articles(previous, incoming, now, {s['id'] for s in sources})
     result = {'version': 1, 'updatedAt': iso(now), 'retentionDays': 30, 'sources': statuses, 'articles': articles}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, separators=(',', ':')) + '\n')
