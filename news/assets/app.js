@@ -1,0 +1,506 @@
+(() => {
+  "use strict";
+  const $ = (selector) => document.querySelector(selector);
+  const $$ = (selector) => [...document.querySelectorAll(selector)];
+  const paths = {
+    search: '<circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/>',
+    moon: '<path d="M20.9 13a9 9 0 0 1-10-10 9 9 0 1 0 10 10Z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/>',
+    bookmark: '<path d="M6 4h12v17l-6-4-6 4V4Z"/>',
+    "arrow-up-right": '<path d="M6 18 18 6M6 6h12v12"/>',
+    "arrow-down": '<path d="M12 4v16m-6-6 6 6 6-6"/>',
+    radio:
+      '<circle cx="12" cy="12" r="2"/><path d="M7.8 7.8a6 6 0 0 0 0 8.4m8.4-8.4a6 6 0 0 1 0 8.4M5 5a10 10 0 0 0 0 14M19 5a10 10 0 0 1 0 14"/>',
+    calendar:
+      '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18"/>',
+    activity: '<path d="M2 12h5l3-8 4 16 3-8h5"/>',
+    sparkles:
+      '<path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3ZM20 2v4m-2-2h4"/>',
+    globe:
+      '<circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/>',
+    rss: '<circle cx="5" cy="19" r="1"/><path d="M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16"/>',
+    x: '<path d="m6 6 12 12M6 18 18 6"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  };
+  const icon = (name) =>
+    `<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">${paths[name] || paths.globe}</svg>`;
+  $$("[data-icon]").forEach((el) => {
+    el.innerHTML = icon(el.dataset.icon);
+  });
+  const escape = (value) =>
+    String(value ?? "").replace(
+      /[&<>"']/g,
+      (c) =>
+        ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        })[c],
+    );
+  const safeUrl = (value) => {
+    try {
+      const u = new URL(value);
+      return ["https:", "http:"].includes(u.protocol) &&
+        !u.username &&
+        !u.password
+        ? u.href
+        : "";
+    } catch {
+      return "";
+    }
+  };
+  const categoryNames = {
+    general: "综合热点",
+    tech: "科技动态",
+    ai: "人工智能",
+  };
+  const state = {
+    data: null,
+    view: "all",
+    filter: "all",
+    query: "",
+    source: "all",
+    date: "",
+    limit: 12,
+    saved: new Map(),
+  };
+  const dateParts = (date) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Shanghai",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(new Date(date));
+  const dayOf = (date) => {
+    const parts = Object.fromEntries(
+      dateParts(date).map((p) => [p.type, p.value]),
+    );
+    return `${parts.year}-${parts.month}-${parts.day}`;
+  };
+  const formatTime = (date) =>
+    new Intl.DateTimeFormat("zh-CN", {
+      timeZone: "Asia/Shanghai",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(new Date(date));
+  const relativeTime = (date) => {
+    const minutes = Math.max(
+      0,
+      Math.floor((Date.now() - new Date(date).getTime()) / 60000),
+    );
+    if (minutes < 1) return "刚刚";
+    if (minutes < 60) return `${minutes} 分钟前`;
+    if (minutes < 1440) return `${Math.floor(minutes / 60)} 小时前`;
+    return formatTime(date);
+  };
+  function validArticle(a) {
+    return (
+      a &&
+      typeof a.id === "string" &&
+      typeof a.title === "string" &&
+      !!safeUrl(a.url) &&
+      Number.isFinite(Date.parse(a.publishedAt)) &&
+      Object.hasOwn(categoryNames, a.category)
+    );
+  }
+  let toastTimer;
+  function toast(message) {
+    $("#toast").textContent = message;
+    $("#toast").hidden = false;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+      $("#toast").hidden = true;
+    }, 3000);
+  }
+  function loadSaved() {
+    try {
+      const data = JSON.parse(
+        localStorage.getItem("zrbac-news-saved-v1") || "[]",
+      );
+      if (Array.isArray(data))
+        state.saved = new Map(data.filter(validArticle).map((a) => [a.id, a]));
+    } catch {
+      state.saved = new Map();
+    }
+    updateSavedCount();
+  }
+  function updateSavedCount() {
+    $("#saved-count").textContent = state.saved.size;
+    $("#saved-count").hidden = !state.saved.size;
+  }
+  function sourceFor(article) {
+    return (
+      state.data?.sources.find((s) => s.id === article.sourceId) || {
+        name: article.sourceName || article.sourceId,
+      }
+    );
+  }
+  function saveArticle(id) {
+    if (state.saved.has(id)) {
+      state.saved.delete(id);
+      toast("已移出收藏");
+    } else {
+      const article = state.data.articles.find((a) => a.id === id);
+      if (!article) return;
+      state.saved.set(id, { ...article, sourceName: sourceFor(article).name });
+      toast("已收藏，可在「我的收藏」中查看");
+    }
+    try {
+      localStorage.setItem(
+        "zrbac-news-saved-v1",
+        JSON.stringify([...state.saved.values()]),
+      );
+    } catch {
+      toast("浏览器未允许保存；本次收藏仅在当前页面有效");
+    }
+    updateSavedCount();
+    render();
+  }
+  function articleCard(article, index) {
+    const saved = state.saved.has(article.id);
+    const source = sourceFor(article);
+    return `<article class="article"><div>${state.view === "brief" ? `<span class="article-number">${String(index + 1).padStart(2, "0")}</span>` : ""}<div class="article-meta"><span class="category-label ${escape(article.category)}">${categoryNames[article.category]}</span><span>${escape(source.name)}</span><span class="meta-dot"></span><time datetime="${escape(article.publishedAt)}" title="北京时间 ${escape(formatTime(article.publishedAt))}">${escape(relativeTime(article.publishedAt))}</time></div><h3><a href="${escape(safeUrl(article.url))}" target="_blank" rel="noopener noreferrer">${escape(article.title)}${icon("arrow-up-right")}</a></h3>${article.excerpt ? `<p>${escape(article.excerpt)}</p>` : ""}<div class="article-bottom"><span>来源摘要</span><span class="meta-dot"></span><a href="${escape(safeUrl(article.url))}" target="_blank" rel="noopener noreferrer">阅读全文 ${icon("arrow-up-right")}</a></div></div><button class="save-button${saved ? " saved" : ""}" data-save="${escape(article.id)}" aria-label="${saved ? "取消收藏" : "收藏"}：${escape(article.title)}" aria-pressed="${saved}" title="${saved ? "取消收藏" : "收藏文章"}">${icon("bookmark")}</button></article>`;
+  }
+  function selectBrief(articles) {
+    const queues = ["general", "ai", "tech"].map((category) =>
+      articles.filter((a) => a.category === category),
+    );
+    const selected = [];
+    const counts = {};
+    // Rotate categories and sources. This is a transparent reading selection, not a popularity score.
+    while (selected.length < 10 && queues.some((q) => q.length)) {
+      for (const q of queues) {
+        if (!q.length || selected.length >= 10) continue;
+        const best = q.findIndex((a) => (counts[a.sourceId] || 0) < 2);
+        const [article] = q.splice(best < 0 ? 0 : best, 1);
+        selected.push(article);
+        counts[article.sourceId] = (counts[article.sourceId] || 0) + 1;
+      }
+    }
+    return selected;
+  }
+  function matchingArticles() {
+    let articles =
+      state.view === "saved"
+        ? [...state.saved.values()].sort((a, b) =>
+            b.publishedAt.localeCompare(a.publishedAt),
+          )
+        : state.data.articles;
+    if (state.filter !== "all")
+      articles = articles.filter((a) =>
+        state.filter === "tech"
+          ? ["tech", "ai"].includes(a.category)
+          : a.category === state.filter,
+      );
+    if (state.source !== "all")
+      articles = articles.filter((a) => a.sourceId === state.source);
+    if (state.date)
+      articles = articles.filter((a) => dayOf(a.publishedAt) === state.date);
+    if (state.query) {
+      const words = state.query
+        .toLocaleLowerCase()
+        .split(/\s+/)
+        .filter(Boolean);
+      articles = articles.filter((a) =>
+        words.every((word) =>
+          `${a.title} ${a.excerpt} ${sourceFor(a).name}`
+            .toLocaleLowerCase()
+            .includes(word),
+        ),
+      );
+    }
+    return state.view === "brief" ? selectBrief(articles) : articles;
+  }
+  function render() {
+    if (!state.data) return;
+    const articles = matchingArticles();
+    const titles = {
+      all: "值得关注",
+      general: "综合热点",
+      tech: "AI / 科技动态",
+      ai: "人工智能",
+      brief: "每日速览",
+      saved: "我的收藏",
+    };
+    $("#section-title").textContent = titles[state.view] || titles.all;
+    $("#result-count").textContent = `${articles.length} 条资讯`;
+    $$("[data-view]").forEach((el) => {
+      const active =
+        el.dataset.view === state.view ||
+        (el.dataset.view === "tech" && state.view === "ai");
+      el.classList.toggle("active", active);
+      if (active) el.setAttribute("aria-current", "page");
+      else el.removeAttribute("aria-current");
+    });
+    $$("[data-filter]").forEach((el) => {
+      const active = el.dataset.filter === state.filter;
+      el.classList.toggle("selected", active);
+      el.setAttribute("aria-pressed", active);
+    });
+    const note = $("#view-note");
+    note.hidden = !["saved", "brief"].includes(state.view);
+    if (state.view === "saved")
+      note.textContent =
+        "收藏保存在当前浏览器，可保留已超出资讯归档期限的条目。清除浏览器数据会移除收藏，不会自动跨设备同步。";
+    if (state.view === "brief")
+      note.textContent =
+        "从所选日期的资讯中，按综合、AI、科技轮流选取最多 10 条，兼顾不同来源。摘要来自资讯源，并非 AI 撰写或人工排名。";
+    $("#date-trigger").classList.toggle("active", !!state.date);
+    $("#date-trigger span:last-child").textContent = state.date
+      ? state.date.slice(5).replace("-", "/")
+      : "日期";
+    $("#articles").setAttribute("aria-busy", "false");
+    if (articles.length) {
+      $("#articles").innerHTML = articles
+        .slice(0, state.limit)
+        .map(articleCard)
+        .join("");
+    } else {
+      const emptySaved = state.view === "saved" && !state.saved.size;
+      $("#articles").innerHTML =
+        `<div class="empty-state">${icon(emptySaved ? "bookmark" : "search")}<h3>${emptySaved ? "把值得读的，留给自己" : "暂时没有匹配的资讯"}</h3><p>${emptySaved ? "点击资讯右侧的书签，就能在这里再次找到它。" : "试试其他关键词、来源或日期。归档从小站上线后逐步积累。"}</p><button data-reset>浏览全部资讯</button></div>`;
+    }
+    $("#load-more").hidden = articles.length <= state.limit;
+    $("#list-end").hidden = !articles.length || articles.length > state.limit;
+  }
+  function route(scroll = false) {
+    const hash = location.hash.slice(1);
+    if (hash === "news-content") {
+      if (!state.data) return;
+      render();
+      return;
+    }
+    state.view = ["all", "general", "tech", "ai", "brief", "saved"].includes(
+      hash,
+    )
+      ? hash
+      : "all";
+    state.filter = ["general", "tech", "ai"].includes(state.view)
+      ? state.view
+      : "all";
+    state.limit = 12;
+    state.query = "";
+    state.source = "all";
+    state.date = state.view === "brief" ? dayOf(Date.now()) : "";
+    $("#search").value = "";
+    $("#source-filter").value = "all";
+    $("#date-filter").value = state.date;
+    $("#date-panel").hidden = state.view !== "brief";
+    $("#date-trigger").setAttribute("aria-expanded", state.view === "brief");
+    render();
+    if (scroll)
+      $("#news-content").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function renderSidebar() {
+    const seenSources = new Set();
+    const latest = [];
+    for (const a of state.data.articles) {
+      if (!seenSources.has(a.sourceId)) {
+        latest.push(a);
+        seenSources.add(a.sourceId);
+      }
+      if (latest.length === 5) break;
+    }
+    $("#latest-list").innerHTML = latest
+      .map(
+        (a) =>
+          `<li><div><a href="${escape(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer">${escape(a.title)}</a><p>${escape(sourceFor(a).name)} · ${escape(relativeTime(a.publishedAt))}</p></div></li>`,
+      )
+      .join("");
+    $("#source-badges").innerHTML = state.data.sources
+      .map((s) => `<span>${escape(s.name)}</span>`)
+      .join("");
+    $("#source-filter").innerHTML =
+      '<option value="all">全部来源</option>' +
+      state.data.sources
+        .map(
+          (s) => `<option value="${escape(s.id)}">${escape(s.name)}</option>`,
+        )
+        .join("");
+    const ok = state.data.sources.filter((s) => s.status === "ok").length;
+    const stale =
+      Date.now() - Date.parse(state.data.updatedAt) > 3 * 3600 * 1000;
+    $("#update-status").textContent =
+      `${stale ? "更新可能延迟 · " : ""}${formatTime(state.data.updatedAt)} 更新 · ${ok}/${state.data.sources.length} 个来源可用`;
+    $("#update-status").title =
+      "计划每小时更新；GitHub Actions 可能延迟。时间均为北京时间。";
+    const dates = state.data.articles.map((a) => dayOf(a.publishedAt)).sort();
+    if (dates.length) $("#date-filter").min = dates[0];
+    $("#date-filter").max = dayOf(Date.now());
+  }
+  function showSources() {
+    $("#dialog-title").textContent = "每一条信息，都有出处";
+    const sourceRows = state.data
+      ? state.data.sources
+          .map(
+            (s) =>
+              `<div class="source-row"><div><a href="${escape(safeUrl(s.home))}" target="_blank" rel="noopener noreferrer">${escape(s.name)} ${icon("arrow-up-right")}</a><small>${s.latestAt ? "最近发布：" + escape(formatTime(s.latestAt)) : "本轮未取得有效资讯"}</small></div><span class="source-status ${s.status === "ok" ? "" : "unavailable"}">${s.status === "ok" ? "● 本轮已连接" : "○ 暂不可用"}</span></div>`,
+          )
+          .join("")
+      : "<p>资讯尚未加载完成，请稍后再试。</p>";
+    $("#dialog-content").innerHTML =
+      "<p>通过公开 RSS 获取标题、发布时间及简短摘要，点击资讯前往原站阅读完整内容。不同来源有各自的报道视角。</p>" +
+      sourceRows +
+      "<p>计划每小时检查一次，来源失败时保留已收录内容。本站归档保留最近 30 天、最多 6000 条，历史从首次上线后逐步积累；并不代表全网实时热度榜。</p>";
+    $("#info-dialog").showModal();
+  }
+  function showAbout() {
+    $("#dialog-title").textContent = "为好奇心，留一个窗口";
+    $("#dialog-content").innerHTML =
+      '<p>今日知闻是 ZrBac 的个人资讯小站，关注综合热点、人工智能与科技变化。我们希望把分散的消息整理到一起，让阅读更轻松。</p><h3>我们如何整理资讯</h3><p>列表按来源标注的发布时间倒序排列，AI 分类依据标题关键词；侧栏取不同来源的最新消息。每日速览兼顾分类和来源，不是人工编辑推荐，也不是热度排名。分类可能有误，请以原文为准。</p><h3>关于内容与隐私</h3><p>标题及短摘要来自对应资讯源，版权归原作者和发布方。本文不提供付费内容全文。收藏仅保存在当前浏览器。本网站没有登录或跨设备收藏功能。</p><h3>曾经的笔记，也仍在这里</h3><p><a href="/blog/">前往博客归档 ↗</a>，继续阅读原来的技术文章。</p><p><a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">内容反馈、来源调整与问题反馈 ↗</a></p>';
+    $("#info-dialog").showModal();
+  }
+  function theme(value) {
+    document.documentElement.dataset.theme = value;
+    $("#theme-toggle").innerHTML = icon(value === "dark" ? "sun" : "moon");
+    $("#theme-toggle").setAttribute(
+      "aria-label",
+      value === "dark" ? "切换浅色模式" : "切换深色模式",
+    );
+    $('meta[name="theme-color"]').content =
+      value === "dark" ? "#191c19" : "#f7f6f2";
+  }
+  let storedTheme;
+  try {
+    storedTheme = localStorage.getItem("zrbac-news-theme");
+  } catch {}
+  theme(storedTheme === "dark" ? "dark" : "light");
+  $("#theme-toggle").addEventListener("click", () => {
+    const value =
+      document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    theme(value);
+    try {
+      localStorage.setItem("zrbac-news-theme", value);
+    } catch {}
+  });
+  $("#edition-date").textContent = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    weekday: "long",
+  }).format(new Date());
+  $("#year").textContent = new Date().getFullYear();
+  $("#search-trigger").addEventListener("click", () => {
+    $("#news-content").scrollIntoView({ behavior: "smooth" });
+    $("#search").focus({ preventScroll: true });
+  });
+  document.addEventListener("keydown", (e) => {
+    if (
+      (e.key === "k" && (e.ctrlKey || e.metaKey)) ||
+      (e.key === "/" &&
+        !/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) &&
+        !$("#info-dialog").open)
+    ) {
+      e.preventDefault();
+      $("#search-trigger").click();
+    }
+  });
+  $("#search").addEventListener("input", (e) => {
+    state.query = e.target.value.trim();
+    state.limit = 12;
+    render();
+  });
+  $("#source-filter").addEventListener("change", (e) => {
+    state.source = e.target.value;
+    state.limit = 12;
+    render();
+  });
+  $("#date-trigger").addEventListener("click", () => {
+    const open = $("#date-panel").hidden;
+    $("#date-panel").hidden = !open;
+    $("#date-trigger").setAttribute("aria-expanded", open);
+    if (open) $("#date-filter").focus();
+  });
+  $("#date-filter").addEventListener("change", (e) => {
+    state.date = e.target.value;
+    state.limit = 12;
+    render();
+  });
+  $("#clear-date").addEventListener("click", () => {
+    state.date = "";
+    $("#date-filter").value = "";
+    render();
+  });
+  $("#load-more").addEventListener("click", () => {
+    state.limit += 12;
+    render();
+  });
+  document.addEventListener("click", (e) => {
+    const filter = e.target.closest("[data-filter]");
+    if (filter) {
+      state.filter = filter.dataset.filter;
+      state.limit = 12;
+      if (!["saved", "brief"].includes(state.view)) {
+        state.view = state.filter;
+        history.replaceState(null, "", "#" + state.view);
+      }
+      render();
+    }
+    const save = e.target.closest("[data-save]");
+    if (save) saveArticle(save.dataset.save);
+    if (e.target.closest("[data-reset]")) {
+      location.hash = "all";
+      route();
+    }
+    if (e.target.closest("[data-retry]")) load();
+  });
+  window.addEventListener("hashchange", () => route(true));
+  window.addEventListener("storage", (e) => {
+    if (e.key === "zrbac-news-saved-v1") {
+      loadSaved();
+      render();
+    }
+  });
+  ["#sources-trigger", "#footer-sources"].forEach((id) =>
+    $(id).addEventListener("click", showSources),
+  );
+  $("#about-trigger").addEventListener("click", showAbout);
+  $("#close-dialog").addEventListener("click", () => $("#info-dialog").close());
+  $("#info-dialog").addEventListener("click", (e) => {
+    if (e.target === $("#info-dialog")) {
+      const r = e.target.getBoundingClientRect();
+      if (
+        e.clientX < r.left ||
+        e.clientX > r.right ||
+        e.clientY < r.top ||
+        e.clientY > r.bottom
+      )
+        e.target.close();
+    }
+  });
+  loadSaved();
+  async function load() {
+    $("#articles").setAttribute("aria-busy", "true");
+    try {
+      const response = await fetch("/data/news.json", {
+        cache: "no-cache",
+        signal: AbortSignal.timeout(15000),
+      });
+      if (!response.ok) throw new Error("News data unavailable");
+      const data = await response.json();
+      if (
+        !Array.isArray(data.articles) ||
+        !Array.isArray(data.sources) ||
+        !Number.isFinite(Date.parse(data.updatedAt))
+      )
+        throw new Error("Invalid data");
+      data.articles = data.articles.filter(validArticle);
+      state.data = data;
+      renderSidebar();
+      route();
+    } catch (error) {
+      $("#articles").setAttribute("aria-busy", "false");
+      $("#articles").innerHTML =
+        `<div class="empty-state">${icon("radio")}<h3>资讯暂时没有连接上</h3><p>请检查网络后重试，也可以先去博客归档逛逛。</p><button data-retry>重新加载</button></div>`;
+      $("#update-status").textContent = "数据加载失败，请稍后重试";
+      $("#latest-list").innerHTML = "<li><div>等待资讯恢复连接</div></li>";
+    }
+  }
+  load();
+})();

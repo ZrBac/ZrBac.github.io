@@ -1,0 +1,50 @@
+[
+  {
+    "id": "chinanews",
+    "name": "中国新闻网",
+    "url": "https://www.chinanews.com.cn/rss/china.xml",
+    "home": "https://www.chinanews.com.cn/",
+    "category": "general",
+    "color": "#b95039"
+  },
+  {
+    "id": "bbc",
+    "name": "BBC 中文",
+    "url": "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml",
+    "home": "https://www.bbc.com/zhongwen",
+    "category": "general",
+    "color": "#8d443d"
+  },
+  {
+    "id": "ithome",
+    "name": "IT之家",
+    "url": "https://www.ithome.com/rss/",
+    "home": "https://www.ithome.com/",
+    "category": "tech",
+    "color": "#c04b3d"
+  },
+  {
+    "id": "ifanr",
+    "name": "爱范儿",
+    "url": "https://www.ifanr.com/feed",
+    "home": "https://www.ifanr.com/",
+    "category": "tech",
+    "color": "#574e78"
+  },
+  {
+    "id": "solidot",
+    "name": "Solidot",
+    "url": "https://www.solidot.org/index.rss",
+    "home": "https://www.solidot.org/",
+    "category": "tech",
+    "color": "#65774a"
+  },
+  {
+    "id": "github",
+    "name": "GitHub Blog",
+    "url": "https://github.blog/feed/",
+    "home": "https://github.blog/",
+    "category": "tech",
+    "color": "#4b657c"
+  }
+]
