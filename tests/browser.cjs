@@ -55,11 +55,30 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     );
 
     await page.click('a[data-view="brief"]');
-    assert((await page.locator(".article").count()) <= 10);
+    assert.equal(await page.locator("#section-title").innerText(), "每日速览");
+    assert.equal(
+      await page.locator('a[data-view="brief"]').getAttribute("aria-current"),
+      "page",
+    );
+    assert.equal(
+      await page.locator('[data-filter][aria-pressed="true"]').count(),
+      0,
+    );
+    const briefCount = await page.locator(".article").count();
+    assert(briefCount > 0 && briefCount <= 10);
     const selectedDate = await page.inputValue("#date-filter");
     assert(selectedDate.length === 10);
     await page.fill("#date-filter", "2020-01-01");
     assert.equal(await page.locator(".article").count(), 0);
+    // Clicking the selected tab must reset an empty date/search without requiring a hash change.
+    await page.click('a[data-view="brief"]');
+    assert.equal(await page.inputValue("#date-filter"), selectedDate);
+    assert.equal(await page.locator(".article").count(), briefCount);
+    await page.fill("#search", "no_matching_brief_287349");
+    assert.equal(await page.locator(".article").count(), 0);
+    await page.click('a[data-view="brief"]');
+    assert.equal(await page.inputValue("#search"), "");
+    assert.equal(await page.locator(".article").count(), briefCount);
     await page.click("#clear-date");
     await page.locator(".article").first().waitFor();
 

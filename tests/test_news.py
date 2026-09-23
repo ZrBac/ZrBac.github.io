@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -85,6 +86,12 @@ class ArchiveTests(unittest.TestCase):
                 self.assertIn('原文保留', (output / '2020/story/index.html').read_text())
                 self.assertTrue((output / 'asset.css').exists())
                 self.assertFalse((output / 'CNAME').exists())
+                # The document must not load an unversioned cached script or stylesheet.
+                homepage = (output / 'index.html').read_text()
+                for name, extension in [('app', 'js'), ('style', 'css'), ('favicon', 'svg')]:
+                    match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, homepage)
+                    self.assertIsNotNone(match)
+                    self.assertEqual((output / match.group(0).lstrip('/')).read_bytes(), (ROOT / 'news/assets' / f'{name}.{extension}').read_bytes())
         finally:
             if existed:
                 data.write_bytes(original)

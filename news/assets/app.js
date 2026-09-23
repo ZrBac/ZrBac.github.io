@@ -449,6 +449,22 @@
     render();
   });
   document.addEventListener("click", (e) => {
+    const viewLink = e.target.closest("a[data-view]");
+    if (
+      viewLink &&
+      !e.ctrlKey &&
+      !e.metaKey &&
+      !e.shiftKey &&
+      !e.altKey &&
+      e.button === 0
+    ) {
+      e.preventDefault();
+      const hash = "#" + viewLink.dataset.view;
+      if (location.hash !== hash) history.pushState(null, "", hash);
+      // A repeated click should also reset the date/search instead of doing nothing.
+      route(true);
+      return;
+    }
     const filter = e.target.closest("[data-filter]");
     if (filter && state.view === "brief") {
       history.replaceState(null, "", "#" + filter.dataset.filter);

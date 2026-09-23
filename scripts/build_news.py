@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Overlay the news portal on the original published blog without rebuilding old Hexo."""
 import argparse
+import hashlib
 import json
 import shutil
 from datetime import datetime
@@ -39,6 +40,15 @@ def main():
             path.write_text(path.read_text().replace('http://yoursite.com', 'https://zrbac.github.io'))
     shutil.copy2(ROOT / 'news/index.html', output / 'index.html')
     shutil.copytree(ROOT / 'news/assets', output / 'assets/news', dirs_exist_ok=True)
+    # New HTML always requests the matching assets, even with cached older releases.
+    homepage = (output / 'index.html').read_text()
+    for filename in ('app.js', 'style.css', 'favicon.svg'):
+        asset = output / 'assets/news' / filename
+        digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
+        versioned = asset.with_name(f'{asset.stem}.{digest}{asset.suffix}')
+        shutil.copy2(asset, versioned)
+        homepage = homepage.replace(f'"/assets/news/{filename}"', f'"/assets/news/{versioned.name}"')
+    (output / 'index.html').write_text(homepage)
     shutil.copytree(ROOT / 'news/data', output / 'data', dirs_exist_ok=True)
     (output / '.nojekyll').touch()
     data = json.loads((output / 'data/news.json').read_text())
