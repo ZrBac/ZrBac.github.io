@@ -17,7 +17,8 @@ python -m http.server 8080 --directory _site
 
 ## 内容和界面
 
-- 6 个公开 RSS：中新网、BBC 中文、IT之家、爱范儿、Solidot、GitHub Blog，详见 `sources.json`。
+- 18 个公开 RSS，详见 `sources.json`。综合来源为中新网、BBC 中文、德国之声中文、法国国际广播电台、香港电台、中央社；科技与 AI 来源为 IT之家、爱范儿、Solidot、GitHub Blog、少数派、极客公园、雷峰网、量子位、Hugging Face、NVIDIA Blog、Google AI、Google DeepMind。
+- 支持 RSS 2.0 和 RSS 1.0/RDF。保留来源的原始语言，英文资讯不自动翻译。
 - 默认按发布时间倒序，科技筛选包含 AI；AI 通过标题关键词分类，可能误分类。
 - 每日速览默认显示北京时间当天的消息，轮流抽取综合/AI/科技，尽量分散来源，最多 10 条。不是 AI 生成、编辑推荐或热度榜。
 - RSS 摘要截取为不超过 90 字符的纯文本，不存储全文、不代理媒体图片。标题和链接保留原始来源。来源可按发布方要求从配置中移除。

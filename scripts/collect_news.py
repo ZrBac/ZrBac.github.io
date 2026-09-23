@@ -90,14 +90,19 @@ def fetch(url, max_bytes=5_000_000):
 def parse_feed(data, source, now):
     root = ET.fromstring(data)
     articles = []
-    for item in root.findall('.//item')[:120]:
-        title = plain(item.findtext('title'))[:240]
-        url = safe_url(item.findtext('link'))
+    rss1 = '{http://purl.org/rss/1.0/}'
+    # RSS 1.0/RDF uses namespaced fields (for example DW); RSS 2.0 does not.
+    items = root.findall('.//item') + root.findall(f'.//{rss1}item')
+    for item in items[:120]:
+        def field(name):
+            return item.findtext(name) or item.findtext(rss1 + name) or ''
+        title = plain(field('title'))[:240]
+        url = safe_url(field('link'))
         date = parse_date(item.findtext('pubDate') or item.findtext('{http://purl.org/dc/elements/1.1/}date'))
         if not title or not url or not date or date > now + timedelta(minutes=10) or date < now - timedelta(days=30):
             continue
         # Keep only a short publisher-provided excerpt; do not republish feed bodies.
-        excerpt = plain(item.findtext('description'))
+        excerpt = plain(field('description'))
         excerpt = re.sub(r'^(?:IT之家|爱范儿)\s*\d+\s*月\s*\d+\s*日(?:消息|讯)[，,：:\s]*', '', excerpt)
         excerpt = excerpt[:89].rstrip() + '…' if len(excerpt) > 90 else excerpt
         category = 'ai' if AI_PATTERN.search(title) else source['category']

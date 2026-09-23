@@ -83,7 +83,13 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await page.locator(".article").first().waitFor();
 
     await page.click("#sources-trigger");
-    assert.equal(await page.locator(".source-row").count(), 6);
+    const publishedSources = (
+      await (await page.request.get(base + "/data/news.json")).json()
+    ).sources;
+    assert.equal(
+      await page.locator(".source-row").count(),
+      publishedSources.length,
+    );
     await page.keyboard.press("Escape");
     assert.equal(await page.locator("dialog").evaluate((e) => e.open), false);
     await page.click("#theme-toggle");

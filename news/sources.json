@@ -46,5 +46,101 @@
     "home": "https://github.blog/",
     "category": "tech",
     "color": "#4b657c"
+  },
+  {
+    "id": "dw",
+    "name": "德国之声中文",
+    "url": "https://rss.dw.com/rdf/rss-chi-all",
+    "home": "https://www.dw.com/zh/",
+    "category": "general",
+    "color": "#8d443d"
+  },
+  {
+    "id": "rfi",
+    "name": "法国国际广播电台",
+    "url": "https://www.rfi.fr/cn/rss",
+    "home": "https://www.rfi.fr/cn/",
+    "category": "general",
+    "color": "#8d443d"
+  },
+  {
+    "id": "rthk",
+    "name": "香港电台",
+    "url": "https://rthk.hk/rthk/news/rss/c_expressnews_cinternational.xml",
+    "home": "https://news.rthk.hk/rthk/ch/",
+    "category": "general",
+    "color": "#8d443d"
+  },
+  {
+    "id": "cna",
+    "name": "中央社",
+    "url": "https://feeds.feedburner.com/rsscna/intworld",
+    "home": "https://www.cna.com.tw/",
+    "category": "general",
+    "color": "#8d443d"
+  },
+  {
+    "id": "sspai",
+    "name": "少数派",
+    "url": "https://sspai.com/feed",
+    "home": "https://sspai.com/",
+    "category": "tech",
+    "color": "#4b657c"
+  },
+  {
+    "id": "geekpark",
+    "name": "极客公园",
+    "url": "https://www.geekpark.net/rss",
+    "home": "https://www.geekpark.net/",
+    "category": "tech",
+    "color": "#4b657c"
+  },
+  {
+    "id": "leiphone",
+    "name": "雷峰网",
+    "url": "https://www.leiphone.com/feed",
+    "home": "https://www.leiphone.com/",
+    "category": "tech",
+    "color": "#4b657c"
+  },
+  {
+    "id": "qbitai",
+    "name": "量子位",
+    "url": "https://www.qbitai.com/feed",
+    "home": "https://www.qbitai.com/",
+    "category": "ai",
+    "color": "#65774a"
+  },
+  {
+    "id": "huggingface",
+    "name": "Hugging Face",
+    "url": "https://huggingface.co/blog/feed.xml",
+    "home": "https://huggingface.co/blog",
+    "category": "ai",
+    "color": "#65774a"
+  },
+  {
+    "id": "nvidia",
+    "name": "NVIDIA Blog",
+    "url": "https://blogs.nvidia.com/feed/",
+    "home": "https://blogs.nvidia.com/",
+    "category": "tech",
+    "color": "#4b657c"
+  },
+  {
+    "id": "google-ai",
+    "name": "Google AI",
+    "url": "https://blog.google/innovation-and-ai/technology/ai/rss/",
+    "home": "https://blog.google/innovation-and-ai/technology/ai/",
+    "category": "ai",
+    "color": "#65774a"
+  },
+  {
+    "id": "deepmind",
+    "name": "Google DeepMind",
+    "url": "https://deepmind.google/blog/rss.xml",
+    "home": "https://deepmind.google/blog/",
+    "category": "ai",
+    "color": "#65774a"
   }
 ]

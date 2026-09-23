@@ -60,6 +60,22 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(len(collector.merge_articles([item], [same_title], self.now, {'example'})), 1)
         self.assertIsNone(collector.safe_url('https://user:password@example.com/'))
 
+    def test_rdf_feed_retains_publisher_date_link_and_excerpt(self):
+        feed = b'''<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+            xmlns="http://purl.org/rss/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/">
+          <item rdf:about="https://example.com/world">
+            <title>World news &amp; analysis</title><link>https://example.com/world</link>
+            <description><![CDATA[<p>A short summary.</p>]]></description>
+            <dc:date>2026-09-22T14:29:00Z</dc:date>
+          </item></rdf:RDF>'''
+        items = collector.parse_feed(feed, dict(self.source, category='general'), self.now)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]['title'], 'World news & analysis')
+        self.assertEqual(items[0]['url'], 'https://example.com/world')
+        self.assertEqual(items[0]['publishedAt'], '2026-09-22T14:29:00Z')
+        self.assertEqual(items[0]['excerpt'], 'A short summary.')
+        self.assertEqual(items[0]['category'], 'general')
+
 
 class ArchiveTests(unittest.TestCase):
     def test_build_preserves_blog_article_urls_and_assets(self):
