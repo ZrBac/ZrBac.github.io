@@ -56,6 +56,7 @@
     tech: "科技动态",
     ai: "人工智能",
     entertainment: "文娱",
+    sports: "体育",
   };
   const state = {
     data: null,
@@ -173,8 +174,8 @@
       </div><button class="save-button${saved ? " saved" : ""}" data-save="${escape(article.id)}" aria-label="${saved ? "取消收藏" : "收藏"}：${escape(article.title)}" aria-pressed="${saved}" title="${saved ? "取消收藏" : "收藏文章"}">${icon("bookmark")}</button></article>`;
   }
   function selectBrief(articles) {
-    const queues = ["general", "ai", "tech", "entertainment"].map((category) =>
-      articles.filter((a) => a.category === category),
+    const queues = ["general", "ai", "tech", "entertainment", "sports"].map(
+      (category) => articles.filter((a) => a.category === category),
     );
     const selected = [];
     const counts = {};
@@ -227,6 +228,7 @@
       tech: "科技动态",
       ai: "人工智能",
       entertainment: "文娱",
+      sports: "体育",
       brief: "每日速览",
       saved: "我的收藏",
     };
@@ -256,7 +258,7 @@
         "收藏保存在当前浏览器，可保留已超出资讯归档期限的条目。清除浏览器数据会移除收藏，不会自动跨设备同步。";
     if (state.view === "brief")
       note.textContent =
-        "从所选日期的资讯中，按综合、AI、科技、文娱轮流选取最多 10 条，兼顾不同来源。摘要来自资讯源，并非 AI 撰写或人工排名。";
+        "从所选日期的资讯中，按综合、AI、科技、文娱、体育轮流选取最多 10 条，兼顾不同来源。摘要来自资讯源，并非 AI 撰写或人工排名。";
     $("#date-trigger").classList.toggle("active", !!state.date);
     $("#date-trigger span:last-child").textContent = state.date
       ? state.date.slice(5).replace("-", "/")
@@ -288,14 +290,19 @@
       "tech",
       "ai",
       "entertainment",
+      "sports",
       "brief",
       "saved",
     ].includes(hash)
       ? hash
       : "all";
-    state.filter = ["general", "tech", "ai", "entertainment"].includes(
-      state.view,
-    )
+    state.filter = [
+      "general",
+      "tech",
+      "ai",
+      "entertainment",
+      "sports",
+    ].includes(state.view)
       ? state.view
       : "all";
     state.limit = 12;
@@ -382,7 +389,7 @@
   function showAbout() {
     $("#dialog-title").textContent = "关于本站";
     $("#dialog-content").innerHTML =
-      '<p>个人新闻订阅页，汇总综合新闻、科技、AI 和文娱资讯，计划每小时检查更新。</p><h3>排序与分类</h3><p>新闻按来源标注的发布时间排列，AI 分类依据标题关键词及来源。每日速览从不同分类与来源中选取最多 10 条，不代表热度排名。</p><h3>内容与收藏</h3><p>标题及短摘要来自对应资讯源，点击标题阅读原文。收藏仅保存在当前浏览器，不会跨设备同步。</p><p><a href="/blog/">博客归档</a> · <a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">问题反馈</a></p>';
+      '<p>个人新闻订阅页，汇总综合新闻、科技、AI、文娱和体育资讯，计划每小时检查更新。</p><h3>排序与分类</h3><p>新闻按来源标注的发布时间排列，AI 分类依据标题关键词及来源。每日速览从不同分类与来源中选取最多 10 条，不代表热度排名。</p><h3>内容与收藏</h3><p>标题及短摘要来自对应资讯源，点击标题阅读原文。收藏仅保存在当前浏览器，不会跨设备同步。</p><p><a href="/blog/">博客归档</a> · <a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">问题反馈</a></p>';
     $("#info-dialog").showModal();
   }
   function theme(value) {

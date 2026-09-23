@@ -16,12 +16,17 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     page.on("pageerror", (e) => errors.push(e.message));
     await page.goto(base, { waitUntil: "networkidle" });
     await page.locator(".article").first().waitFor();
-    assert.match(await page.locator("#update-status").innerText(), /最近检查 .*最新文章/);
+    assert.match(
+      await page.locator("#update-status").innerText(),
+      /最近检查 .*最新文章/,
+    );
     assert.equal(await page.locator(".article").count(), 12);
     await page.click("#load-more");
     assert.equal(await page.locator(".article").count(), 24);
 
-    const news = await (await page.request.get(base + "/data/news.json")).json();
+    const news = await (
+      await page.request.get(base + "/data/news.json")
+    ).json();
     const aiUrls = new Set(
       news.articles.filter((a) => a.category === "ai").map((a) => a.url),
     );
@@ -31,9 +36,9 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     assert.equal(await page.locator("#section-title").innerText(), "科技动态");
     while (await page.locator("#load-more").isVisible())
       await page.click("#load-more");
-    const techUrls = await page.locator(".article h3 a").evaluateAll(
-      (links) => links.map((a) => a.getAttribute("href")),
-    );
+    const techUrls = await page
+      .locator(".article h3 a")
+      .evaluateAll((links) => links.map((a) => a.getAttribute("href")));
     assert(techUrls.length > 0);
     assert.equal(
       techUrls.length,
@@ -132,6 +137,42 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await page.fill("#search", "");
     await page.selectOption("#source-filter", "all");
 
+    await page.click('[data-filter="sports"]');
+    assert.equal(await page.locator("#section-title").innerText(), "体育");
+    assert((await page.locator(".article").count()) > 0);
+    assert(
+      (await page.locator(".article .category-label").allTextContents()).every(
+        (t) => t === "体育",
+      ),
+    );
+    await page.reload({ waitUntil: "networkidle" });
+    assert.equal(
+      await page.locator('[data-filter="sports"]').getAttribute("aria-pressed"),
+      "true",
+    );
+    await page.selectOption("#source-filter", "cna-sports");
+    assert((await page.locator(".article").count()) > 0);
+    assert(
+      (await page.locator(".article-meta").allTextContents()).every((t) =>
+        t.includes("中央通訊社·運動"),
+      ),
+    );
+    await page.fill("#search", "no_sports_results_849217");
+    assert.equal(await page.locator(".article").count(), 0);
+    await page.fill("#search", "");
+    await page.click(".save-button >> nth=0");
+    const sportsTitle = await page.locator(".article h3").first().textContent();
+    await page.click(".saved-link");
+    await page.reload({ waitUntil: "networkidle" });
+    assert.equal(await page.locator(".article").count(), 1);
+    assert.equal(
+      await page.locator(".article h3").first().textContent(),
+      sportsTitle,
+    );
+    assert.equal(await page.locator(".category-label").innerText(), "体育");
+    await page.click(".save-button");
+    await page.click('[data-filter="sports"]');
+
     await page.click("#sources-trigger");
     const publishedSources = (
       await (await page.request.get(base + "/data/news.json")).json()
@@ -198,7 +239,10 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
       route.fulfill({ json: fixture }),
     );
     await page.reload({ waitUntil: "networkidle" });
-    assert.match(await page.locator("#update-status").innerText(), /检查已延迟/);
+    assert.match(
+      await page.locator("#update-status").innerText(),
+      /检查已延迟/,
+    );
     assert.equal(await page.locator(".article img,.article script").count(), 0);
     assert.equal(await page.locator('a[href^="javascript:"]').count(), 0);
     assert.equal(await page.evaluate(() => window.injected), undefined);

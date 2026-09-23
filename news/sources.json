@@ -182,5 +182,45 @@
     "home": "https://deadline.com/",
     "category": "entertainment",
     "color": "#8d443d"
+  },
+  {
+    "id": "chinanews-sports",
+    "name": "中新网体育",
+    "url": "https://www.chinanews.com.cn/rss/sports.xml",
+    "home": "https://www.chinanews.com.cn/sports/",
+    "category": "sports",
+    "color": "#52745b"
+  },
+  {
+    "id": "cna-sports",
+    "name": "中央通訊社·運動",
+    "url": "https://feeds.feedburner.com/rsscna/sport",
+    "home": "https://www.cna.com.tw/list/aspt.aspx",
+    "category": "sports",
+    "color": "#52745b"
+  },
+  {
+    "id": "rthk-sports",
+    "name": "香港电台体育",
+    "url": "https://rthk.hk/rthk/news/rss/c_expressnews_csport.xml",
+    "home": "https://news.rthk.hk/rthk/ch/latest-news/sport.htm",
+    "category": "sports",
+    "color": "#52745b"
+  },
+  {
+    "id": "yahoo-sports",
+    "name": "Yahoo 体育",
+    "url": "https://tw.news.yahoo.com/rss/sports",
+    "home": "https://tw.sports.yahoo.com/",
+    "category": "sports",
+    "color": "#52745b"
+  },
+  {
+    "id": "bbc-sport",
+    "name": "BBC Sport",
+    "url": "https://feeds.bbci.co.uk/sport/rss.xml",
+    "home": "https://www.bbc.com/sport",
+    "category": "sports",
+    "color": "#52745b"
   }
 ]

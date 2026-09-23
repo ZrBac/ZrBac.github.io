@@ -106,8 +106,8 @@ def parse_feed(data, source, now):
         excerpt = plain(field('description'))
         excerpt = re.sub(r'^(?:IT之家|爱范儿)\s*\d+\s*月\s*\d+\s*日(?:消息|讯)[，,：:\s]*', '', excerpt)
         excerpt = excerpt[:89].rstrip() + '…' if len(excerpt) > 90 else excerpt
-        # Entertainment channels stay in their section even when a story mentions AI.
-        category = source['category'] if source['category'] == 'entertainment' else ('ai' if AI_PATTERN.search(title) else source['category'])
+        # Dedicated sections stay separate even when a story mentions AI.
+        category = source['category'] if source['category'] in ('entertainment', 'sports') else ('ai' if AI_PATTERN.search(title) else source['category'])
         articles.append({
             'id': hashlib.sha256(url.encode()).hexdigest()[:16], 'title': title,
             'url': url, 'sourceId': source['id'], 'category': category,
@@ -142,7 +142,7 @@ def merge_articles(previous, incoming, now, allowed_sources):
         date = parse_date(article.get('publishedAt'))
         if not url or not date or not now - timedelta(days=30) <= date <= now + timedelta(minutes=10):
             continue
-        if article.get('sourceId') not in allowed_sources or article.get('category') not in ('general', 'tech', 'ai', 'entertainment'):
+        if article.get('sourceId') not in allowed_sources or article.get('category') not in ('general', 'tech', 'ai', 'entertainment', 'sports'):
             continue
         clean = {key: str(article.get(key, '')) for key in ('title', 'sourceId', 'category', 'publishedAt', 'excerpt')}
         clean.update(url=url, id=hashlib.sha256(url.encode()).hexdigest()[:16], title=plain(clean['title'])[:240], excerpt=plain(clean['excerpt'])[:90])
