@@ -51,7 +51,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     assert.equal(await page.locator(".article").count(), 0);
     assert.match(
       await page.locator(".empty-state h3").textContent(),
-      /留给自己/,
+      /还没有收藏/,
     );
 
     await page.click('a[data-view="brief"]');

@@ -43,7 +43,7 @@ def main():
     (output / '.nojekyll').touch()
     data = json.loads((output / 'data/news.json').read_text())
     items = ''.join(f'<item><title>{escape(a["title"])}</title><link>{escape(a["url"])}</link><guid>{escape(a["url"])}</guid><pubDate>{format_datetime(datetime.fromisoformat(a["publishedAt"].replace("Z", "+00:00")))}</pubDate><description>{escape(a["excerpt"])}</description></item>' for a in data['articles'][:50])
-    (output / 'news.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>今日知闻 · ZrBac</title><link>https://zrbac.github.io/</link><description>综合热点与 AI 科技资讯。摘要来自原始资讯源。</description>' + items + '</channel></rss>')
+    (output / 'news.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>ZrBac 资讯</title><link>https://zrbac.github.io/</link><description>综合热点与 AI 科技资讯。摘要来自原始资讯源。</description>' + items + '</channel></rss>')
     # A compact sitemap of the portal and preserved article URLs.
     urls = ['https://zrbac.github.io/', 'https://zrbac.github.io/blog/']
     urls += ['https://zrbac.github.io/' + str(f.relative_to(output).parent) + '/' for f in output.glob('20*/**/index.html')]

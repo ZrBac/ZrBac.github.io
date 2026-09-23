@@ -4,16 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f7f6f2" />
+    <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="今日知闻：一处读懂综合热点与 AI 科技动态。聚合多个资讯源，保留出处，让阅读少一点噪音，多一点收获。"
+      content="综合新闻、人工智能和科技动态，按发布时间更新，附来源与原文链接。"
     />
-    <meta property="og:title" content="今日知闻 · 世界在发生，值得你知道" />
-    <meta
-      property="og:description"
-      content="综合热点、AI 与科技资讯、每日速览。每条信息都有出处。"
-    />
+    <meta property="og:title" content="ZrBac 资讯 · 综合与科技" />
+    <meta property="og:description" content="综合新闻、AI 与科技资讯。" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zrbac.github.io/" />
     <link rel="canonical" href="https://zrbac.github.io/" />
@@ -21,27 +18,26 @@
     <link
       rel="alternate"
       type="application/rss+xml"
-      title="今日知闻 RSS"
+      title="ZrBac 资讯 RSS"
       href="/news.xml"
     />
     <link rel="stylesheet" href="/assets/news/style.css" />
-    <title>今日知闻 · 综合热点与 AI 科技资讯</title>
+    <title>ZrBac 资讯 · 综合热点与 AI 科技资讯</title>
     <script src="/assets/news/app.js" defer></script>
   </head>
   <body>
     <a href="#news-content" class="skip-link">跳到资讯列表</a>
     <header class="header">
       <div class="header-inner">
-        <a class="brand" href="#all" aria-label="今日知闻首页"
-          ><span class="brand-mark">知<span></span></span
+        <a class="brand" href="#all" aria-label="ZrBac 资讯首页"
           ><span class="brand-name"
-            >今日知闻<small>THE DAILY SIGNAL</small></span
+            >ZrBac<span class="brand-separator">/</span>资讯</span
           ></a
         >
         <nav class="top-nav" aria-label="主导航">
-          <a href="#all" data-view="all" class="active">发现<span></span></a>
-          <a href="#general" data-view="general">综合热点</a>
-          <a href="#tech" data-view="tech">AI / 科技</a>
+          <a href="#all" data-view="all" class="active">最新</a>
+          <a href="#general" data-view="general">综合</a>
+          <a href="#tech" data-view="tech">科技</a>
           <a href="#brief" data-view="brief">每日速览</a>
         </nav>
         <div class="header-actions">
@@ -70,54 +66,10 @@
     </header>
 
     <main class="page">
-      <div class="edition-line">
-        <span><i class="live-dot"></i>保持好奇，连接世界</span
-        ><span id="edition-date">今日知闻 · 每日更新</span>
-      </div>
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <div class="eyebrow">
-            <span></span> YOUR DAILY DOSE OF PERSPECTIVE
-          </div>
-          <h1 id="hero-title">
-            世界在发生，<br />值得你<span class="accent-word"
-              >知道<svg viewBox="0 0 210 14" aria-hidden="true">
-                <path d="M3 9 Q90 -2 206 6 M24 13 Q116 4 185 10" /></svg></span
-            >。
-          </h1>
-          <p>
-            从世界的脉动，到科技的下一步。<br
-              class="mobile-break"
-            />在这里，发现值得关注的消息。
-          </p>
-          <a class="hero-link" href="#news-content"
-            >开始阅读 <span data-icon="arrow-down"></span
-          ></a>
-        </div>
-        <aside class="daily-note" aria-labelledby="note-title">
-          <div class="note-top">
-            <span><span data-icon="sun"></span> 今日阅读提案</span
-            ><span class="note-number">01 — 03</span>
-          </div>
-          <h2 id="note-title">多一点视角，<br />少一点信息噪音。</h2>
-          <p>读热点，也看变化背后的线索。<br />用一份速览，开启今天的阅读。</p>
-          <a href="#brief" class="note-link"
-            >打开每日速览 <span data-icon="arrow-up-right"></span
-          ></a>
-          <div class="orbit" aria-hidden="true">
-            <i></i><i></i><i></i><b></b>
-          </div>
-        </aside>
-      </section>
-
       <div class="update-bar">
-        <span
-          ><span data-icon="radio"></span><strong>资讯雷达</strong
-          ><span class="bar-divider"></span
-          ><span id="update-status" role="status">正在连接资讯…</span></span
-        ><button id="sources-trigger">
-          查看资讯源 <span data-icon="arrow-up-right"></span>
-        </button>
+        <span id="edition-date">资讯更新</span>
+        <span id="update-status" role="status">正在加载…</span>
+        <button id="sources-trigger">来源状态</button>
       </div>
 
       <div class="main-layout">
@@ -129,8 +81,7 @@
         >
           <div class="section-heading">
             <div>
-              <span class="section-index">01 / FEED</span>
-              <h2 id="section-title">值得关注</h2>
+              <h1 id="section-title">最新资讯</h1>
             </div>
             <span id="result-count" class="result-count"></span>
           </div>
@@ -138,16 +89,9 @@
             <button data-filter="all" class="selected" aria-pressed="true">
               全部资讯
             </button>
-            <button data-filter="general" aria-pressed="false">
-              <span class="category-dot general"></span>综合热点
-            </button>
-            <button data-filter="tech" aria-pressed="false">
-              <span class="category-dot tech"></span>科技动态
-            </button>
-            <button data-filter="ai" aria-pressed="false">
-              <span class="category-dot ai"></span>人工智能
-              <span class="mini-new">AI</span>
-            </button>
+            <button data-filter="general" aria-pressed="false">综合热点</button>
+            <button data-filter="tech" aria-pressed="false">科技动态</button>
+            <button data-filter="ai" aria-pressed="false">人工智能</button>
           </div>
           <div class="filter-row">
             <label class="search-box"
@@ -192,83 +136,52 @@
           >
             <div class="loading-state">
               <span class="loading-ring"></span>
-              <p>正在整理今天的消息…</p>
+              <p>正在加载资讯…</p>
             </div>
           </div>
           <button id="load-more" class="load-more" hidden>
-            继续探索 <span data-icon="arrow-down"></span>
+            加载更多 <span data-icon="arrow-down"></span>
           </button>
-          <p id="list-end" class="list-end" hidden>
-            你已读到这份列表的末尾。去原文，多了解一点。
-          </p>
+          <p id="list-end" class="list-end" hidden>已显示全部结果。</p>
         </section>
 
         <aside class="sidebar">
           <section class="radar-card">
             <div class="sidebar-heading">
-              <h2><span data-icon="activity"></span>最新速递</h2>
-              <span>按发布时间</span>
+              <h2>各站最新</h2>
+              <span>每站一条</span>
             </div>
             <ol id="latest-list">
               <li class="sidebar-placeholder">正在获取最新资讯…</li>
             </ol>
           </section>
-          <section class="topic-card">
-            <span class="section-index">FOCUS / 专题</span>
-            <div class="topic-icon" aria-hidden="true">
-              <span data-icon="sparkles"></span>
+          <section class="sidebar-section">
+            <div class="sidebar-heading">
+              <h2>AI 动态</h2>
+              <a href="#ai">更多</a>
             </div>
-            <h2>下一步，<br />人工智能。</h2>
-            <p>模型、应用与开源。<br />追踪正在发生的技术变化。</p>
-            <a href="#ai"
-              >探索 AI 动态 <span data-icon="arrow-up-right"></span></a
-            ><span class="topic-grid" aria-hidden="true"></span>
+            <ol id="tech-list" class="side-list"></ol>
           </section>
           <section class="source-card">
-            <div class="sidebar-heading">
-              <h2>让信息有出处</h2>
-              <span data-icon="globe"></span>
-            </div>
-            <p>
-              聚合多方声音，始终保留原文。<br />保持好奇，也保持自己的判断。
-            </p>
+            <div class="sidebar-heading"><h2>订阅来源</h2></div>
             <div id="source-badges" class="source-badges"></div>
-            <button id="about-trigger" class="text-button">
-              了解这个小站 <span data-icon="arrow-up-right"></span>
-            </button>
+            <button id="about-trigger" class="text-button">关于本站</button>
           </section>
         </aside>
       </div>
-      <section class="bottom-banner">
-        <div class="banner-mark" aria-hidden="true">知</div>
-        <div>
-          <h2>信息很多，值得留意的事不必错过。</h2>
-          <p>把今日知闻加入书签，让阅读成为一个小小的日常。</p>
-        </div>
-        <a href="/news.xml"
-          ><span data-icon="rss"></span> RSS 订阅
-          <span data-icon="arrow-up-right"></span
-        ></a>
-      </section>
     </main>
     <footer class="footer">
-      <div>
-        <a class="footer-brand" href="#all">今日知闻<span> BY ZRBAC</span></a>
-        <p>保持好奇，独立思考。</p>
-      </div>
+      <span class="copyright">© <span id="year">2026</span> ZrBac</span>
       <div class="footer-links">
-        <a href="/blog/">博客归档</a
-        ><button id="footer-sources">资讯来源</button
-        ><a
+        <a href="/blog/">博客归档</a><a href="/news.xml">RSS</a>
+        <button id="footer-sources">资讯来源</button>
+        <a
           href="https://github.com/ZrBac/ZrBac.github.io"
           target="_blank"
           rel="noopener noreferrer"
-          >GitHub <span data-icon="arrow-up-right"></span
-        ></a>
+          >GitHub</a
+        >
       </div>
-      <span class="copyright"
-        >© <span id="year">2026</span> ZrBac · 为好奇心而建</span
-      >
     </footer>
     <dialog id="info-dialog" aria-labelledby="dialog-title">
       <div class="dialog-heading">

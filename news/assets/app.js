@@ -164,7 +164,12 @@
   function articleCard(article, index) {
     const saved = state.saved.has(article.id);
     const source = sourceFor(article);
-    return `<article class="article"><div>${state.view === "brief" ? `<span class="article-number">${String(index + 1).padStart(2, "0")}</span>` : ""}<div class="article-meta"><span class="category-label ${escape(article.category)}">${categoryNames[article.category]}</span><span>${escape(source.name)}</span><span class="meta-dot"></span><time datetime="${escape(article.publishedAt)}" title="北京时间 ${escape(formatTime(article.publishedAt))}">${escape(relativeTime(article.publishedAt))}</time></div><h3><a href="${escape(safeUrl(article.url))}" target="_blank" rel="noopener noreferrer">${escape(article.title)}${icon("arrow-up-right")}</a></h3>${article.excerpt ? `<p>${escape(article.excerpt)}</p>` : ""}<div class="article-bottom"><span>来源摘要</span><span class="meta-dot"></span><a href="${escape(safeUrl(article.url))}" target="_blank" rel="noopener noreferrer">阅读全文 ${icon("arrow-up-right")}</a></div></div><button class="save-button${saved ? " saved" : ""}" data-save="${escape(article.id)}" aria-label="${saved ? "取消收藏" : "收藏"}：${escape(article.title)}" aria-pressed="${saved}" title="${saved ? "取消收藏" : "收藏文章"}">${icon("bookmark")}</button></article>`;
+    return `<article class="article"><div class="article-body">
+      ${state.view === "brief" ? `<span class="article-number">${String(index + 1).padStart(2, "0")}</span>` : ""}
+      <h3><a href="${escape(safeUrl(article.url))}" target="_blank" rel="noopener noreferrer">${escape(article.title)}</a></h3>
+      ${article.excerpt ? `<p>${escape(article.excerpt)}</p>` : ""}
+      <div class="article-meta"><span>${escape(source.name)}</span><time datetime="${escape(article.publishedAt)}" title="北京时间 ${escape(formatTime(article.publishedAt))}">${escape(relativeTime(article.publishedAt))}</time><span class="category-label ${escape(article.category)}">${categoryNames[article.category]}</span></div>
+      </div><button class="save-button${saved ? " saved" : ""}" data-save="${escape(article.id)}" aria-label="${saved ? "取消收藏" : "收藏"}：${escape(article.title)}" aria-pressed="${saved}" title="${saved ? "取消收藏" : "收藏文章"}">${icon("bookmark")}</button></article>`;
   }
   function selectBrief(articles) {
     const queues = ["general", "ai", "tech"].map((category) =>
@@ -220,7 +225,7 @@
     if (!state.data) return;
     const articles = matchingArticles();
     const titles = {
-      all: "值得关注",
+      all: "最新资讯",
       general: "综合热点",
       tech: "AI / 科技动态",
       ai: "人工智能",
@@ -263,7 +268,7 @@
     } else {
       const emptySaved = state.view === "saved" && !state.saved.size;
       $("#articles").innerHTML =
-        `<div class="empty-state">${icon(emptySaved ? "bookmark" : "search")}<h3>${emptySaved ? "把值得读的，留给自己" : "暂时没有匹配的资讯"}</h3><p>${emptySaved ? "点击资讯右侧的书签，就能在这里再次找到它。" : "试试其他关键词、来源或日期。归档从小站上线后逐步积累。"}</p><button data-reset>浏览全部资讯</button></div>`;
+        `<div class="empty-state">${icon(emptySaved ? "bookmark" : "search")}<h3>${emptySaved ? "还没有收藏" : "暂时没有匹配的资讯"}</h3><p>${emptySaved ? "点击新闻右侧的书签即可收藏。" : "试试其他关键词、来源或日期。"}</p><button data-reset>浏览全部资讯</button></div>`;
     }
     $("#load-more").hidden = articles.length <= state.limit;
     $("#list-end").hidden = !articles.length || articles.length > state.limit;
@@ -312,8 +317,19 @@
           `<li><div><a href="${escape(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer">${escape(a.title)}</a><p>${escape(sourceFor(a).name)} · ${escape(relativeTime(a.publishedAt))}</p></div></li>`,
       )
       .join("");
+    $("#tech-list").innerHTML = state.data.articles
+      .filter((a) => a.category === "ai")
+      .slice(0, 5)
+      .map(
+        (a) =>
+          `<li><a href="${escape(safeUrl(a.url))}" target="_blank" rel="noopener noreferrer">${escape(a.title)}</a><p>${escape(sourceFor(a).name)} · ${escape(relativeTime(a.publishedAt))}</p></li>`,
+      )
+      .join("");
     $("#source-badges").innerHTML = state.data.sources
-      .map((s) => `<span>${escape(s.name)}</span>`)
+      .map(
+        (s) =>
+          `<a href="${escape(safeUrl(s.home))}" target="_blank" rel="noopener noreferrer">${escape(s.name)}</a>`,
+      )
       .join("");
     $("#source-filter").innerHTML =
       '<option value="all">全部来源</option>' +
@@ -334,7 +350,7 @@
     $("#date-filter").max = dayOf(Date.now());
   }
   function showSources() {
-    $("#dialog-title").textContent = "每一条信息，都有出处";
+    $("#dialog-title").textContent = "资讯来源";
     const sourceRows = state.data
       ? state.data.sources
           .map(
@@ -350,9 +366,9 @@
     $("#info-dialog").showModal();
   }
   function showAbout() {
-    $("#dialog-title").textContent = "为好奇心，留一个窗口";
+    $("#dialog-title").textContent = "关于本站";
     $("#dialog-content").innerHTML =
-      '<p>今日知闻是 ZrBac 的个人资讯小站，关注综合热点、人工智能与科技变化。我们希望把分散的消息整理到一起，让阅读更轻松。</p><h3>我们如何整理资讯</h3><p>列表按来源标注的发布时间倒序排列，AI 分类依据标题关键词；侧栏取不同来源的最新消息。每日速览兼顾分类和来源，不是人工编辑推荐，也不是热度排名。分类可能有误，请以原文为准。</p><h3>关于内容与隐私</h3><p>标题及短摘要来自对应资讯源，版权归原作者和发布方。本文不提供付费内容全文。收藏仅保存在当前浏览器。本网站没有登录或跨设备收藏功能。</p><h3>曾经的笔记，也仍在这里</h3><p><a href="/blog/">前往博客归档 ↗</a>，继续阅读原来的技术文章。</p><p><a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">内容反馈、来源调整与问题反馈 ↗</a></p>';
+      '<p>ZrBac 的个人新闻订阅页，汇总综合新闻和科技资讯，每小时更新。</p><h3>排序与分类</h3><p>新闻按来源标注的发布时间排列，AI 分类依据标题关键词。每日速览从不同分类与来源中选取最多 10 条，不代表热度排名。</p><h3>内容与收藏</h3><p>标题及短摘要来自对应资讯源，点击标题阅读原文。收藏仅保存在当前浏览器，不会跨设备同步。</p><p><a href="/blog/">博客归档</a> · <a href="https://github.com/ZrBac/ZrBac.github.io/issues" target="_blank" rel="noopener noreferrer">问题反馈</a></p>';
     $("#info-dialog").showModal();
   }
   function theme(value) {
@@ -363,7 +379,7 @@
       value === "dark" ? "切换浅色模式" : "切换深色模式",
     );
     $('meta[name="theme-color"]').content =
-      value === "dark" ? "#191c19" : "#f7f6f2";
+      value === "dark" ? "#181818" : "#ffffff";
   }
   let storedTheme;
   try {
@@ -497,7 +513,7 @@
     } catch (error) {
       $("#articles").setAttribute("aria-busy", "false");
       $("#articles").innerHTML =
-        `<div class="empty-state">${icon("radio")}<h3>资讯暂时没有连接上</h3><p>请检查网络后重试，也可以先去博客归档逛逛。</p><button data-retry>重新加载</button></div>`;
+        `<div class="empty-state">${icon("radio")}<h3>资讯加载失败</h3><p>请检查网络后重试。</p><button data-retry>重新加载</button></div>`;
       $("#update-status").textContent = "数据加载失败，请稍后重试";
       $("#latest-list").innerHTML = "<li><div>等待资讯恢复连接</div></li>";
     }

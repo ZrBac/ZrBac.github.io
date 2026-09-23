@@ -79,7 +79,7 @@ class ArchiveTests(unittest.TestCase):
                 (legacy / 'CNAME').write_text('obsolete.example.com')
                 output = Path(tmp) / 'out'
                 subprocess.run([sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)], check=True, capture_output=True)
-                self.assertIn('今日知闻', (output / 'index.html').read_text())
+                self.assertIn('id="news-content"', (output / 'index.html').read_text())
                 self.assertIn('Blog', (output / 'blog/index.html').read_text())
                 self.assertIn('href="/blog/"', (output / '2020/story/index.html').read_text())
                 self.assertIn('原文保留', (output / '2020/story/index.html').read_text())
