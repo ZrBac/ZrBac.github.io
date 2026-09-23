@@ -1,4 +1,4 @@
-# ZrBac 资讯
+# 资讯
 
 综合热点 + AI/科技资讯门户。界面为原生 HTML/CSS/JavaScript；采集与构建仅需 Python 3.11+ 标准库，不依赖旧 Hexo 的运行环境，也不需要模型 API 密钥。
 

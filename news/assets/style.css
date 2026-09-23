@@ -115,7 +115,7 @@ span[data-icon] {
 .header-inner {
   max-width: 1160px;
   margin: auto;
-  min-height: 83px;
+  min-height: 70px;
   display: flex;
   align-items: center;
   gap: 44px;
@@ -129,38 +129,6 @@ span[data-icon] {
   font-size: 25px;
   font-weight: 750;
   letter-spacing: -0.7px;
-}
-.brand-separator {
-  margin: 0 11px;
-  font-weight: 300;
-  color: #aaa;
-}
-.top-nav {
-  display: flex;
-  gap: 27px;
-  align-self: stretch;
-  align-items: stretch;
-}
-.top-nav a {
-  display: flex;
-  align-items: center;
-  position: relative;
-  font-size: 14px;
-  color: var(--secondary);
-  white-space: nowrap;
-}
-.top-nav a.active {
-  color: var(--ink);
-  font-weight: 600;
-}
-.top-nav a.active:after {
-  content: "";
-  height: 2px;
-  background: var(--ink);
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
 }
 .header-actions {
   margin-left: auto;
@@ -248,7 +216,8 @@ span[data-icon] {
   gap: 26px;
   border-bottom: 1px solid var(--line);
 }
-.filter-tabs button {
+.filter-tabs button,
+.filter-tabs a {
   font-size: 13px;
   white-space: nowrap;
   padding: 0 0 10px;
@@ -256,12 +225,14 @@ span[data-icon] {
   border-bottom: 2px solid transparent;
   margin-bottom: -1px;
 }
-.filter-tabs button.selected {
+.filter-tabs button.selected,
+.filter-tabs a.active {
   color: var(--accent);
   border-bottom-color: var(--accent);
   font-weight: 600;
 }
-.filter-tabs button:hover {
+.filter-tabs button:hover,
+.filter-tabs a:hover {
   color: var(--ink);
 }
 .filter-row {
@@ -654,9 +625,6 @@ dialog::backdrop {
   .header-inner {
     gap: 28px;
   }
-  .top-nav {
-    gap: 20px;
-  }
   .header-actions {
     gap: 6px;
   }
@@ -679,23 +647,11 @@ dialog::backdrop {
 }
 @media (max-width: 760px) {
   .header-inner {
-    flex-wrap: wrap;
-    padding-top: 16px;
-    gap: 0;
-    min-height: 111px;
+    gap: 16px;
+    min-height: 60px;
   }
   .brand-name {
     font-size: 23px;
-  }
-  .top-nav {
-    order: 3;
-    width: 100%;
-    height: 42px;
-    margin-top: 11px;
-    gap: 26px;
-  }
-  .top-nav a {
-    font-size: 13px;
   }
   .header-actions {
     margin-left: auto;
@@ -763,9 +719,6 @@ dialog::backdrop {
   .brand-name {
     font-size: 22px;
   }
-  .brand-separator {
-    margin: 0 8px;
-  }
   .saved-link > span:not([data-icon]) {
     display: none;
   }
@@ -775,14 +728,12 @@ dialog::backdrop {
   .header-actions {
     gap: 6px;
   }
-  .top-nav {
-    gap: 27px;
-  }
   .filter-tabs {
     justify-content: space-between;
     gap: 8px;
   }
-  .filter-tabs button {
+  .filter-tabs button,
+  .filter-tabs a {
     font-size: 12px;
   }
   .filter-row {

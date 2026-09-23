@@ -9,7 +9,7 @@
       name="description"
       content="综合新闻、人工智能和科技动态，按发布时间更新，附来源与原文链接。"
     />
-    <meta property="og:title" content="ZrBac 资讯 · 综合与科技" />
+    <meta property="og:title" content="资讯 · 综合与科技" />
     <meta property="og:description" content="综合新闻、AI 与科技资讯。" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://zrbac.github.io/" />
@@ -18,28 +18,20 @@
     <link
       rel="alternate"
       type="application/rss+xml"
-      title="ZrBac 资讯 RSS"
+      title="资讯 RSS"
       href="/news.xml"
     />
     <link rel="stylesheet" href="/assets/news/style.css" />
-    <title>ZrBac 资讯 · 综合热点与 AI 科技资讯</title>
+    <title>资讯 · 综合热点与 AI 科技资讯</title>
     <script src="/assets/news/app.js" defer></script>
   </head>
   <body>
     <a href="#news-content" class="skip-link">跳到资讯列表</a>
     <header class="header">
       <div class="header-inner">
-        <a class="brand" href="#all" aria-label="ZrBac 资讯首页"
-          ><span class="brand-name"
-            >ZrBac<span class="brand-separator">/</span>资讯</span
-          ></a
+        <a class="brand" href="#all" aria-label="资讯首页"
+          ><span class="brand-name">资讯</span></a
         >
-        <nav class="top-nav" aria-label="主导航">
-          <a href="#all" data-view="all" class="active">最新</a>
-          <a href="#general" data-view="general">综合</a>
-          <a href="#tech" data-view="tech">科技</a>
-          <a href="#brief" data-view="brief">每日速览</a>
-        </nav>
         <div class="header-actions">
           <button
             id="search-trigger"
@@ -87,11 +79,12 @@
           </div>
           <div class="filter-tabs" role="group" aria-label="资讯分类">
             <button data-filter="all" class="selected" aria-pressed="true">
-              全部资讯
+              全部
             </button>
-            <button data-filter="general" aria-pressed="false">综合热点</button>
-            <button data-filter="tech" aria-pressed="false">科技动态</button>
-            <button data-filter="ai" aria-pressed="false">人工智能</button>
+            <button data-filter="general" aria-pressed="false">综合</button>
+            <button data-filter="tech" aria-pressed="false">科技</button>
+            <button data-filter="ai" aria-pressed="false">AI</button>
+            <a href="#brief" data-view="brief">每日速览</a>
           </div>
           <div class="filter-row">
             <label class="search-box"

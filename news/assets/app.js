@@ -243,7 +243,8 @@
       else el.removeAttribute("aria-current");
     });
     $$("[data-filter]").forEach((el) => {
-      const active = el.dataset.filter === state.filter;
+      const active =
+        el.dataset.filter === state.filter && state.view !== "brief";
       el.classList.toggle("selected", active);
       el.setAttribute("aria-pressed", active);
     });
@@ -449,6 +450,11 @@
   });
   document.addEventListener("click", (e) => {
     const filter = e.target.closest("[data-filter]");
+    if (filter && state.view === "brief") {
+      history.replaceState(null, "", "#" + filter.dataset.filter);
+      route();
+      return;
+    }
     if (filter) {
       state.filter = filter.dataset.filter;
       state.limit = 12;
