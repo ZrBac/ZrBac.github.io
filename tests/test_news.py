@@ -60,6 +60,12 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(len(collector.merge_articles([item], [same_title], self.now, {'example'})), 1)
         self.assertIsNone(collector.safe_url('https://user:password@example.com/'))
 
+    def test_entertainment_category_survives_ai_keyword_and_archive_merge(self):
+        source = dict(self.source, category='entertainment')
+        items = collector.parse_feed(self.feed(), source, self.now)
+        self.assertEqual(items[0]['category'], 'entertainment')
+        self.assertEqual(collector.merge_articles(items, [], self.now, {'example'}), items)
+
     def test_rdf_feed_retains_publisher_date_link_and_excerpt(self):
         feed = b'''<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
             xmlns="http://purl.org/rss/1.0/" xmlns:dc="http://purl.org/dc/elements/1.1/">

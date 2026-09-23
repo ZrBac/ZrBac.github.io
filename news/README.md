@@ -1,6 +1,6 @@
 # 资讯
 
-综合热点 + AI/科技资讯门户。界面为原生 HTML/CSS/JavaScript；采集与构建仅需 Python 3.11+ 标准库，不依赖旧 Hexo 的运行环境，也不需要模型 API 密钥。
+综合热点 + AI/科技 + 文娱资讯门户。界面为原生 HTML/CSS/JavaScript；采集与构建仅需 Python 3.11+ 标准库，不依赖旧 Hexo 的运行环境，也不需要模型 API 密钥。
 
 ## 本地运行
 
@@ -17,10 +17,10 @@ python -m http.server 8080 --directory _site
 
 ## 内容和界面
 
-- 18 个公开 RSS，详见 `sources.json`。综合来源为中新网、BBC 中文、德国之声中文、法国国际广播电台、香港电台、中央社；科技与 AI 来源为 IT之家、爱范儿、Solidot、GitHub Blog、少数派、极客公园、雷峰网、量子位、Hugging Face、NVIDIA Blog、Google AI、Google DeepMind。
+- 23 个公开 RSS，详见 `sources.json`。综合来源为中新网、BBC 中文、德国之声中文、法国国际广播电台、香港电台、中央社；科技与 AI 来源为 IT之家、爱范儿、Solidot、GitHub Blog、少数派、极客公园、雷峰网、量子位、Hugging Face、NVIDIA Blog、Google AI、Google DeepMind。文娱频道来源为中新网文娱、中央通訊社·娛樂、Yahoo 娱乐、Variety、Deadline。
 - 支持 RSS 2.0 和 RSS 1.0/RDF。保留来源的原始语言，英文资讯不自动翻译。
-- 默认按发布时间倒序，科技筛选包含 AI；AI 通过标题关键词分类，可能误分类。
-- 每日速览默认显示北京时间当天的消息，轮流抽取综合/AI/科技，尽量分散来源，最多 10 条。不是 AI 生成、编辑推荐或热度榜。
+- 默认按发布时间倒序，科技筛选包含 AI；AI 通过标题关键词分类，可能误分类；专门的文娱来源优先归入文娱。
+- 每日速览默认显示北京时间当天的消息，轮流抽取综合/AI/科技/文娱，尽量分散来源，最多 10 条。不是 AI 生成、编辑推荐或热度榜。
 - RSS 摘要截取为不超过 90 字符的纯文本，不存储全文、不代理媒体图片。标题和链接保留原始来源。来源可按发布方要求从配置中移除。
 - 来源缺少明确带时区的日期、日期过旧/过于超前、无安全 HTTP(S) 链接的条目不发布。
 - 收藏将文章快照保存到当前浏览器的 localStorage，不会跨设备同步；浏览器拒绝持久化时会提示。

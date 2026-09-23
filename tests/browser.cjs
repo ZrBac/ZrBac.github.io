@@ -82,6 +82,35 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await page.click("#clear-date");
     await page.locator(".article").first().waitFor();
 
+    await page.click('[data-filter="entertainment"]');
+    assert.equal(await page.locator("#section-title").innerText(), "文娱");
+    assert.equal(await page.inputValue("#date-filter"), "");
+    assert((await page.locator(".article").count()) > 0);
+    assert(
+      (await page.locator(".article .category-label").allTextContents()).every(
+        (t) => t === "文娱",
+      ),
+    );
+    await page.reload({ waitUntil: "networkidle" });
+    assert.equal(await page.locator("#section-title").innerText(), "文娱");
+    assert.equal(
+      await page
+        .locator('[data-filter="entertainment"]')
+        .getAttribute("aria-pressed"),
+      "true",
+    );
+    await page.selectOption("#source-filter", "yahoo-ent");
+    assert((await page.locator(".article").count()) > 0);
+    assert(
+      (await page.locator(".article-meta").allTextContents()).every((t) =>
+        t.includes("Yahoo 娱乐"),
+      ),
+    );
+    await page.fill("#search", "no_entertainment_results_732985");
+    assert.equal(await page.locator(".article").count(), 0);
+    await page.fill("#search", "");
+    await page.selectOption("#source-filter", "all");
+
     await page.click("#sources-trigger");
     const publishedSources = (
       await (await page.request.get(base + "/data/news.json")).json()

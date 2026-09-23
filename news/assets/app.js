@@ -55,6 +55,7 @@
     general: "综合热点",
     tech: "科技动态",
     ai: "人工智能",
+    entertainment: "文娱",
   };
   const state = {
     data: null,
@@ -172,7 +173,7 @@
       </div><button class="save-button${saved ? " saved" : ""}" data-save="${escape(article.id)}" aria-label="${saved ? "取消收藏" : "收藏"}：${escape(article.title)}" aria-pressed="${saved}" title="${saved ? "取消收藏" : "收藏文章"}">${icon("bookmark")}</button></article>`;
   }
   function selectBrief(articles) {
-    const queues = ["general", "ai", "tech"].map((category) =>
+    const queues = ["general", "ai", "tech", "entertainment"].map((category) =>
       articles.filter((a) => a.category === category),
     );
     const selected = [];
@@ -229,6 +230,7 @@
       general: "综合热点",
       tech: "AI / 科技动态",
       ai: "人工智能",
+      entertainment: "文娱",
       brief: "每日速览",
       saved: "我的收藏",
     };
@@ -249,13 +251,16 @@
       el.setAttribute("aria-pressed", active);
     });
     const note = $("#view-note");
-    note.hidden = !["saved", "brief"].includes(state.view);
+    note.hidden = !["saved", "brief", "entertainment"].includes(state.view);
+    if (state.view === "entertainment")
+      note.textContent =
+        "娱乐圈、影视和综艺消息，按发布时间更新。点击标题查看原报道。";
     if (state.view === "saved")
       note.textContent =
         "收藏保存在当前浏览器，可保留已超出资讯归档期限的条目。清除浏览器数据会移除收藏，不会自动跨设备同步。";
     if (state.view === "brief")
       note.textContent =
-        "从所选日期的资讯中，按综合、AI、科技轮流选取最多 10 条，兼顾不同来源。摘要来自资讯源，并非 AI 撰写或人工排名。";
+        "从所选日期的资讯中，按综合、AI、科技、文娱轮流选取最多 10 条，兼顾不同来源。摘要来自资讯源，并非 AI 撰写或人工排名。";
     $("#date-trigger").classList.toggle("active", !!state.date);
     $("#date-trigger span:last-child").textContent = state.date
       ? state.date.slice(5).replace("-", "/")
@@ -281,12 +286,20 @@
       render();
       return;
     }
-    state.view = ["all", "general", "tech", "ai", "brief", "saved"].includes(
-      hash,
-    )
+    state.view = [
+      "all",
+      "general",
+      "tech",
+      "ai",
+      "entertainment",
+      "brief",
+      "saved",
+    ].includes(hash)
       ? hash
       : "all";
-    state.filter = ["general", "tech", "ai"].includes(state.view)
+    state.filter = ["general", "tech", "ai", "entertainment"].includes(
+      state.view,
+    )
       ? state.view
       : "all";
     state.limit = 12;

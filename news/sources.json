@@ -73,7 +73,7 @@
   },
   {
     "id": "cna",
-    "name": "中央社",
+    "name": "中央通訊社",
     "url": "https://feeds.feedburner.com/rsscna/intworld",
     "home": "https://www.cna.com.tw/",
     "category": "general",
@@ -142,5 +142,45 @@
     "home": "https://deepmind.google/blog/",
     "category": "ai",
     "color": "#65774a"
+  },
+  {
+    "id": "chinanews-culture",
+    "name": "中新网文娱",
+    "url": "https://www.chinanews.com.cn/rss/culture.xml",
+    "home": "https://www.chinanews.com.cn/cul/",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "cna-stars",
+    "name": "中央通訊社·娛樂",
+    "url": "https://feeds.feedburner.com/rsscna/stars",
+    "home": "https://www.cna.com.tw/list/amov.aspx",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "yahoo-ent",
+    "name": "Yahoo 娱乐",
+    "url": "https://tw.news.yahoo.com/rss/entertainment",
+    "home": "https://tw.news.yahoo.com/entertainment/",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "variety",
+    "name": "Variety",
+    "url": "https://variety.com/feed/",
+    "home": "https://variety.com/",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "deadline",
+    "name": "Deadline",
+    "url": "https://deadline.com/feed/",
+    "home": "https://deadline.com/",
+    "category": "entertainment",
+    "color": "#8d443d"
   }
 ]
