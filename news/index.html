@@ -53,6 +53,9 @@
       <div class="update-bar">
         <span id="edition-date">资讯更新</span>
         <span id="update-status" role="status">正在加载…</span>
+        <button id="refresh-news" title="请求抓取并发布最新新闻">
+          刷新资讯
+        </button>
         <button id="sources-trigger">来源状态</button>
       </div>
 
@@ -117,6 +120,8 @@
             </button>
           </div>
           <p id="view-note" class="view-note" hidden></p>
+          <p id="load-notice" class="view-note" role="status" hidden></p>
+          <p id="refresh-notice" class="view-note" role="status" hidden></p>
           <div
             id="articles"
             class="article-list"

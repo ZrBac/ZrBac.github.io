@@ -107,7 +107,7 @@
       typeof a.title === "string" &&
       !!safeUrl(a.url) &&
       Number.isFinite(Date.parse(a.publishedAt)) &&
-      Object.hasOwn(categoryNames, a.category)
+      Object.prototype.hasOwnProperty.call(categoryNames, a.category)
     );
   }
   let toastTimer;
@@ -533,32 +533,189 @@
     }
   });
   loadSaved();
-  async function load() {
-    $("#articles").setAttribute("aria-busy", "true");
+  const cacheKey = "zrbac-news-cache-v1";
+  let loading = false;
+  let refreshing = false;
+  function validateData(data) {
+    if (
+      !data ||
+      !Array.isArray(data.articles) ||
+      !Array.isArray(data.sources) ||
+      !Number.isFinite(Date.parse(data.updatedAt))
+    )
+      throw new Error("Invalid data");
+    data.articles = data.articles.filter(validArticle);
+    return data;
+  }
+  async function requestJSON(url, options = {}, timeout = 30000) {
+    const controller =
+      typeof AbortController === "function" ? new AbortController() : null;
+    let timer;
     try {
-      const response = await fetch("/data/news.json", {
-        cache: "no-cache",
-        signal: AbortSignal.timeout(15000),
-      });
-      if (!response.ok) throw new Error("News data unavailable");
-      const data = await response.json();
-      if (
-        !Array.isArray(data.articles) ||
-        !Array.isArray(data.sources) ||
-        !Number.isFinite(Date.parse(data.updatedAt))
-      )
-        throw new Error("Invalid data");
-      data.articles = data.articles.filter(validArticle);
-      state.data = data;
-      renderSidebar();
-      route();
-    } catch (error) {
-      $("#articles").setAttribute("aria-busy", "false");
-      $("#articles").innerHTML =
-        `<div class="empty-state">${icon("radio")}<h3>资讯加载失败</h3><p>请检查网络后重试。</p><button data-retry>重新加载</button></div>`;
-      $("#update-status").textContent = "数据加载失败，请稍后重试";
-      $("#latest-list").innerHTML = "<li><div>等待资讯恢复连接</div></li>";
+      return await Promise.race([
+        fetch(url, {
+          ...options,
+          ...(controller ? { signal: controller.signal } : {}),
+        }).then(async (response) => {
+          if (!response.ok) throw new Error("News data unavailable");
+          return response.json();
+        }),
+        new Promise((resolve, reject) => {
+          timer = setTimeout(() => {
+            const error = new Error("News request timed out");
+            error.name = "TimeoutError";
+            reject(error);
+            if (controller) controller.abort();
+          }, timeout);
+        }),
+      ]);
+    } finally {
+      clearTimeout(timer);
     }
   }
+  async function fetchData() {
+    return validateData(
+      await requestJSON("/data/news.json", { cache: "no-cache" }),
+    );
+  }
+  function showData(data, preserveFilters = false) {
+    const hadData = !!state.data;
+    state.data = data;
+    try {
+      localStorage.setItem(cacheKey, JSON.stringify(data));
+    } catch {}
+    renderSidebar();
+    if (preserveFilters && hadData) {
+      if (
+        state.source !== "all" &&
+        !data.sources.some((s) => s.id === state.source)
+      )
+        state.source = "all";
+      $("#source-filter").value = state.source;
+      render();
+    } else route();
+  }
+  async function load(preserveFilters = false) {
+    if (loading) return;
+    loading = true;
+    $("#refresh-news").disabled = true;
+    $("#load-notice").hidden = true;
+    $("#articles").setAttribute("aria-busy", "true");
+    try {
+      let data;
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          data = await fetchData();
+          break;
+        } catch (error) {
+          if (attempt === 1) throw error;
+          $("#update-status").textContent = "连接暂时不畅，正在重试…";
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+        }
+      }
+      showData(data, preserveFilters);
+      return true;
+    } catch (error) {
+      if (!state.data) {
+        try {
+          state.data = validateData(JSON.parse(localStorage.getItem(cacheKey)));
+        } catch {}
+      }
+      if (state.data) {
+        showData(state.data, preserveFilters);
+        $("#load-notice").innerHTML =
+          `连接暂时失败，当前显示上次成功获取的资讯（${escape(formatTime(state.data.updatedAt))}）。<button class="text-button" data-retry>重新连接</button>`;
+        $("#load-notice").hidden = false;
+        return false;
+      }
+      $("#articles").setAttribute("aria-busy", "false");
+      $("#articles").innerHTML =
+        `<div class="empty-state">${icon("radio")}<h3>资讯加载失败</h3><p>${error.name === "TimeoutError" ? "连接超时，请重试或换个网络。" : "暂时无法连接资讯，请稍后重试或换个网络。"}</p><button data-retry>重新加载</button></div>`;
+      $("#update-status").textContent = "数据加载失败，请稍后重试";
+      $("#latest-list").innerHTML = "<li><div>等待资讯恢复连接</div></li>";
+      return false;
+    } finally {
+      loading = false;
+      $("#refresh-news").disabled = refreshing;
+      $("#articles").setAttribute("aria-busy", "false");
+    }
+  }
+  $("#refresh-news").addEventListener("click", async () => {
+    if (refreshing || loading) return;
+    refreshing = true;
+    const button = $("#refresh-news");
+    const notice = $("#refresh-notice");
+    button.disabled = true;
+    button.textContent = "正在刷新…";
+    notice.hidden = false;
+    notice.textContent = "正在请求更新…";
+    const endpoint = "https://zacai.fun/api/news-refresh";
+    let baseline = Date.parse(state.data?.updatedAt || "") || 0;
+    try {
+      let result = await requestJSON(
+        endpoint,
+        {
+          method: "POST",
+          credentials: "omit",
+          headers: {
+            "Content-Type": "application/json",
+            "X-News-Refresh": "1",
+          },
+          body: "{}",
+        },
+        90000,
+      );
+      if (result.status === "fresh" || result.status === "cooldown") {
+        const loaded = await load(true);
+        notice.textContent = loaded
+          ? "已重新读取已发布的资讯。为避免重复抓取，后台刷新最多每 15 分钟触发一次。"
+          : "后台近期已有刷新请求，但当前未能读取最新资讯，请稍后重试。";
+        return;
+      }
+      if (result.status === "busy") {
+        notice.textContent = "后台正在检查更新，请稍后再试。";
+        return;
+      }
+      if (result.status !== "running") throw new Error("Refresh unavailable");
+      baseline = Math.max(baseline, Date.parse(result.baselineAt || "") || 0);
+      const deadline = Date.now() + 180000;
+      while (Date.now() < deadline) {
+        notice.textContent =
+          result.status === "ready"
+            ? "发布已完成，正在读取最新资讯…"
+            : "正在抓取和发布，通常需要约一分钟；排队时可能更久。";
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+        result = await requestJSON(
+          endpoint + "/status",
+          { credentials: "omit", cache: "no-store" },
+          15000,
+        );
+        if (result.status === "failed") {
+          notice.textContent =
+            "本次抓取或发布未成功，现有资讯仍可阅读，请稍后再试。";
+          return;
+        }
+        if (result.status === "ready") {
+          const data = await fetchData();
+          if (Date.parse(data.updatedAt) > baseline) {
+            showData(data, true);
+            $("#load-notice").hidden = true;
+            notice.textContent = `刷新完成，最近检查 ${formatTime(data.updatedAt)}。`;
+            return;
+          }
+        }
+      }
+      notice.textContent =
+        "更新请求已提交，暂未读到新版本，请稍后再点刷新查看。";
+    } catch {
+      await load(true);
+      notice.textContent =
+        "暂时无法确认后台刷新状态，已尝试重新读取网站资讯，请稍后再试。";
+    } finally {
+      refreshing = false;
+      button.disabled = false;
+      button.textContent = "刷新资讯";
+    }
+  });
   load();
 })();

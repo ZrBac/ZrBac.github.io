@@ -253,9 +253,52 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     );
     await page.reload({ waitUntil: "networkidle" });
     await page.locator("[data-retry]").waitFor();
+    assert((await page.locator(".article").count()) > 0);
+    assert.match(
+      await page.locator("#load-notice").innerText(),
+      /上次成功获取/,
+    );
     await page.unroute("**/data/news.json");
     await page.click("[data-retry]");
+    await page.locator("#load-notice").waitFor({ state: "hidden" });
     await page.locator(".article").first().waitFor();
+
+    // Older browsers without AbortSignal.timeout still load, and a transient
+    // first request failure is retried without requiring a click.
+    const compatibility = await browser.newPage();
+    await compatibility.addInitScript(() => {
+      Object.defineProperty(AbortSignal, "timeout", {
+        value: undefined,
+        configurable: true,
+      });
+    });
+    let requests = 0;
+    await compatibility.route("**/data/news.json", (route) => {
+      requests++;
+      return requests === 1 ? route.abort("failed") : route.continue();
+    });
+    await compatibility.goto(base, { waitUntil: "networkidle" });
+    await compatibility.locator(".article").first().waitFor();
+    assert.equal(requests, 2);
+    // First-time visitors with no cache get a working retry button, not a crash.
+    await compatibility.evaluate(() =>
+      localStorage.removeItem("zrbac-news-cache-v1"),
+    );
+    await compatibility.unroute("**/data/news.json");
+    await compatibility.route("**/data/news.json", (route) =>
+      route.fulfill({ status: 503, body: "unavailable" }),
+    );
+    await compatibility.reload({ waitUntil: "networkidle" });
+    await compatibility.locator("[data-retry]").waitFor();
+    assert.equal(await compatibility.locator(".article").count(), 0);
+    assert.match(
+      await compatibility.locator(".empty-state h3").innerText(),
+      /资讯加载失败/,
+    );
+    await compatibility.unroute("**/data/news.json");
+    await compatibility.click("[data-retry]");
+    await compatibility.locator(".article").first().waitFor();
+    await compatibility.close();
     assert.deepEqual(errors, []);
     console.log(
       "PASS: filters, search, pagination, saved persistence, brief/date, source dialog, theme, keyboard, 4 viewports, blog preservation, RSS, XSS safety, failure/retry.",

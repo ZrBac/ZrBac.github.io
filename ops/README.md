@@ -44,3 +44,31 @@ systemctl disable --now zrbac-news-watchdog.timer
 `--dry-run` 只检查和报告，不触发 GitHub，也不修改补跑预算。状态存储在 `/var/lib/zrbac-news-watchdog/state.json`。日志由 systemd journal 管理；`retry_limit` 表示停更仍未恢复、需要排查；`check_failed` 表示网页、凭据、API 或本地状态检查异常。这里没有配置邮件或消息通知。
 
 服务器重启后 timer 自动启动，`Persistent=true` 会补做一次错过的检查。若服务器离线或 GitHub API/执行队列不可用，这套补跑检查也不能保证每小时更新。
+
+## 网页上的手动刷新
+
+`scripts/news_refresh_api.py` 提供一个固定用途的公开接口，只能触发 `ZrBac/news` 的 `news.yml` / `hexo`，不接受仓库名、分支名或命令参数。它通过 `https://zacai.fun/api/news-refresh` 提供服务，监听本机 `127.0.0.1:8001`，由 nginx 转发。网站仍由 GitHub Pages 托管；浏览和读取已发布的新闻不依赖该接口。
+
+- POST `/api/news-refresh`：需要网站 Origin 和 `X-News-Refresh: 1` 请求头，无需登录，不使用旅行网站会话。
+- GET `/api/news-refresh/status`：查看共享任务状态，GitHub 查询结果缓存 10 秒。
+- 全站共享至少 15 分钟触发间隔，预算先落盘后触发，请求失败也计入间隔。已有任务直接复用；与自动补跑共享文件锁。
+- Origin 检查用于避免浏览器跨站误触发，不作为身份认证。公开接口的资源限制依靠固定任务、全站冷却、nginx 每 IP 限流及进程资源限制。
+- GitHub 凭据仍只读取服务器本地 root 的 `gh` 配置，不出现在静态网页和接口响应中。
+
+安装：
+
+```sh
+install -d -m 0755 /opt/zrbac-news-refresh
+install -m 0755 scripts/news_refresh_api.py scripts/check_news_update.py /opt/zrbac-news-refresh/
+install -m 0644 ops/zrbac-news-refresh.service /etc/systemd/system/
+install -m 0644 ops/news-refresh-limit.conf /etc/nginx/conf.d/news-refresh-limit.conf
+install -m 0644 ops/news-refresh-location.conf /etc/nginx/news-refresh-location.conf
+# 在 /etc/nginx/conf.d/zacai.fun.conf 的 HTTPS server 块内添加：
+# include /etc/nginx/news-refresh-location.conf;
+systemctl daemon-reload
+systemctl enable --now zrbac-news-refresh.service
+nginx -t
+systemctl reload nginx
+```
+
+状态文件位于 `/var/lib/zrbac-news-refresh/request.json`。用 `journalctl -u zrbac-news-refresh.service` 排查接口错误。代码更新后须重新安装两个 Python 文件并重启服务。停用时移除 nginx 的 include，验证并 reload nginx，然后 `systemctl disable --now zrbac-news-refresh.service`；已发布网站仍可访问。
