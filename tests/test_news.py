@@ -112,6 +112,11 @@ class ArchiveTests(unittest.TestCase):
                 self.assertFalse((output / 'CNAME').exists())
                 # The document must not load an unversioned cached script or stylesheet.
                 homepage = (output / 'index.html').read_text()
+                self.assertIn('rel="canonical" href="https://news.zacai.fun/"', homepage)
+                for filename in ('news.xml', 'sitemap.xml', 'robots.txt'):
+                    contents = (output / filename).read_text()
+                    self.assertIn('https://news.zacai.fun/', contents)
+                    self.assertNotIn('https://zrbac.github.io', contents)
                 for name, extension in [('app', 'js'), ('style', 'css'), ('favicon', 'svg')]:
                     match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, homepage)
                     self.assertIsNotNone(match)

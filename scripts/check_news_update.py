@@ -10,7 +10,7 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-REPO = 'ZrBac/ZrBac.github.io'
+REPO = 'ZrBac/news'
 WORKFLOW = 'news.yml'
 SITE_DATA = 'https://news.zacai.fun/data/news.json'
 STALE_SECONDS = 2 * 3600

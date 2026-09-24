@@ -1,5 +1,7 @@
 # 新闻更新补跑检查
 
+当前仓库为 `ZrBac/news`，补跑脚本直接使用该名称。
+
 服务器上的 systemd timer 在每小时第 07、37 分钟检查 `https://news.zacai.fun/data/news.json`。保留 GitHub 原有每小时第 17 分钟的计划任务。
 
 补跑条件：

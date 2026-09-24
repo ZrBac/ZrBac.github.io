@@ -24,7 +24,7 @@ jobs:
       - name: Check out the original published blog
         uses: actions/checkout@v6
         with:
-          ref: master
+          ref: 82b36364655d6fee8e148b8082dac22ef222e6e5 # Original published blog snapshot
           path: _legacy
       - uses: actions/setup-python@v6
         with:
@@ -34,7 +34,7 @@ jobs:
       - name: Validate browser script
         run: node --check news/assets/app.js
       - name: Collect news and retain the previous archive
-        run: python scripts/collect_news.py --previous-url https://zrbac.github.io/data/news.json
+        run: python scripts/collect_news.py --previous-url https://news.zacai.fun/data/news.json
       - name: Build portal and preserve blog URLs
         run: python scripts/build_news.py --legacy _legacy
       - uses: actions/upload-pages-artifact@v4

@@ -80,7 +80,7 @@ def safe_url(value):
 
 
 def fetch(url, max_bytes=5_000_000):
-    request = urllib.request.Request(url, headers={'User-Agent': 'ZrBacNews/1.0 (+https://zrbac.github.io/)', 'Accept': 'application/rss+xml, application/xml, application/json, text/xml;q=0.9, */*;q=0.5'})
+    request = urllib.request.Request(url, headers={'User-Agent': 'ZrBacNews/1.0 (+https://news.zacai.fun/)', 'Accept': 'application/rss+xml, application/xml, application/json, text/xml;q=0.9, */*;q=0.5'})
     with urllib.request.urlopen(request, timeout=25) as response:
         data = response.read(max_bytes + 1)
     if len(data) > max_bytes:

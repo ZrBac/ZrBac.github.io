@@ -7,7 +7,7 @@
 ```sh
 python -m unittest discover -s tests -v
 python scripts/collect_news.py
-git fetch origin master
+git fetch origin 82b36364655d6fee8e148b8082dac22ef222e6e5
 git worktree add --detach ../zrbac-legacy FETCH_HEAD
 python scripts/build_news.py --legacy ../zrbac-legacy
 python -m http.server 8080 --directory _site
@@ -30,7 +30,7 @@ python -m http.server 8080 --directory _site
 
 `.github/workflows/news.yml` 在 `hexo` 分支相关文件更新、手动执行以及每小时第 17 分钟运行。GitHub Pages 发布方式使用 GitHub Actions。
 
-构建拉取 `master` 分支的原博客成品，将旧首页放到 `/blog/`，保留历史文章、分页、分类、图片等 URL；旧博客的首页链接改为 `/blog/`。`master` 不会被写入。`source` 下的 Hexo Markdown 也不修改。
+构建拉取固定提交 `82b36364655d6fee8e148b8082dac22ef222e6e5` 的原博客成品，将旧首页放到 `/blog/`，保留历史文章、分页、分类、图片等 URL；旧博客的首页链接改为 `/blog/`。不依赖已删除的 `master` 分支。`source` 下的 Hexo Markdown 也不修改。
 
 采集时读取上次发布的 `/data/news.json`，合并去重，保留最近 30 天、最多 6000 条，历史随运行积累。单来源失败时保留其历史并显示不可用状态；所有来源失败则终止部署，线上保留上一个成功版本。页面分别显示最近检查时间和最新文章发布时间，超过两小时未检查会显示延迟提示。
 
@@ -40,7 +40,7 @@ GitHub 的计划任务不是严格实时调度，可能延迟或被跳过；公�
 
 ## 回滚
 
-原 `master` 分支未被修改。紧急恢复原博客：在 Settings → Pages 将 Source 改回 Deploy from a branch，选择 `master`、`/(root)`，并禁用此资讯工作流，防止再次覆盖。资讯代码回滚使用 Git revert 后重新运行工作流。
+资讯代码回滚使用 Git revert 后重新运行工作流。仓库现为 `ZrBac/news`，站点为 `https://news.zacai.fun`；不要回滚到依赖已删除的 `master` 分支或旧域名读取归档的配置。原博客快照仍固定为上述提交。
 
 ## 维护
 
