@@ -22,9 +22,6 @@ media
 - https://www.kdocs.cn/l/cnrcmOcyYrae
 - https://radio.garden/visit/nanjing/KQCeQG1O
 
-sim card
-- https://172.lot-ml.com/Product/Index/1
-
 agent
 - http://batch.1key.me/
 
