@@ -6,9 +6,9 @@
   "workers_dev": true,
   "preview_urls": false,
   "vars": {
-    // Keep both disabled until the server-to-cloud cutover is verified.
-    "MANUAL_ENABLED": "false",
-    "WATCHDOG_ENABLED": "false",
+    // Production: manual refresh and scheduled recovery both run in Cloudflare.
+    "MANUAL_ENABLED": "true",
+    "WATCHDOG_ENABLED": "true",
   },
   "triggers": { "crons": ["7,37 * * * *"] },
   "durable_objects": {

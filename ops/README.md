@@ -1,6 +1,6 @@
 # 新闻更新补跑检查
 
-云函数迁移实现和切换步骤见 [Cloudflare Workers](cloudflare/README.md)。在验证并正式切换前，本页的服务器服务仍继续提供生产功能。
+2026-09-24 已切换到 [Cloudflare Workers](cloudflare/README.md)。本页的服务器 timer/API 已停用；以下安装说明保留用于回退。旧 API 地址通过 nginx 转发到 Worker，新页面直接调用云函数。
 
 当前仓库为 `ZrBac/news`，补跑脚本直接使用该名称。
 
