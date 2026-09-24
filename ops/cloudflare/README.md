@@ -4,7 +4,7 @@
 
 ## 当前状态
 
-代码和测试已准备好。默认两个开关均关闭，网页仍使用原服务器接口；部署 Worker 本身不会切换生产网站。只有完成下面的验证和切换后，才可停用原服务。
+2026-09-24 已部署测试版 `https://news-refresh.944052796.workers.dev`，SQLite Durable Object、限流绑定和 cron 均已创建，跨域预检返回正常。尚待配置 `GITHUB_TOKEN` 并验证真实触发。两个开关均关闭，网页仍使用原服务器接口；部署 Worker 本身不会切换生产网站。只有完成下面的验证和切换后，才可停用原服务。
 
 ## 行为
 
@@ -31,7 +31,7 @@ npm run check
 
 ## 凭证与首次部署
 
-1. 在可信终端执行 `npx wrangler login`，然后 `npx wrangler whoami` 确认正确账号。远程服务器可使用 SSH 端口转发接收本机浏览器 OAuth 回调，或在本地电脑完成部署。不要把凭证贴进聊天、仓库或网页。
+1. 在可信终端执行 `npx wrangler login --device --browser=false --scopes account:read user:read workers_scripts:write workers_tail:read`，在自己的浏览器打开 CLI 给出的 Cloudflare 页面并输入短验证码完成授权，然后 `npx wrangler whoami` 确认正确账号。设备登录无需开放端口或转发 localhost 回调。这里只请求部署、查看账号和日志所需权限；whoami 可能提示缺少其他产品的可选权限，无需因此扩大授权。不要把密码或访问令牌贴进聊天、仓库或网页。
 2. 在 GitHub 创建细粒度访问令牌，仅选 `ZrBac/news`，仓库权限 `Actions: Read and write`。设置合适的有效期，并在过期前轮换。
 3. 执行 `npm run deploy`，保持 `MANUAL_ENABLED` 和 `WATCHDOG_ENABLED` 为 `false`。首次部署会建立 SQLite Durable Object。
 4. 执行 `npx wrangler secret put GITHUB_TOKEN`，在隐藏的输入提示中填入专用令牌。
