@@ -649,7 +649,9 @@
     button.textContent = "正在刷新…";
     notice.hidden = false;
     notice.textContent = "正在请求更新…";
-    const endpoint = "https://zacai.fun/api/news-refresh";
+    const endpoint =
+      document.querySelector('meta[name="news-refresh-endpoint"]')?.content ||
+      "https://zacai.fun/api/news-refresh";
     let baseline = Date.parse(state.data?.updatedAt || "") || 0;
     try {
       let result = await requestJSON(

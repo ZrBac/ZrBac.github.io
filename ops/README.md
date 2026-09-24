@@ -1,5 +1,7 @@
 # 新闻更新补跑检查
 
+云函数迁移实现和切换步骤见 [Cloudflare Workers](cloudflare/README.md)。在验证并正式切换前，本页的服务器服务仍继续提供生产功能。
+
 当前仓库为 `ZrBac/news`，补跑脚本直接使用该名称。
 
 服务器上的 systemd timer 在每小时第 07、37 分钟检查 `https://news.zacai.fun/data/news.json`。保留 GitHub 原有每小时第 17 分钟的计划任务。

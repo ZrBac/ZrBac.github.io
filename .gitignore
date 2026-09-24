@@ -9,3 +9,5 @@ _site/
 _legacy/
 news/data/
 __pycache__/
+.wrangler/
+.dev.vars*

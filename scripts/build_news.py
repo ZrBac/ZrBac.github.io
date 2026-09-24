@@ -3,10 +3,13 @@
 import argparse
 import hashlib
 import json
+import os
 import shutil
+from html import escape as html_escape
 from datetime import datetime
 from email.utils import format_datetime
 from pathlib import Path
+from urllib.parse import urlsplit
 from xml.sax.saxutils import escape
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +20,11 @@ def main():
     p.add_argument('--legacy', type=Path, required=True)
     p.add_argument('--output', type=Path, default=ROOT / '_site')
     args = p.parse_args()
+    refresh_endpoint = os.environ.get('NEWS_REFRESH_ENDPOINT', '').strip() or 'https://zacai.fun/api/news-refresh'
+    endpoint = urlsplit(refresh_endpoint)
+    if (endpoint.scheme != 'https' or not endpoint.hostname or endpoint.username or endpoint.password
+            or endpoint.query or endpoint.fragment or endpoint.path != '/api/news-refresh'):
+        raise SystemExit('NEWS_REFRESH_ENDPOINT must be an HTTPS /api/news-refresh URL without credentials or query parameters')
     legacy = args.legacy.resolve()
     output = args.output.resolve()
     if not (legacy / 'index.html').is_file():
@@ -42,6 +50,8 @@ def main():
     shutil.copytree(ROOT / 'news/assets', output / 'assets/news', dirs_exist_ok=True)
     # New HTML always requests the matching assets, even with cached older releases.
     homepage = (output / 'index.html').read_text()
+    homepage = homepage.replace('content="https://zacai.fun/api/news-refresh"',
+                                f'content="{html_escape(refresh_endpoint, quote=True)}"')
     for filename in ('app.js', 'style.css', 'favicon.svg'):
         asset = output / 'assets/news' / filename
         digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
@@ -52,6 +62,11 @@ def main():
     shutil.copytree(ROOT / 'news/data', output / 'data', dirs_exist_ok=True)
     (output / '.nojekyll').touch()
     data = json.loads((output / 'data/news.json').read_text())
+    # A tiny health file avoids downloading and parsing the entire archive in Workers.
+    updated_at = data['updatedAt']
+    if datetime.fromisoformat(updated_at.replace('Z', '+00:00')).tzinfo is None:
+        raise SystemExit('News timestamp must include a timezone')
+    (output / 'data/status.json').write_text(json.dumps({'updatedAt': updated_at}) + '\n')
     items = ''.join(f'<item><title>{escape(a["title"])}</title><link>{escape(a["url"])}</link><guid>{escape(a["url"])}</guid><pubDate>{format_datetime(datetime.fromisoformat(a["publishedAt"].replace("Z", "+00:00")))}</pubDate><description>{escape(a["excerpt"])}</description></item>' for a in data['articles'][:50])
     (output / 'news.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>资讯</title><link>https://news.zacai.fun/</link><description>综合热点与 AI 科技资讯。摘要来自原始资讯源。</description>' + items + '</channel></rss>')
     # A compact sitemap of the portal and preserved article URLs.

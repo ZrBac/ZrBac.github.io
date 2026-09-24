@@ -1,0 +1,26 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "news-refresh",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-09-01",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    // Keep both disabled until the server-to-cloud cutover is verified.
+    "MANUAL_ENABLED": "false",
+    "WATCHDOG_ENABLED": "false",
+  },
+  "triggers": { "crons": ["7,37 * * * *"] },
+  "durable_objects": {
+    "bindings": [{ "name": "COORDINATOR", "class_name": "NewsCoordinator" }],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["NewsCoordinator"] }],
+  "ratelimits": [
+    {
+      "name": "REQUEST_LIMITER",
+      "namespace_id": "1001",
+      "simple": { "limit": 60, "period": 60 },
+    },
+  ],
+  "observability": { "enabled": true },
+}

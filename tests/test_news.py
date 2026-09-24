@@ -1,5 +1,6 @@
 import importlib.util
 import json
+import os
 import re
 import subprocess
 import sys
@@ -92,7 +93,7 @@ class ArchiveTests(unittest.TestCase):
         original = data.read_bytes() if existed else None
         try:
             data.parent.mkdir(parents=True, exist_ok=True)
-            data.write_text(json.dumps({'articles': []}))
+            data.write_text(json.dumps({'articles': [], 'updatedAt': '2026-09-24T06:00:00Z'}))
             with tempfile.TemporaryDirectory() as tmp:
                 legacy = Path(tmp) / 'old'
                 legacy.mkdir()
@@ -110,6 +111,8 @@ class ArchiveTests(unittest.TestCase):
                 self.assertIn('原文保留', (output / '2020/story/index.html').read_text())
                 self.assertTrue((output / 'asset.css').exists())
                 self.assertFalse((output / 'CNAME').exists())
+                self.assertEqual(json.loads((output / 'data/status.json').read_text()),
+                                 {'updatedAt': '2026-09-24T06:00:00Z'})
                 # The document must not load an unversioned cached script or stylesheet.
                 homepage = (output / 'index.html').read_text()
                 self.assertIn('rel="canonical" href="https://news.zacai.fun/"', homepage)
@@ -121,6 +124,14 @@ class ArchiveTests(unittest.TestCase):
                     match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, homepage)
                     self.assertIsNotNone(match)
                     self.assertEqual((output / match.group(0).lstrip('/')).read_bytes(), (ROOT / 'news/assets' / f'{name}.{extension}').read_bytes())
+                cloud_endpoint = 'https://news-api.zacai.fun/api/news-refresh'
+                env = dict(os.environ, NEWS_REFRESH_ENDPOINT=cloud_endpoint)
+                command = [sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)]
+                subprocess.run(command, check=True, capture_output=True, env=env)
+                self.assertIn(f'name="news-refresh-endpoint" content="{cloud_endpoint}"',
+                              (output / 'index.html').read_text())
+                env['NEWS_REFRESH_ENDPOINT'] = 'https://user:secret@example.com/api/news-refresh'
+                self.assertNotEqual(subprocess.run(command, capture_output=True, env=env).returncode, 0)
         finally:
             if existed:
                 data.write_bytes(original)

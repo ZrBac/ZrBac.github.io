@@ -36,6 +36,8 @@ jobs:
       - name: Collect news and retain the previous archive
         run: python scripts/collect_news.py --previous-url https://news.zacai.fun/data/news.json
       - name: Build portal and preserve blog URLs
+        env:
+          NEWS_REFRESH_ENDPOINT: ${{ vars.NEWS_REFRESH_ENDPOINT }}
         run: python scripts/build_news.py --legacy _legacy
       - uses: actions/upload-pages-artifact@v4
         with:
