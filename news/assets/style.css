@@ -492,6 +492,7 @@ span[data-icon] {
   font-size: 11px;
 }
 .footer-links {
+  flex-wrap: wrap;
   display: flex;
   gap: 23px;
   align-items: center;

@@ -113,6 +113,22 @@ class ArchiveTests(unittest.TestCase):
                 self.assertFalse((output / 'CNAME').exists())
                 self.assertEqual(json.loads((output / 'data/status.json').read_text()),
                                  {'updatedAt': '2026-09-24T06:00:00Z'})
+                manifest = json.loads((output / 'manifest.webmanifest').read_text())
+                self.assertEqual(manifest['display'], 'standalone')
+                self.assertEqual(manifest['start_url'], '/')
+                for size in (192, 512):
+                    icon = next(i for i in manifest['icons'] if i['sizes'] == f'{size}x{size}')
+                    png = (output / icon['src'].lstrip('/')).read_bytes()
+                    self.assertEqual(png[:8], b'\x89PNG\r\n\x1a\n')
+                    self.assertEqual(int.from_bytes(png[16:20], 'big'), size)
+                    self.assertEqual(int.from_bytes(png[20:24], 'big'), size)
+                worker = (output / 'sw.js').read_text()
+                self.assertNotIn('__BUILD_ID__', worker)
+                self.assertNotIn('__SHELL_FILES__', worker)
+                shell = json.loads(re.search(r'const SHELL = (\[.*?\]);', worker, re.S).group(1))
+                self.assertNotIn('/data/news.json', shell)
+                for path in shell:
+                    self.assertTrue((output / ('index.html' if path == '/' else path.lstrip('/'))).is_file())
                 # The document must not load an unversioned cached script or stylesheet.
                 homepage = (output / 'index.html').read_text()
                 self.assertIn('rel="canonical" href="https://news.zacai.fun/"', homepage)
@@ -120,16 +136,21 @@ class ArchiveTests(unittest.TestCase):
                     contents = (output / filename).read_text()
                     self.assertIn('https://news.zacai.fun/', contents)
                     self.assertNotIn('https://zrbac.github.io', contents)
-                for name, extension in [('app', 'js'), ('style', 'css'), ('favicon', 'svg')]:
+                for name, extension in [('app', 'js'), ('pwa', 'js'), ('style', 'css'), ('favicon', 'svg')]:
                     match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, homepage)
                     self.assertIsNotNone(match)
                     self.assertEqual((output / match.group(0).lstrip('/')).read_bytes(), (ROOT / 'news/assets' / f'{name}.{extension}').read_bytes())
+                # Hourly news publications must not force a new application-shell update.
+                data.write_text(json.dumps({'articles': [], 'updatedAt': '2026-09-24T07:00:00Z'}))
+                subprocess.run([sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)], check=True, capture_output=True)
+                self.assertEqual((output / 'sw.js').read_text(), worker)
                 cloud_endpoint = 'https://news-api.zacai.fun/api/news-refresh'
                 env = dict(os.environ, NEWS_REFRESH_ENDPOINT=cloud_endpoint)
                 command = [sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)]
                 subprocess.run(command, check=True, capture_output=True, env=env)
                 self.assertIn(f'name="news-refresh-endpoint" content="{cloud_endpoint}"',
-                              (output / 'index.html').read_text())
+                              re.sub(r'\s+', ' ', (output / 'index.html').read_text()))
+                self.assertNotEqual((output / 'sw.js').read_text(), worker)
                 env['NEWS_REFRESH_ENDPOINT'] = 'https://user:secret@example.com/api/news-refresh'
                 self.assertNotEqual(subprocess.run(command, capture_output=True, env=env).returncode, 0)
         finally:

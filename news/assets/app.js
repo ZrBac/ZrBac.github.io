@@ -574,6 +574,7 @@
     }
   }
   async function fetchData() {
+    if (!navigator.onLine) throw new Error("Offline");
     return validateData(
       await requestJSON("/data/news.json", { cache: "no-cache" }),
     );
@@ -642,6 +643,12 @@
   }
   $("#refresh-news").addEventListener("click", async () => {
     if (refreshing || loading) return;
+    if (!navigator.onLine) {
+      $("#refresh-notice").textContent =
+        "当前离线，可继续阅读已缓存的资讯；联网后再刷新。";
+      $("#refresh-notice").hidden = false;
+      return;
+    }
     refreshing = true;
     const button = $("#refresh-news");
     const notice = $("#refresh-notice");
@@ -717,6 +724,17 @@
       refreshing = false;
       button.disabled = false;
       button.textContent = "刷新资讯";
+    }
+  });
+  window.addEventListener("online", () => {
+    if ($("#refresh-notice").textContent.includes("当前离线"))
+      $("#refresh-notice").hidden = true;
+    load(true);
+  });
+  window.addEventListener("offline", () => {
+    if (state.data) {
+      $("#load-notice").textContent = "当前离线，正在显示上次成功获取的资讯。";
+      $("#load-notice").hidden = false;
     }
   });
   load();

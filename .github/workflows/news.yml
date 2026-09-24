@@ -32,7 +32,10 @@ jobs:
       - name: Test feed parsing and archive preservation
         run: python -m unittest discover -s tests -v
       - name: Validate browser script
-        run: node --check news/assets/app.js
+        run: |
+          node --check news/assets/app.js
+          node --check news/assets/pwa.js
+          node --check news/sw.js
       - name: Collect news and retain the previous archive
         run: python scripts/collect_news.py --previous-url https://news.zacai.fun/data/news.json
       - name: Build portal and preserve blog URLs

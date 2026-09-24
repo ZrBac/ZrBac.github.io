@@ -52,13 +52,24 @@ def main():
     homepage = (output / 'index.html').read_text()
     homepage = homepage.replace('content="https://zacai.fun/api/news-refresh"',
                                 f'content="{html_escape(refresh_endpoint, quote=True)}"')
-    for filename in ('app.js', 'style.css', 'favicon.svg'):
+    shell_files = ['/', '/manifest.webmanifest', '/assets/news/icon-180.png',
+                   '/assets/news/icon-192.png', '/assets/news/icon-512.png']
+    for filename in ('app.js', 'pwa.js', 'style.css', 'favicon.svg'):
         asset = output / 'assets/news' / filename
         digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
         versioned = asset.with_name(f'{asset.stem}.{digest}{asset.suffix}')
         shutil.copy2(asset, versioned)
         homepage = homepage.replace(f'"/assets/news/{filename}"', f'"/assets/news/{versioned.name}"')
+        shell_files.append(f'/assets/news/{versioned.name}')
     (output / 'index.html').write_text(homepage)
+    shutil.copy2(ROOT / 'news/manifest.webmanifest', output / 'manifest.webmanifest')
+    worker = (ROOT / 'news/sw.js').read_text()
+    shell_digest = hashlib.sha256(homepage.encode() + worker.encode())
+    for path in shell_files[1:]:
+        shell_digest.update((output / path.lstrip('/')).read_bytes())
+    worker = worker.replace('__BUILD_ID__', shell_digest.hexdigest()[:16])
+    worker = worker.replace('__SHELL_FILES__', json.dumps(shell_files))
+    (output / 'sw.js').write_text(worker)
     shutil.copytree(ROOT / 'news/data', output / 'data', dirs_exist_ok=True)
     (output / '.nojekyll').touch()
     data = json.loads((output / 'data/news.json').read_text())

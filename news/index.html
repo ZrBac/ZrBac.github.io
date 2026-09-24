@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ffffff" />
-    <meta name="news-refresh-endpoint" content="https://zacai.fun/api/news-refresh" />
+    <meta
+      name="news-refresh-endpoint"
+      content="https://zacai.fun/api/news-refresh"
+    />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="资讯" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/assets/news/icon-180.png" />
     <meta
       name="description"
       content="综合新闻、人工智能和科技动态，按发布时间更新，附来源与原文链接。"
@@ -25,6 +32,7 @@
     <link rel="stylesheet" href="/assets/news/style.css" />
     <title>资讯 · 综合热点与 AI 科技资讯</title>
     <script src="/assets/news/app.js" defer></script>
+    <script src="/assets/news/pwa.js" defer></script>
   </head>
   <body>
     <a href="#news-content" class="skip-link">跳到资讯列表</a>
@@ -123,6 +131,11 @@
           <p id="view-note" class="view-note" hidden></p>
           <p id="load-notice" class="view-note" role="status" hidden></p>
           <p id="refresh-notice" class="view-note" role="status" hidden></p>
+          <p id="pwa-update" class="view-note" role="status" hidden>
+            网站有新版本。<button id="apply-update" class="text-button">
+              更新页面
+            </button>
+          </p>
           <div
             id="articles"
             class="article-list"
@@ -170,6 +183,7 @@
       <div class="footer-links">
         <a href="/blog/">博客归档</a><a href="/news.xml">RSS</a>
         <button id="footer-sources">资讯来源</button>
+        <button id="install-app">安装到桌面</button>
         <a
           href="https://github.com/ZrBac/news"
           target="_blank"
