@@ -35,7 +35,7 @@
     <script src="/assets/news/pwa.js" defer></script>
   </head>
   <body>
-    <a href="#news-content" class="skip-link">跳到资讯列表</a>
+    <a href="#section-title" class="skip-link">跳到资讯列表</a>
     <header class="header">
       <div class="header-inner">
         <a class="brand" href="#all" aria-label="资讯首页"
@@ -73,11 +73,10 @@
           id="news-content"
           class="news-section"
           aria-labelledby="section-title"
-          tabindex="-1"
         >
           <div class="section-heading">
             <div>
-              <h1 id="section-title">最新资讯</h1>
+              <h1 id="section-title" tabindex="-1">最新资讯</h1>
             </div>
             <span id="result-count" class="result-count"></span>
           </div>

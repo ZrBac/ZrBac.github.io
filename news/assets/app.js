@@ -279,7 +279,7 @@
   }
   function route(scroll = false) {
     const hash = location.hash.slice(1);
-    if (hash === "news-content") {
+    if (hash === "news-content" || hash === "section-title") {
       if (!state.data) return;
       render();
       return;

@@ -34,6 +34,8 @@ body {
   color: var(--ink);
   font: 14px/1.6 var(--sans);
   -webkit-font-smoothing: antialiased;
+  /* Also cover non-control text and containers handled by delegated clicks. */
+  -webkit-tap-highlight-color: transparent;
 }
 button,
 input,
@@ -68,15 +70,13 @@ a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-#news-content:focus-visible {
+#section-title:focus-visible {
   outline: 2px solid var(--accent);
 }
-#news-content {
-  /* iOS highlights the whole focusable section when its text is tapped. */
-  -webkit-tap-highlight-color: transparent;
+#section-title {
   outline-offset: 4px;
 }
-#news-content:focus:not(:focus-visible) {
+#section-title:focus:not(:focus-visible) {
   outline: none;
 }
 [hidden] {
