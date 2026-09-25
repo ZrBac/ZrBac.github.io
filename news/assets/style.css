@@ -67,8 +67,17 @@ a {
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+#news-content:focus-visible {
   outline: 2px solid var(--accent);
+}
+#news-content {
+  /* iOS highlights the whole focusable section when its text is tapped. */
+  -webkit-tap-highlight-color: transparent;
+  outline-offset: 4px;
+}
+#news-content:focus:not(:focus-visible) {
+  outline: none;
 }
 [hidden] {
   display: none !important;
