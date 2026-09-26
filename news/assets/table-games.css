@@ -44,7 +44,7 @@
   position: fixed;
   inset: 0;
   height: 100vh;
-  height: var(--table-height, 100dvh);
+  height: var(--table-height, 100vh);
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
     env(safe-area-inset-bottom) env(safe-area-inset-left);
   display: flex;
@@ -424,7 +424,7 @@
     width: min(
       300px,
       calc(
-        var(--table-height, 100dvh) - 92px - env(safe-area-inset-top) -
+        var(--table-height, 100vh) - 92px - env(safe-area-inset-top) -
           env(safe-area-inset-bottom)
       ),
       calc(100% - 130px)

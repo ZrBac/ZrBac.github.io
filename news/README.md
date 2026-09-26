@@ -43,6 +43,16 @@ python -m http.server 8080 --directory _site
 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_TEST_SITE=_site node tests/pwa-browser.cjs
 ```
 
+## 旧版 Safari 兼容
+
+Safari 15.3 缺少原生 `<dialog>` 的 `showModal()` / `close()` 和 `Object.hasOwn()`（这些在 [Safari 15.4](https://webkit.org/blog/12445/new-webkit-features-in-safari-15-4/) 加入）。前者曾让游戏路由初始化中断，并让未打开的弹窗混入布局；后者曾让 Service Worker 的导航与资源读取失败。
+
+- `compat.js` 在业务脚本之前按能力检测，仅为缺少原生弹窗方法的浏览器提供遮罩、关闭、焦点约束与 Escape 处理；`compat.css` 显式隐藏未打开的弹窗。新闻来源、安装说明和游戏弹窗共用兼容处理。兼容资源参与哈希构建、离线缓存和更新。
+- Service Worker 使用 `Object.prototype.hasOwnProperty.call()` 判断路径；游戏高度使用 `visualViewport` / `innerHeight` 的像素值，并以 `100vh` 作为 CSS 回退，不依赖新视口单位。
+- 已安装旧版的用户需要联网打开页面，点“更新页面”，待小游戏列表显示“已准备好，可离线玩”后再断网。无需清空已有存档。
+
+`node --test tests/sw-compat.cjs` 在没有 `Object.hasOwn` 的独立运行环境中验证离线导航、资源和路由范围。浏览器测试可加 `NEWS_LEGACY_SAFARI=1`，移除原生弹窗方法与新接口，覆盖初始化、触屏、弹窗、存档与离线更新；PWA 测试也会移除 Service Worker 中的新接口。这是缺失功能的回归测试，不等同于 iOS 15.3.1 真机测试。
+
 ## 离线小游戏
 
 首页右上角“小游戏”进入 `/games/`，提供打砖块（五关）、飞机大战（自动开火、敌机逐渐加速）、跳跃跑酷（二段跳）、叠高楼（对齐落块）和连色消除（消除相连同色块、全清奖励）。这五款采用原生 Canvas 实现，另有蜘蛛纸牌和数独，均不加载第三方游戏、广告、字体或网络素材。

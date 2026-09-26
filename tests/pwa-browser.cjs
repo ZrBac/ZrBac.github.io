@@ -25,6 +25,8 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
             .toString()
             .replace(/news-shell-([a-f0-9]+)/, "news-shell-$1-test" + revision),
         );
+      if (pathname === "/sw.js" && process.env.NEWS_LEGACY_SAFARI)
+        body = Buffer.from("Object.hasOwn = undefined;\n" + body.toString());
       if (pathname === "/data/news.json" && dataTime) {
         const data = JSON.parse(body);
         data.updatedAt = dataTime;
@@ -64,6 +66,8 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
         event.stopImmediatePropagation();
       }),
     );
+    if (process.env.NEWS_LEGACY_SAFARI)
+      await context.addInitScript(require("./legacy-safari.cjs"));
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (error) => errors.push(error.message));
@@ -84,7 +88,28 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
       await page.locator("#dialog-content").innerText(),
       /添加到主屏幕/,
     );
+    if (process.env.NEWS_LEGACY_SAFARI) {
+      assert(
+        await page
+          .locator("#info-dialog")
+          .evaluate((el) => el.classList.contains("legacy-dialog")),
+      );
+      await page.keyboard.press("Tab");
+      assert(
+        await page
+          .locator("#info-dialog")
+          .evaluate((el) => el.contains(document.activeElement)),
+      );
+      await page.keyboard.press("Escape");
+      assert(await page.locator("#info-dialog").isHidden());
+      assert.equal(
+        await page.evaluate(() => document.activeElement.id),
+        "install-app",
+      );
+      await page.click("#install-app");
+    }
     await page.click("#close-dialog");
+    assert(await page.locator("#info-dialog").isHidden());
     await page.click(".save-button >> nth=0");
     const savedTitle = await page.locator(".article h3").first().innerText();
     const before = await page.evaluate(
@@ -165,7 +190,11 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
     );
     assert(keys.includes("unrelated-test-cache"));
     assert(await page.locator("#pwa-update").isHidden());
-    for (const path of ["/blog/", "/2020/09/25/Java-8-HashMap/", "/not-a-news-page"]) {
+    for (const path of [
+      "/blog/",
+      "/2020/09/25/Java-8-HashMap/",
+      "/not-a-news-page",
+    ]) {
       const missing = await page.goto(base + path, {
         waitUntil: "domcontentloaded",
       });

@@ -16,6 +16,8 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
       Math.random = () =>
         (seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0) / 4294967296;
     });
+    if (process.env.NEWS_LEGACY_SAFARI)
+      await context.addInitScript(require("./legacy-safari.cjs"));
     const page = await context.newPage(),
       errors = [];
     page.on("pageerror", (e) => errors.push(e.message));

@@ -109,11 +109,14 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
-  if (request.mode === "navigate" && Object.hasOwn(PAGES, url.pathname)) {
+  if (
+    request.mode === "navigate" &&
+    Object.prototype.hasOwnProperty.call(PAGES, url.pathname)
+  ) {
     event.respondWith(navigation(request, PAGES[url.pathname]));
   } else if (
     SHELL.includes(url.pathname) &&
-    !Object.hasOwn(PAGES, url.pathname)
+    !Object.prototype.hasOwnProperty.call(PAGES, url.pathname)
   ) {
     event.respondWith(
       (async () =>

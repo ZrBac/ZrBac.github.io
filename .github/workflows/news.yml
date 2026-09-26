@@ -28,6 +28,7 @@ jobs:
         run: python -m unittest discover -s tests -v
       - name: Validate browser script
         run: |
+          node --check news/assets/compat.js
           node --check news/assets/app.js
           node --check news/assets/pwa.js
           node --check news/sw.js
@@ -35,7 +36,7 @@ jobs:
           node --check news/assets/games-core.js
           node --check news/assets/table-games.js
           node --check news/assets/table-games-core.js
-          node --test tests/games-core.cjs tests/table-games-core.cjs
+          node --test tests/games-core.cjs tests/table-games-core.cjs tests/sw-compat.cjs
       - name: Collect news and retain the previous archive
         run: python scripts/collect_news.py --previous-url https://news.zacai.fun/data/news.json
       - name: Build news portal

@@ -8,6 +8,8 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
   const browser = await chromium.launch({ args: ["--no-sandbox"] });
   try {
     const context = await browser.newContext({ ...devices["iPhone 13"] });
+    if (process.env.NEWS_LEGACY_SAFARI)
+      await context.addInitScript(require("./legacy-safari.cjs"));
     const page = await context.newPage();
     const errors = [];
     page.on("pageerror", (e) => errors.push(e.message));

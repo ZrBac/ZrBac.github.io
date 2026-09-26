@@ -130,7 +130,7 @@ class BuildTests(unittest.TestCase):
                 for path in shell:
                     self.assertTrue((output / (path.lstrip('/') + 'index.html' if path.endswith('/') else path.lstrip('/'))).is_file())
                 games = (output / 'games/index.html').read_text()
-                for name, extension in [('games', 'js'), ('games-core', 'js'), ('games', 'css'), ('table-games', 'js'), ('table-games-core', 'js'), ('table-games', 'css')]:
+                for name, extension in [('compat', 'js'), ('compat', 'css'), ('games', 'js'), ('games-core', 'js'), ('games', 'css'), ('table-games', 'js'), ('table-games-core', 'js'), ('table-games', 'css')]:
                     match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, games)
                     self.assertIsNotNone(match)
                     self.assertIn(match.group(0), shell)
@@ -141,7 +141,7 @@ class BuildTests(unittest.TestCase):
                     contents = (output / filename).read_text()
                     self.assertIn('https://news.zacai.fun/', contents)
                     self.assertNotIn('https://zrbac.github.io', contents)
-                for name, extension in [('app', 'js'), ('pwa', 'js'), ('style', 'css'), ('favicon', 'svg')]:
+                for name, extension in [('compat', 'js'), ('compat', 'css'), ('app', 'js'), ('pwa', 'js'), ('style', 'css'), ('favicon', 'svg')]:
                     match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, homepage)
                     self.assertIsNotNone(match)
                     self.assertEqual((output / match.group(0).lstrip('/')).read_bytes(), (ROOT / 'news/assets' / f'{name}.{extension}').read_bytes())

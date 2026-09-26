@@ -467,7 +467,7 @@ body.playing #play {
   position: fixed;
   inset: 0;
   height: 100vh;
-  height: var(--play-height, 100dvh);
+  height: var(--play-height, 100vh);
   display: flex;
   flex-direction: column;
   padding: env(safe-area-inset-top) env(safe-area-inset-right)
