@@ -115,7 +115,16 @@
   function route() {
     saveRecord();
     stop();
+    window.TableGames.close();
     kind = location.hash.slice(1);
+    if (["spider", "sudoku"].includes(kind)) {
+      state = null;
+      $("#library").hidden = true;
+      $("#play").hidden = true;
+      document.body.classList.add("playing");
+      window.TableGames.open(kind);
+      return;
+    }
     const game = games[kind];
     $("#library").hidden = !!game;
     $("#play").hidden = !game;

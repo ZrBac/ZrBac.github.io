@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="打砖块、飞机大战、跳跃跑酷、叠高楼、连色消除。为手机触屏设计，准备好后可离线游玩。"
+      content="打砖块、飞机大战、跳跃跑酷、叠高楼、连色消除、蜘蛛纸牌、数独。为手机触屏设计，准备好后可离线游玩。"
     />
     <link rel="canonical" href="https://news.zacai.fun/games/" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -19,6 +19,9 @@
     <title>小游戏 · 资讯</title>
     <link rel="stylesheet" href="/assets/news/games.css" />
     <script src="/assets/news/games-core.js" defer></script>
+    <link rel="stylesheet" href="/assets/news/table-games.css" />
+    <script src="/assets/news/table-games-core.js" defer></script>
+    <script src="/assets/news/table-games.js" defer></script>
     <script src="/assets/news/games.js" defer></script>
     <script src="/assets/news/pwa.js" defer></script>
   </head>
@@ -35,12 +38,31 @@
         网站有新版本。<button id="apply-update">更新页面</button>
       </p>
       <p id="storage-notice" class="notice" hidden>
-        浏览器未允许保存成绩，本次仍可正常游玩。
+        浏览器未允许保存成绩或进度，本次仍可正常游玩。
       </p>
       <section id="library" aria-labelledby="library-title">
         <h1 id="library-title" tabindex="-1">玩一小会儿</h1>
-        <p class="intro">选一款，挑战一下自己的最高分。</p>
+        <p class="intro">选一款，开始游戏。</p>
         <div class="game-list">
+          <a class="game-card" href="#spider"
+            ><span class="cover spider-cover" aria-hidden="true"
+              ><b>K<span>♠</span></b
+              ><i>Q<span>♥</span></i></span
+            ><span
+              ><strong>蜘蛛纸牌</strong
+              ><small>理顺牌序，收齐八组 K 到 A。</small
+              ><em>单花色 / 双花色 · 撤销 · 自动存档</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+          <a class="game-card" href="#sudoku"
+            ><span class="cover sudoku-cover" aria-hidden="true"
+              ><b>1</b><b></b><b>9</b><b></b><b>5</b><b></b><b>7</b><b></b
+              ><b>3</b></span
+            ><span
+              ><strong>数独</strong><small>用逻辑填满九宫格，无需拼手速。</small
+              ><em>三档难度 · 笔记 · 提示 · 自动存档</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
           <a class="game-card" href="#breakout"
             ><span class="cover brick-cover" aria-hidden="true"
               ><i></i><i></i><i></i><i></i><b>●</b><em></em></span
@@ -87,7 +109,7 @@
           >
         </div>
         <p class="footnote">
-          显示“已准备好，可离线玩”后，断网也能打开。没有广告，最高分保存在这台设备上。
+          显示“已准备好，可离线玩”后，断网也能打开。没有广告，成绩和纸牌、数独进度保存在这台设备上。
         </p>
       </section>
       <section id="play" hidden aria-labelledby="game-title">
@@ -130,6 +152,55 @@
           切换页面会自动暂停。电脑也可用方向键、空格和 P 键操作。
         </p>
       </section>
+      <section id="table-play" hidden aria-labelledby="table-title">
+        <div class="game-heading">
+          <a class="back" href="#" aria-label="返回游戏列表">← 返回</a>
+          <h1 id="table-title"></h1>
+          <button id="table-help">玩法</button
+          ><button id="table-new">新一局</button>
+        </div>
+        <div class="table-hud">
+          <span id="table-progress"></span><span id="table-difficulty"></span>
+        </div>
+        <div id="table-tools" class="table-tools">
+          <button id="table-undo" disabled>撤销</button
+          ><button id="table-hint">提示</button
+          ><button id="spider-deal">发牌</button
+          ><button id="spider-cancel" hidden>取消选牌</button
+          ><button id="sudoku-notes" aria-pressed="false" hidden>
+            笔记：关</button
+          ><button id="sudoku-erase" hidden>擦除</button>
+        </div>
+        <p
+          id="table-message"
+          class="table-message"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div id="table-result" class="table-result" hidden></div>
+        <div id="table-area" class="table-area">
+          <div id="spider-scroll" class="spider-scroll">
+            <div id="spider-board" class="spider-board"></div>
+          </div>
+          <div id="sudoku-wrap" class="sudoku-wrap" hidden>
+            <div
+              id="sudoku-board"
+              class="sudoku-board"
+              role="group"
+              aria-label="数独棋盘"
+            ></div>
+            <div
+              id="sudoku-pad"
+              class="sudoku-pad"
+              role="group"
+              aria-label="填入数字"
+            ></div>
+          </div>
+        </div>
+        <p id="table-save-status" class="table-save-status">
+          进度自动保存在本机
+        </p>
+      </section>
       <noscript
         ><p>
           游戏需要开启 JavaScript。首次联网准备完成后可离线使用。
@@ -137,6 +208,16 @@
       >
     </main>
     <footer>随时停下，下次再来。</footer>
+    <dialog id="table-new-dialog" aria-labelledby="table-new-title">
+      <h2 id="table-new-title">开始新一局</h2>
+      <p>重新发牌或换题会替换当前进度。</p>
+      <label for="table-level">难度</label
+      ><select id="table-level"></select>
+      <div class="table-dialog-actions">
+        <button id="table-new-cancel">继续当前局</button
+        ><button id="table-new-confirm">开始新一局</button>
+      </div>
+    </dialog>
     <dialog id="help-dialog" aria-labelledby="help-title">
       <div class="dialog-heading">
         <h2 id="help-title">玩法</h2>

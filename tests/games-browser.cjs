@@ -19,7 +19,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await context.setOffline(true);
     await page.goto(base + "/games/");
     await page.locator("#offline-status.ready").waitFor();
-    assert.equal(await page.locator(".game-card").count(), 5);
+    assert.equal(await page.locator(".game-card").count(), 7);
     await page.screenshot({
       path: "/tmp/news-games-library.png",
       fullPage: true,
@@ -132,7 +132,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
           new RegExp(String(score)),
         );
       }
-      await page.locator(".back").tap();
+      await page.locator("#play .back").tap();
     }
     for (const path of ["/games/index.html", "/games"]) {
       await page.goto(base + path);
@@ -163,7 +163,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await page.locator("#help-game").tap();
     assert(await page.locator("#help-dialog").isVisible());
     await page.locator("#close-help").tap();
-    await page.locator(".back").tap();
+    await page.locator("#play .back").tap();
     assert(
       !(await page.evaluate(() => document.body.classList.contains("playing"))),
     );
@@ -193,11 +193,16 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     assert(await privatePage.locator("#game-overlay").isHidden());
     assert(await privatePage.locator("#storage-notice").isVisible());
     const colorsPage = await context.newPage();
-    await colorsPage.addInitScript(() => { Math.random = () => 0; });
+    await colorsPage.addInitScript(() => {
+      Math.random = () => 0;
+    });
     await colorsPage.goto(base + "/games/#colors");
     await colorsPage.locator("#start-game").tap();
     await colorsPage.locator("canvas").tap();
-    await colorsPage.waitForFunction(() => document.querySelector("#overlay-title").textContent === "全部消除！");
+    await colorsPage.waitForFunction(
+      () =>
+        document.querySelector("#overlay-title").textContent === "全部消除！",
+    );
     assert.equal(await colorsPage.locator("#score").innerText(), "得分 33000");
     assert.deepEqual(errors, []);
     console.log(
