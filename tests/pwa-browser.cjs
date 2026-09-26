@@ -13,7 +13,7 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
     const pathname = new URL(request.url, "http://localhost").pathname;
     const target = path.resolve(
       root,
-      "." + (pathname === "/" ? "/index.html" : pathname),
+      "." + (pathname.endsWith("/") ? pathname + "index.html" : pathname),
     );
     if (!target.startsWith(root + path.sep))
       return response.writeHead(404).end();

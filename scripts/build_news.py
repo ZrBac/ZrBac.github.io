@@ -31,26 +31,31 @@ def main():
         shutil.rmtree(output)
     output.mkdir(parents=True)
     shutil.copy2(ROOT / 'news/index.html', output / 'index.html')
+    shutil.copytree(ROOT / 'news/games', output / 'games')
     shutil.copytree(ROOT / 'news/assets', output / 'assets/news', dirs_exist_ok=True)
     # New HTML always requests the matching assets, even with cached older releases.
     homepage = (output / 'index.html').read_text()
     homepage = homepage.replace('content="https://zacai.fun/api/news-refresh"',
                                 f'content="{html_escape(refresh_endpoint, quote=True)}"')
-    shell_files = ['/', '/manifest.webmanifest', '/assets/news/icon-180.png',
+    pages = {'/': homepage, '/games/': (output / 'games/index.html').read_text()}
+    shell_files = ['/', '/games/', '/manifest.webmanifest', '/assets/news/icon-180.png',
                    '/assets/news/icon-192.png', '/assets/news/icon-512.png']
-    for filename in ('app.js', 'pwa.js', 'style.css', 'favicon.svg'):
+    for filename in ('app.js', 'pwa.js', 'style.css', 'favicon.svg', 'games.css', 'games-core.js', 'games.js'):
         asset = output / 'assets/news' / filename
         digest = hashlib.sha256(asset.read_bytes()).hexdigest()[:12]
         versioned = asset.with_name(f'{asset.stem}.{digest}{asset.suffix}')
         shutil.copy2(asset, versioned)
-        homepage = homepage.replace(f'"/assets/news/{filename}"', f'"/assets/news/{versioned.name}"')
+        for path in pages:
+            pages[path] = pages[path].replace(f'"/assets/news/{filename}"', f'"/assets/news/{versioned.name}"')
         shell_files.append(f'/assets/news/{versioned.name}')
-    (output / 'index.html').write_text(homepage)
+    for path, page in pages.items():
+        (output / path.lstrip('/') / 'index.html').write_text(page)
     shutil.copy2(ROOT / 'news/manifest.webmanifest', output / 'manifest.webmanifest')
     worker = (ROOT / 'news/sw.js').read_text()
-    shell_digest = hashlib.sha256(homepage.encode() + worker.encode())
+    shell_digest = hashlib.sha256(pages['/'].encode() + worker.encode())
     for path in shell_files[1:]:
-        shell_digest.update((output / path.lstrip('/')).read_bytes())
+        asset = output / path.lstrip('/')
+        shell_digest.update((asset / 'index.html' if path.endswith('/') else asset).read_bytes())
     worker = worker.replace('__BUILD_ID__', shell_digest.hexdigest()[:16])
     worker = worker.replace('__SHELL_FILES__', json.dumps(shell_files))
     (output / 'sw.js').write_text(worker)
@@ -64,7 +69,7 @@ def main():
     (output / 'data/status.json').write_text(json.dumps({'updatedAt': updated_at}) + '\n')
     items = ''.join(f'<item><title>{escape(a["title"])}</title><link>{escape(a["url"])}</link><guid>{escape(a["url"])}</guid><pubDate>{format_datetime(datetime.fromisoformat(a["publishedAt"].replace("Z", "+00:00")))}</pubDate><description>{escape(a["excerpt"])}</description></item>' for a in data['articles'][:50])
     (output / 'news.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>资讯</title><link>https://news.zacai.fun/</link><description>综合热点与 AI 科技资讯。摘要来自原始资讯源。</description>' + items + '</channel></rss>')
-    urls = ['https://news.zacai.fun/']
+    urls = ['https://news.zacai.fun/', 'https://news.zacai.fun/games/']
     (output / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{escape(u)}</loc></url>' for u in urls) + '</urlset>')
     (output / 'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: https://news.zacai.fun/sitemap.xml\n')
     print(f'Built {output}; {len(data["articles"])} news items.')

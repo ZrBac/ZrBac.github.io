@@ -31,6 +31,9 @@ jobs:
           node --check news/assets/app.js
           node --check news/assets/pwa.js
           node --check news/sw.js
+          node --check news/assets/games.js
+          node --check news/assets/games-core.js
+          node --test tests/games-core.cjs
       - name: Collect news and retain the previous archive
         run: python scripts/collect_news.py --previous-url https://news.zacai.fun/data/news.json
       - name: Build news portal

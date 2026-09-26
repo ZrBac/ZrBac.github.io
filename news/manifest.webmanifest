@@ -25,6 +25,7 @@
   ],
   "shortcuts": [
     { "name": "每日速览", "url": "/#brief" },
-    { "name": "我的收藏", "url": "/#saved" }
+    { "name": "我的收藏", "url": "/#saved" },
+    { "name": "小游戏", "url": "/games/" }
   ]
 }

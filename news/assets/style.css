@@ -164,6 +164,11 @@ span[data-icon] {
   font-size: 12px;
   white-space: nowrap;
 }
+.games-link {
+  font-size: 12px;
+  white-space: nowrap;
+  padding: 10px 5px;
+}
 .saved-link b {
   font-size: 10px;
   font-weight: 500;

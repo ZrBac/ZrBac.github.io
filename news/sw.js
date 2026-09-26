@@ -1,6 +1,13 @@
 /* Build replaces these constants; news-only publications keep the same shell version. */
 const CACHE = "news-shell-__BUILD_ID__";
 const SHELL = __SHELL_FILES__;
+const PAGES = {
+  "/": "/",
+  "/index.html": "/",
+  "/games": "/games/",
+  "/games/": "/games/",
+  "/games/index.html": "/games/",
+};
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -11,7 +18,19 @@ self.addEventListener("install", (event) => {
           SHELL.map((url) => new Request(url, { cache: "reload" })),
         );
         // A deployment crossing the installation window must not mix HTML and assets.
-        const html = await (await cache.match("/")).text();
+        const html = (
+          await Promise.all(
+            ["/", "/games/"].map(async (path) =>
+              (await cache.match(path)).text(),
+            ),
+          )
+        ).join("\n");
+        for (const asset of html.match(
+          /\/assets\/news\/[\w.-]+\.[a-f0-9]{12}\.(?:js|css|svg)/g,
+        ) || []) {
+          if (!SHELL.includes(asset))
+            throw new Error("Page assets belong to another deployment");
+        }
         for (const asset of SHELL.filter((url) =>
           /\.[a-f0-9]{12}\.(js|css|svg)$/.test(url),
         )) {
@@ -42,9 +61,33 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("message", (event) => {
   if (event.data?.type === "ACTIVATE_UPDATE") self.skipWaiting();
+  if (event.data?.type === "CHECK_OFFLINE" && event.ports[0]) {
+    event.waitUntil(
+      (async () => {
+        try {
+          const cache = await caches.open(CACHE);
+          const paths = Array.isArray(event.data.paths) ? event.data.paths : [];
+          const ready =
+            paths.length > 0 &&
+            paths.length <= 20 &&
+            (
+              await Promise.all(
+                paths.map(
+                  async (path) =>
+                    SHELL.includes(path) && !!(await cache.match(path)),
+                ),
+              )
+            ).every(Boolean);
+          event.ports[0].postMessage({ ready });
+        } catch {
+          event.ports[0].postMessage({ ready: false });
+        }
+      })(),
+    );
+  }
 });
 
-async function navigation(request) {
+async function navigation(request, page) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 4000);
   try {
@@ -56,7 +99,7 @@ async function navigation(request) {
     return response;
   } catch {
     // Keep the precached HTML paired with its own assets until a new worker installs.
-    return (await (await caches.open(CACHE)).match("/")) || Response.error();
+    return (await (await caches.open(CACHE)).match(page)) || Response.error();
   } finally {
     clearTimeout(timer);
   }
@@ -66,15 +109,11 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin) return;
-  if (
-    request.mode === "navigate" &&
-    ["/", "/index.html"].includes(url.pathname)
-  ) {
-    event.respondWith(navigation(request));
+  if (request.mode === "navigate" && Object.hasOwn(PAGES, url.pathname)) {
+    event.respondWith(navigation(request, PAGES[url.pathname]));
   } else if (
     SHELL.includes(url.pathname) &&
-    url.pathname !== "/" &&
-    url.pathname !== "/index.html"
+    !Object.hasOwn(PAGES, url.pathname)
   ) {
     event.respondWith(
       (async () =>

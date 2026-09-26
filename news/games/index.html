@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <meta
+      name="description"
+      content="打砖块、飞机大战、跳跃跑酷。为手机触屏设计，准备好后可离线游玩。"
+    />
+    <link rel="canonical" href="https://news.zacai.fun/games/" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/assets/news/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/assets/news/icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <title>小游戏 · 资讯</title>
+    <link rel="stylesheet" href="/assets/news/games.css" />
+    <script src="/assets/news/games-core.js" defer></script>
+    <script src="/assets/news/games.js" defer></script>
+    <script src="/assets/news/pwa.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <a href="/">← 返回资讯</a><span>小游戏</span
+      ><button id="install-app">安装到桌面</button>
+    </header>
+    <main>
+      <p id="offline-status" class="connection" role="status">
+        正在准备离线使用…
+      </p>
+      <p id="pwa-update" class="notice" hidden>
+        网站有新版本。<button id="apply-update">更新页面</button>
+      </p>
+      <p id="storage-notice" class="notice" hidden>
+        浏览器未允许保存成绩，本次仍可正常游玩。
+      </p>
+      <section id="library" aria-labelledby="library-title">
+        <h1 id="library-title" tabindex="-1">玩一小会儿</h1>
+        <p class="intro">选一款，挑战一下自己的最高分。</p>
+        <div class="game-list">
+          <a class="game-card" href="#breakout"
+            ><span class="cover brick-cover" aria-hidden="true"
+              ><i></i><i></i><i></i><i></i><b>●</b><em></em></span
+            ><span
+              ><strong>打砖块</strong><small>接住弹球，打穿五关砖墙。</small
+              ><em>拖动挡板 · 3 次机会</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+          <a class="game-card" href="#shooter"
+            ><span class="cover space-cover" aria-hidden="true"
+              ><i></i><b>▲</b><em>· ·</em></span
+            ><span
+              ><strong>飞机大战</strong
+              ><small>穿过敌机，把火力坚持到最后。</small
+              ><em>自动开火 · 拖动闪避</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+          <a class="game-card" href="#runner"
+            ><span class="cover run-cover" aria-hidden="true"
+              ><b></b><i></i><em></em></span
+            ><span
+              ><strong>跳跃跑酷</strong
+              ><small>越过障碍，跑得比上一局更远。</small
+              ><em>点击跳跃 · 支持二段跳</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+        </div>
+        <p class="footnote">
+          显示“已准备好，可离线玩”后，断网也能打开。没有广告，最高分保存在这台设备上。
+        </p>
+      </section>
+      <section id="play" hidden aria-labelledby="game-title">
+        <a class="back" href="#">← 换个游戏</a>
+        <div class="game-heading">
+          <h1 id="game-title" tabindex="-1"></h1>
+          <button id="pause-game" disabled>暂停</button>
+        </div>
+        <p id="instructions" class="intro"></p>
+        <div class="scorebar">
+          <span id="score">得分 0</span><span id="record">最高 0</span>
+        </div>
+        <div class="stage" id="stage">
+          <canvas
+            id="game-canvas"
+            width="720"
+            height="920"
+            tabindex="0"
+            role="img"
+            aria-label="游戏画面。操作方法见上方说明。"
+            >浏览器需要支持 Canvas 才能运行游戏。</canvas
+          >
+          <div id="game-overlay" class="game-overlay">
+            <div>
+              <h2 id="overlay-title">准备好了吗？</h2>
+              <p id="overlay-note"></p>
+              <button id="start-game">开始游戏</button
+              ><button id="restart-game" hidden>重新开始</button>
+            </div>
+          </div>
+        </div>
+        <p
+          id="game-status"
+          class="game-status"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <p class="footnote play-note">
+          切换页面会自动暂停。电脑也可用方向键、空格和 P 键操作。
+        </p>
+      </section>
+      <noscript
+        ><p>
+          游戏需要开启 JavaScript。首次联网准备完成后可离线使用。
+        </p></noscript
+      >
+    </main>
+    <footer>随时停下，下次再来。</footer>
+    <dialog id="info-dialog" aria-labelledby="dialog-title">
+      <div class="dialog-heading">
+        <h2 id="dialog-title">安装到桌面</h2>
+        <button id="close-dialog" aria-label="关闭">×</button>
+      </div>
+      <div id="dialog-content"></div>
+    </dialog>
+  </body>
+</html>

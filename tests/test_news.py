@@ -109,7 +109,7 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn('/blog/', (output / 'index.html').read_text())
                 self.assertNotIn('/blog/', (output / 'assets/news/app.js').read_text())
                 self.assertEqual(re.findall(r'<loc>(.*?)</loc>', (output / 'sitemap.xml').read_text()),
-                                 ['https://news.zacai.fun/'])
+                                 ['https://news.zacai.fun/', 'https://news.zacai.fun/games/'])
                 self.assertEqual(json.loads((output / 'data/status.json').read_text()),
                                  {'updatedAt': '2026-09-24T06:00:00Z'})
                 manifest = json.loads((output / 'manifest.webmanifest').read_text())
@@ -126,8 +126,14 @@ class BuildTests(unittest.TestCase):
                 self.assertNotIn('__SHELL_FILES__', worker)
                 shell = json.loads(re.search(r'const SHELL = (\[.*?\]);', worker, re.S).group(1))
                 self.assertNotIn('/data/news.json', shell)
+                self.assertIn('/games/', shell)
                 for path in shell:
-                    self.assertTrue((output / ('index.html' if path == '/' else path.lstrip('/'))).is_file())
+                    self.assertTrue((output / (path.lstrip('/') + 'index.html' if path.endswith('/') else path.lstrip('/'))).is_file())
+                games = (output / 'games/index.html').read_text()
+                for name, extension in [('games', 'js'), ('games-core', 'js'), ('games', 'css')]:
+                    match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, games)
+                    self.assertIsNotNone(match)
+                    self.assertIn(match.group(0), shell)
                 # The document must not load an unversioned cached script or stylesheet.
                 homepage = (output / 'index.html').read_text()
                 self.assertIn('rel="canonical" href="https://news.zacai.fun/"', homepage)
