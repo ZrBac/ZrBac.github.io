@@ -130,7 +130,7 @@ class BuildTests(unittest.TestCase):
                 for path in shell:
                     self.assertTrue((output / (path.lstrip('/') + 'index.html' if path.endswith('/') else path.lstrip('/'))).is_file())
                 games = (output / 'games/index.html').read_text()
-                for name, extension in [('compat', 'js'), ('compat', 'css'), ('games', 'js'), ('games-core', 'js'), ('games', 'css'), ('table-games', 'js'), ('table-games-core', 'js'), ('table-games', 'css')]:
+                for name, extension in [('compat', 'js'), ('compat', 'css'), ('games', 'js'), ('games-core', 'js'), ('games', 'css'), ('table-games', 'js'), ('table-games-core', 'js'), ('table-games', 'css'), ('extra-games', 'js'), ('extra-games-core', 'js'), ('extra-games', 'css')]:
                     match = re.search(r'/assets/news/' + name + r'\.[0-9a-f]{12}\.' + extension, games)
                     self.assertIsNotNone(match)
                     self.assertIn(match.group(0), shell)

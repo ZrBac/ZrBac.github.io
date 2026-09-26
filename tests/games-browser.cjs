@@ -21,7 +21,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await context.setOffline(true);
     await page.goto(base + "/games/");
     await page.locator("#offline-status.ready").waitFor();
-    assert.equal(await page.locator(".game-card").count(), 7);
+    assert.equal(await page.locator(".game-card").count(), 10);
     await page.screenshot({
       path: "/tmp/news-games-library.png",
       fullPage: true,
@@ -31,7 +31,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
       await page.locator("#start-game").tap();
       await page.waitForTimeout(250);
       assert(await page.locator("#game-overlay").isHidden());
-      const box = await page.locator("canvas").boundingBox();
+      const box = await page.locator("#game-canvas").boundingBox();
       const viewport = page.viewportSize();
       assert(box.width >= viewport.width * 0.96, "game must fill phone width");
       assert(
@@ -157,7 +157,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await page.waitForFunction(
       () => document.querySelector("#overlay-title").textContent === "休息一下",
     );
-    const landscape = await page.locator("canvas").boundingBox();
+    const landscape = await page.locator("#game-canvas").boundingBox();
     assert(
       landscape.width >= 820 && landscape.height >= 300,
       "landscape also fills the screen",
@@ -200,7 +200,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     });
     await colorsPage.goto(base + "/games/#colors");
     await colorsPage.locator("#start-game").tap();
-    await colorsPage.locator("canvas").tap();
+    await colorsPage.locator("#game-canvas").tap();
     await colorsPage.waitForFunction(
       () =>
         document.querySelector("#overlay-title").textContent === "全部消除！",

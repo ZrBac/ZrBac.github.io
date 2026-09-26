@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="打砖块、飞机大战、跳跃跑酷、叠高楼、连色消除、蜘蛛纸牌、数独。为手机触屏设计，准备好后可离线游玩。"
+      content="打砖块、飞机大战、跳跃跑酷、叠高楼、连色消除、蜘蛛纸牌、数独、卡牌地牢、轻量塔防、俄罗斯方块。为手机触屏设计，准备好后可离线游玩。"
     />
     <link rel="canonical" href="https://news.zacai.fun/games/" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="/assets/news/table-games.css" />
     <script src="/assets/news/table-games-core.js" defer></script>
     <script src="/assets/news/table-games.js" defer></script>
+    <link rel="stylesheet" href="/assets/news/extra-games.css" />
+    <script src="/assets/news/extra-games-core.js" defer></script>
+    <script src="/assets/news/extra-games.js" defer></script>
     <script src="/assets/news/games.js" defer></script>
     <script src="/assets/news/pwa.js" defer></script>
   </head>
@@ -46,6 +49,32 @@
         <h1 id="library-title" tabindex="-1">玩一小会儿</h1>
         <p class="intro">选一款，开始游戏。</p>
         <div class="game-list">
+          <a class="game-card" href="#dungeon"
+            ><span class="cover dungeon-cover" aria-hidden="true"
+              ><b>牌</b><i>✦</i></span
+            ><span
+              ><strong>卡牌地牢</strong
+              ><small>攒一副好牌，闯过十二层地牢。</small
+              ><em>回合战斗 · 装备成长 · 自动存档</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+          <a class="game-card" href="#defense"
+            ><span class="cover defense-cover" aria-hidden="true"
+              ><b>塔</b><i>· · ·</i></span
+            ><span
+              ><strong>轻量塔防</strong><small>布置防线，守住十二波来敌。</small
+              ><em>三种防御塔 · 升级搭配 · 可暂停</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+          <a class="game-card" href="#blocks"
+            ><span class="cover blocks-cover" aria-hidden="true"
+              ><b>▟</b><i>▰</i></span
+            ><span
+              ><strong>俄罗斯方块</strong
+              ><small>转好方向，填满一行再消除。</small
+              ><em>落点提示 · 暂存 · 触屏按键</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
           <a class="game-card" href="#spider"
             ><span class="cover spider-cover" aria-hidden="true"
               ><b>K<span>♠</span></b
@@ -111,7 +140,7 @@
           >
         </div>
         <p class="footnote">
-          显示“已准备好，可离线玩”后，断网也能打开。没有广告，成绩和纸牌、数独进度保存在这台设备上。
+          显示“已准备好，可离线玩”后，断网也能打开。没有广告，成绩和支持存档的游戏进度保存在这台设备上。
         </p>
       </section>
       <section id="play" hidden aria-labelledby="game-title">
@@ -203,6 +232,64 @@
           进度自动保存在本机
         </p>
       </section>
+      <section id="extra-play" hidden aria-labelledby="extra-title">
+        <div class="game-heading">
+          <a class="back" href="#" aria-label="返回游戏列表">← 返回</a>
+          <h1 id="extra-title"></h1>
+          <button id="extra-help">玩法</button
+          ><button id="extra-new">新一局</button>
+        </div>
+        <div id="extra-hud" class="extra-hud"></div>
+        <p
+          id="extra-message"
+          class="extra-message"
+          role="status"
+          aria-live="polite"
+        ></p>
+        <div id="dungeon-area" class="dungeon-area" hidden></div>
+        <div id="extra-arena" class="extra-arena" hidden>
+          <canvas id="extra-canvas" tabindex="0"></canvas>
+          <div id="blocks-side" class="blocks-side" hidden>
+            <span>下一个</span>
+            <div id="blocks-next"></div>
+            <span>暂存</span>
+            <div id="blocks-held"></div>
+            <small id="blocks-best"></small>
+          </div>
+          <div id="extra-overlay" class="extra-overlay" hidden>
+            <strong id="extra-overlay-title"></strong>
+            <p id="extra-overlay-text"></p>
+            <button id="extra-resume">开始游戏</button>
+          </div>
+        </div>
+        <div id="defense-tools" class="defense-tools" hidden>
+          <div class="tower-types">
+            <button data-tower="arrow">箭塔 · 45</button
+            ><button data-tower="cannon">炮塔 · 75</button
+            ><button data-tower="frost">冰塔 · 60</button>
+          </div>
+          <div class="defense-actions">
+            <button id="defense-upgrade" disabled>升级</button
+            ><button id="defense-sell" disabled>出售</button
+            ><button id="defense-wave">开始第 1 波</button>
+          </div>
+        </div>
+        <div id="blocks-controls" class="blocks-controls" hidden>
+          <button data-block="left" aria-label="左移">←</button
+          ><button data-block="rotate" aria-label="旋转">旋转</button
+          ><button data-block="right" aria-label="右移">→</button
+          ><button data-block="hold">暂存</button
+          ><button data-block="down">下移</button
+          ><button data-block="drop">落到底</button>
+        </div>
+        <div id="extra-actions" class="extra-actions">
+          <button id="extra-pause">暂停</button
+          ><button id="defense-speed">速度 ×1</button
+          ><button id="dungeon-deck">查看牌组</button
+          ><button id="dungeon-end">结束回合</button>
+        </div>
+        <p id="extra-save" class="extra-save">进度自动保存在本机</p>
+      </section>
       <noscript
         ><p>
           游戏需要开启 JavaScript。首次联网准备完成后可离线使用。
@@ -218,6 +305,14 @@
       <div class="table-dialog-actions">
         <button id="table-new-cancel">继续当前局</button
         ><button id="table-new-confirm">开始新一局</button>
+      </div>
+    </dialog>
+    <dialog id="extra-new-dialog" aria-labelledby="extra-new-title">
+      <h2 id="extra-new-title">开始新一局</h2>
+      <p>当前这一局会被替换，已保存的最高分会保留。</p>
+      <div class="table-dialog-actions">
+        <button id="extra-new-cancel">继续当前局</button
+        ><button id="extra-new-confirm">开始新一局</button>
       </div>
     </dialog>
     <dialog id="help-dialog" aria-labelledby="help-title">

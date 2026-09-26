@@ -116,7 +116,16 @@
     saveRecord();
     stop();
     window.TableGames.close();
+    window.ExtraGames.close();
     kind = location.hash.slice(1);
+    if (["dungeon", "defense", "blocks"].includes(kind)) {
+      state = null;
+      $("#library").hidden = true;
+      $("#play").hidden = true;
+      document.body.classList.add("playing");
+      window.ExtraGames.open(kind);
+      return;
+    }
     if (["spider", "sudoku"].includes(kind)) {
       state = null;
       $("#library").hidden = true;
