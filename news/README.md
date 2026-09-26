@@ -55,7 +55,7 @@ Safari 15.3 缺少原生 `<dialog>` 的 `showModal()` / `close()` 和 `Object.ha
 
 ## 离线小游戏
 
-首页右上角“小游戏”进入 `/games/`，提供打砖块（五关）、飞机大战（自动开火、敌机逐渐加速）、跳跃跑酷（二段跳）、叠高楼（对齐落块）和连色消除（消除相连同色块、全清奖励）。这五款采用原生 Canvas 实现，另有蜘蛛纸牌、数独、卡牌地牢、轻量塔防和俄罗斯方块，共十款，均不加载第三方游戏、广告、字体或网络素材。
+首页右上角“小游戏”进入 `/games/`，提供打砖块（五关）、飞机大战（自动开火、敌机逐渐加速）、跳跃跑酷（二段跳）、叠高楼（对齐落块）和连色消除（消除相连同色块、全清奖励）。这五款采用原生 Canvas 实现，另有蜘蛛纸牌、数独、卡牌地牢、轻量塔防、俄罗斯方块、跳一跳、消消乐和扫雷，共十三款，均不加载第三方游戏、广告、字体或网络素材。
 
 - 游戏页使用独立满屏布局，说明收进“玩法”。五款 Canvas 游戏画面随可见视口和安全区域适配，横竖屏保持物体比例；尺寸变化时暂停并调整当前局的位置，不清空成绩。
 - 手机在画面任意位置相对拖动控制挡板和飞机，按下时不会跳到手指下方；点按跑酷跳跃、叠高楼落块或连色消除选块。电脑可用方向键 / WASD，空格或 Enter 触发动作，P / Escape 暂停；连色消除可用方向键选格。
@@ -67,15 +67,20 @@ Safari 15.3 缺少原生 `<dialog>` 的 `showModal()` / `close()` 和 `Object.ha
 - 轻量塔防是一张原创的 9×9 绕行地图，共 12 波，含快敌、装甲敌与首领。箭塔单体快攻、炮塔范围伤害、冰塔减速，每塔可升至 3 级；出售返还投入金币的 70%。支持战斗中建造、暂停、两倍速，并保存波次内的敌人位置。
 - 俄罗斯方块使用 10×20 棋盘，七袋随机、三个后续预览、每块一次暂存、落点提示和旋转避墙。每消除 10 行加速；手机支持按钮长按、棋盘左右滑动、向下滑动和轻点旋转。电脑用方向键、空格落到底、C 暂存、P / Escape 暂停。
 - 三款新游戏分别使用 `zacai-extra-dungeon-v1`、`zacai-extra-defense-v1`、`zacai-extra-blocks-v1` 存当前局，纪录存在 `zacai-extra-records-v1`。回合操作及时保存，实时游戏每两秒、落块或波次切换、暂停和离开时保存。恢复实时游戏后需要手动继续；尺寸变化也会暂停。存档会校验，存储受限时仍可在当前页面内切换后继续，并明确提示。
+- 跳一跳通过长按画面或大按钮蓄力、松手起跳；电脑支持长按空格。落台得分，连续落在圆心有额外奖励，随进度缩小台面。切换页面、旋转屏幕自动暂停，未完成的蓄力会取消；已起跳的进度可保存并继续。
+- 消消乐使用 7×7 棋盘，支持点选或滑动交换相邻方块，横竖三连消除和连锁倍数。每关 28 步，第一关目标 1000 分，后续每关增加 250 分。无效交换不扣步，提示免费，主动重排扣 2 步；无合法移动时自动免费重排。颜色和形状共同区分方块，结算完成的状态在动画前保存，动画中退出也不会丢失分数。
+- 扫雷有入门（8×8、10 雷）、标准（9×9、14 雷）、挑战（9×12、22 雷）三档。首次翻开及周围八格安全；支持长按、右键或 F 键插旗、明确的翻开/插旗模式，以及数字格周围旗数相符后的快速翻开。随机局面不保证无需猜测。计时只统计页面在前台、获得焦点且未打开弹窗的游玩时间；挑战棋盘在高度不足时可纵向滚动。
+- 这三款新游戏使用 `zacai-casual-jump-v1`、`zacai-casual-match-v1`、`zacai-casual-mines-v1` 保存进度，跳一跳最高分使用 `zacai-jump-best-v1`。读档会校验，存储受限时提示并在当前页面内保留进度。新一局先确认，扫雷可在确认框选择难度。
 - 全部游戏资源随站点一起预缓存，不必先分别打开每一款。页面向正在控制它的 Service Worker 查询当前页面所需资源是否完整，显示“已准备好，可离线玩”后可断网使用。浏览器清理缓存后需重新联网准备。
 - 更新采用现有 PWA 的“更新页面”流程，首页与小游戏页的文件一起校验、一起切换。小游戏不会触发新闻刷新 API。
 
-规则测试随发布执行：`node --test tests/games-core.cjs tests/table-games-core.cjs tests/extra-games-core.cjs tests/sw-compat.cjs`。本地构建并启动预览后，可运行触屏、暂停、成绩保存和离线打开检查：
+规则测试随发布执行：`node --test tests/games-core.cjs tests/table-games-core.cjs tests/extra-games-core.cjs tests/casual-games-core.cjs tests/sw-compat.cjs`。本地构建并启动预览后，可运行触屏、暂停、成绩保存和离线打开检查：
 
 ```sh
 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/games-browser.cjs
 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/table-games-browser.cjs
 NEWS_LEGACY_SAFARI=1 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/extra-games-browser.cjs
+NEWS_LEGACY_SAFARI=1 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/casual-games-browser.cjs
 ```
 
 ## 自动发布

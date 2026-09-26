@@ -117,7 +117,16 @@
     stop();
     window.TableGames.close();
     window.ExtraGames.close();
+    window.CasualGames.close();
     kind = location.hash.slice(1);
+    if (["jump", "match", "mines"].includes(kind)) {
+      state = null;
+      $("#library").hidden = true;
+      $("#play").hidden = true;
+      document.body.classList.add("playing");
+      window.CasualGames.open(kind);
+      return;
+    }
     if (["dungeon", "defense", "blocks"].includes(kind)) {
       state = null;
       $("#library").hidden = true;

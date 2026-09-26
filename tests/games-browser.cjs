@@ -21,7 +21,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await context.setOffline(true);
     await page.goto(base + "/games/");
     await page.locator("#offline-status.ready").waitFor();
-    assert.equal(await page.locator(".game-card").count(), 10);
+    assert.equal(await page.locator(".game-card").count(), 13);
     await page.screenshot({
       path: "/tmp/news-games-library.png",
       fullPage: true,
