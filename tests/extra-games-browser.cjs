@@ -252,6 +252,13 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
       [1024, 768],
     ]) {
       await page.setViewportSize({ width, height });
+      // Viewport emulation returns before resize events and the next layout frame.
+      await page.evaluate(
+        () =>
+          new Promise((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(resolve)),
+          ),
+      );
       const layout = await page.evaluate(() => {
         const c = document
             .querySelector("#extra-canvas")
