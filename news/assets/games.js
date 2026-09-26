@@ -20,18 +20,6 @@
       instructions: "点画面或按空格跳跃，空中可再跳一次。",
       note: "看准障碍，点一下就起跳。",
     },
-    stack: {
-      title: "叠高楼",
-      instructions:
-        "点一下画面或按空格，让移动方块落下。只保留与下面重叠的部分，完美对齐额外加分。",
-      note: "瞄准下面那一层，点击落块。",
-    },
-    colors: {
-      title: "连色消除",
-      instructions:
-        "点击至少两个上下左右相连的同色方块，连得越多得分越高。清空全盘奖励 1000 分。电脑用方向键选格、空格或回车消除。",
-      note: "没有倒计时，先想想下一步。",
-    },
   };
   const canvas = $("#game-canvas"),
     ctx = canvas.getContext("2d");
@@ -46,9 +34,7 @@
     pointer = null;
   let world = { width: C.W, height: C.H },
     renderScale = 2,
-    dragStart = null,
-    selected = 0,
-    keyboardSelection = false;
+    dragStart = null;
   const recordsKey = "zacai-arcade-records-v1";
   let records = {};
   try {
@@ -152,8 +138,6 @@
     if (!game) return;
     sizeCanvas();
     state = C.create(kind, world);
-    selected = 0;
-    keyboardSelection = false;
     $("#help-title").textContent = game.title + " · 玩法";
     $("#help-text").textContent = game.instructions;
     $("#game-title").textContent = game.title;
@@ -201,16 +185,8 @@
     }
     draw();
   }
-  function colorLayout() {
-    const tile = Math.min((world.width - 24) / 8, (world.height - 85) / 10);
-    return {
-      tile,
-      x: (world.width - tile * 8) / 2,
-      y: (world.height - tile * 10) / 2 + 12,
-    };
-  }
-  function act(index) {
-    C.action(state, index);
+  function act() {
+    C.action(state);
     if (state.event) $("#game-status").textContent = state.event;
     hud();
     draw();
@@ -238,11 +214,7 @@
       stop();
       saveRecord();
       showOverlay(
-        state.won
-          ? kind === "colors"
-            ? "全部消除！"
-            : "五关全通！"
-          : "这一局结束了",
+        state.won ? "五关全通！" : "这一局结束了",
         "得分 " + state.score + " · 最高 " + records[kind],
         "再玩一次",
       );
@@ -368,54 +340,6 @@
         "#947b58",
         11,
       );
-    } else if (kind === "stack") {
-      rect(0, 0, W, H, "#1d2b3d");
-      text("已叠 " + (s.layers.length - 1) + " 层", 16, 28, "#becbd8", 14);
-      const camera = Math.max(0, (s.layers.length - 1) * 24 - (H - 190));
-      const palette = ["#78999f", "#8eb1ad", "#b3c4a8", "#d2c5a4", "#dcaf90"];
-      for (let i = 0; i < s.layers.length; i++) {
-        const y = H - 80 - i * 24 + camera;
-        if (y > H || y < 35) continue;
-        const layer = s.layers[i];
-        rect(layer.x, y, layer.w, 22, palette[i % palette.length]);
-        rect(layer.x, y + 17, layer.w, 5, "#0002");
-      }
-      const m = s.moving,
-        y = H - 80 - s.layers.length * 24 + camera;
-      rect(m.x, y, m.w, 22, "#f1dac0");
-      rect(m.x, y + 17, m.w, 5, "#0002");
-      text("点击画面落块", 16, H - 28, "#a4b3c4");
-    } else if (kind === "colors") {
-      rect(0, 0, W, H, "#f1ece2");
-      const { tile, x, y } = colorLayout();
-      const palette = ["#cc7c63", "#679697", "#b49a50", "#9280aa"];
-      text(
-        "剩余 " + s.cells.filter((c) => c != null).length + " 块",
-        16,
-        28,
-        "#786c5d",
-        14,
-      );
-      for (let i = 0; i < 80; i++) {
-        const color = s.cells[i],
-          px = x + (i % 8) * tile,
-          py = y + Math.floor(i / 8) * tile;
-        if (color != null) {
-          rect(px + 2, py + 2, tile - 4, tile - 4, palette[color]);
-          text(
-            String(color + 1),
-            px + tile * 0.4,
-            py + tile * 0.65,
-            "#fff",
-            tile * 0.4,
-          );
-        }
-        if (keyboardSelection && i === selected) {
-          ctx.strokeStyle = "#273a49";
-          ctx.lineWidth = 3;
-          ctx.strokeRect(px + 1, py + 1, tile - 2, tile - 2);
-        }
-      }
     }
     for (const p of s.particles) {
       ctx.globalAlpha = p.life / 0.4;
@@ -437,14 +361,8 @@
     pointer = e.pointerId;
     canvas.setPointerCapture(e.pointerId);
     const p = point(e);
-    keyboardSelection = false;
-    if (kind === "runner" || kind === "stack") act();
-    else if (kind === "colors") {
-      const { tile, x, y } = colorLayout();
-      const col = Math.floor((p.x - x) / tile),
-        row = Math.floor((p.y - y) / tile);
-      if (col >= 0 && col < 8 && row >= 0 && row < 10) act(row * 8 + col);
-    } else {
+    if (kind === "runner") act();
+    else {
       dragStart = {
         x: p.x,
         y: p.y,
@@ -521,28 +439,11 @@
       return;
     }
     if (phase !== "running") return;
-    if (kind === "colors") {
-      keyboardSelection = true;
-      const moves = {
-        ArrowLeft: -1,
-        a: -1,
-        ArrowRight: 1,
-        d: 1,
-        ArrowUp: -8,
-        w: -8,
-        ArrowDown: 8,
-        s: 8,
-      };
-      if (moves[key]) selected = C.clamp(selected + moves[key], 0, 79);
-      if ([" ", "Enter"].includes(key) && !e.repeat) act(selected);
-      draw();
-      return;
-    }
     delete input.x;
     delete input.y;
     keys.add(key);
     if (
-      ["runner", "stack"].includes(kind) &&
+      kind === "runner" &&
       [" ", "ArrowUp", "w", "Enter"].includes(key) &&
       !e.repeat
     )

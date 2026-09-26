@@ -21,12 +21,12 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await context.setOffline(true);
     await page.goto(base + "/games/");
     await page.locator("#offline-status.ready").waitFor();
-    assert.equal(await page.locator(".game-card").count(), 13);
+    assert.equal(await page.locator(".game-card").count(), 11);
     await page.screenshot({
       path: "/tmp/news-games-library.png",
       fullPage: true,
     });
-    for (const kind of ["breakout", "shooter", "runner", "stack", "colors"]) {
+    for (const kind of ["breakout", "shooter", "runner"]) {
       await page.locator(`a[href="#${kind}"]`).tap();
       await page.locator("#start-game").tap();
       await page.waitForTimeout(250);
@@ -194,21 +194,9 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await privatePage.locator("#start-game").click();
     assert(await privatePage.locator("#game-overlay").isHidden());
     assert(await privatePage.locator("#storage-notice").isVisible());
-    const colorsPage = await context.newPage();
-    await colorsPage.addInitScript(() => {
-      Math.random = () => 0;
-    });
-    await colorsPage.goto(base + "/games/#colors");
-    await colorsPage.locator("#start-game").tap();
-    await colorsPage.locator("#game-canvas").tap();
-    await colorsPage.waitForFunction(
-      () =>
-        document.querySelector("#overlay-title").textContent === "全部消除！",
-    );
-    assert.equal(await colorsPage.locator("#score").innerText(), "得分 33000");
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: mobile entry, first offline game visit, all five games offline, immersive portrait/landscape, relative drag without teleporting, touch, keyboard, pause/resume, visibility pause, restart, saved records, route aliases, five widths, denied storage.",
+      "PASS: mobile entry, first offline game visit, all three arcade games offline, immersive portrait/landscape, relative drag without teleporting, touch, keyboard, pause/resume, visibility pause, restart, saved records, route aliases, five widths, denied storage.",
     );
   } finally {
     await browser.close();

@@ -103,58 +103,6 @@ test("controls stay within boundaries and ended rounds freeze", () => {
   }
 });
 
-test("stack trims overhang, rewards perfect drops and ends on a miss", () => {
-  const s = C.create("stack");
-  s.moving.x = s.layers[0].x + 2;
-  assert(C.action(s));
-  assert.equal(s.score, 15);
-  assert.equal(s.layers[1].w, 150);
-  assert.equal(C.action(s), false, "ignore accidental double tap");
-  s.cooldown = 0;
-  s.moving.x = s.layers[1].x + 20;
-  C.action(s);
-  assert.equal(s.layers[2].w, 130);
-  assert.equal(s.score, 25);
-  s.cooldown = 0;
-  s.moving.x = 0;
-  s.moving.w = 10;
-  C.action(s);
-  assert(s.ended);
-});
-test("colors only matches orthogonal neighbors and refuses a single cell", () => {
-  const s = C.create("colors");
-  s.cells.fill(null);
-  s.cells[0] = 0;
-  s.cells[9] = 0;
-  s.cells[7] = 1;
-  s.cells[8] = 1;
-  assert.deepEqual(C.colorGroup(s.cells, 0), [0]);
-  assert.deepEqual(C.colorGroup(s.cells, 7), [7]);
-  assert.equal(C.action(s, 0), false);
-  assert.equal(s.score, 0);
-});
-test("colors scores clusters, applies gravity and collapses empty columns", () => {
-  const s = C.create("colors");
-  s.cells.fill(null);
-  s.cells[64] = 0;
-  s.cells[72] = 0;
-  s.cells[73] = 2;
-  s.cells[65] = 3;
-  s.cells[74] = 2;
-  C.action(s, 72);
-  assert.equal(s.score, 20);
-  assert.equal(s.cells[64], 3);
-  assert.equal(s.cells[72], 2);
-  assert.equal(s.cells[73], 2);
-  C.action(s, 72);
-  assert(s.ended);
-  assert(!s.won);
-  assert.equal(s.score, 40);
-  const clear = C.create("colors", {}, () => 0);
-  C.action(clear, 0);
-  assert(clear.won && clear.ended);
-  assert.equal(clear.score, 33000);
-});
 test("tall and landscape playfields keep controls and ground inside the visible world", () => {
   for (const size of [
     { width: 360, height: 720 },

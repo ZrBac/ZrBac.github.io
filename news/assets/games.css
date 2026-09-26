@@ -404,48 +404,6 @@ dialog p {
   }
 }
 
-.stack-cover {
-  background: #253345;
-}
-.stack-cover i,
-.stack-cover b,
-.stack-cover em {
-  position: absolute;
-  height: 13px;
-  background: #89b4ae;
-  left: 14px;
-  width: 50px;
-  bottom: 12px;
-}
-.stack-cover b {
-  bottom: 27px;
-  width: 41px;
-  left: 23px;
-  background: #b6cbaa;
-}
-.stack-cover em {
-  bottom: 42px;
-  width: 32px;
-  left: 17px;
-  background: #e6cfa2;
-}
-.colors-cover {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 5px;
-  padding: 9px;
-  background: #eee9df;
-}
-.colors-cover i {
-  background: #cf7d62;
-  border-radius: 4px;
-}
-.colors-cover i:nth-child(2) {
-  background: #6b9c9d;
-}
-.colors-cover i:nth-child(3) {
-  background: #ccb263;
-}
 body.playing {
   overflow: hidden;
   position: fixed;

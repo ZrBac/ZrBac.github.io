@@ -35,7 +35,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await context.setOffline(true);
     await page.goto(base + "/games/");
     await page.locator("#offline-status.ready").waitFor();
-    assert.equal(await page.locator(".game-card").count(), 13);
+    assert.equal(await page.locator(".game-card").count(), 11);
     // Hold with actual touchscreen events until the center-target charge, then land and reload offline.
     await page.locator('a[href="#jump"]').tap();
     await page.locator("#casual-resume").tap();
@@ -298,7 +298,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     assert(await page.locator("#casual-play").isHidden());
     await page.goto(base + "/games/#spider");
     assert.equal(await page.locator(".spider-column").count(), 10);
-    await page.goto(base + "/games/#colors");
+    await page.goto(base + "/games/#breakout");
     assert(await page.locator("#play").isVisible());
     assert.deepEqual(errors, []);
     await context.close();

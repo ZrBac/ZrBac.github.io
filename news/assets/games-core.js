@@ -28,7 +28,7 @@
     };
     s.wait = 0.8;
   }
-  function create(kind, size = {}, random = Math.random) {
+  function create(kind, size = {}) {
     const width = size.width || W,
       height = size.height || H;
     const s = {
@@ -67,18 +67,6 @@
         spawn: 1.4,
         distance: 0,
       });
-    if (kind === "stack")
-      Object.assign(s, {
-        layers: [{ x: width / 2 - 75, w: 150 }],
-        moving: { x: 0, w: 150 },
-        direction: 1,
-        cooldown: 0,
-      });
-    if (kind === "colors") {
-      s.cells = Array.from({ length: 80 }, () => Math.floor(random() * 4));
-      // Every new board offers at least one legal opening move.
-      s.cells[1] = s.cells[0];
-    }
     return s;
   }
   function burst(s, x, y, color) {
@@ -282,102 +270,10 @@
         }
       }
       s.obstacles = s.obstacles.filter((o) => o.x + o.w > 0);
-    } else if (s.kind === "stack") {
-      s.cooldown = Math.max(0, s.cooldown - dt);
-      s.moving.x += s.direction * Math.min(260, 90 + s.layers.length * 7) * dt;
-      if (s.moving.x < 0 || s.moving.x + s.moving.w > W) {
-        s.moving.x = clamp(s.moving.x, 0, W - s.moving.w);
-        s.direction *= -1;
-      }
     }
   }
-  function colorGroup(cells, index) {
-    if (index < 0 || index >= 80 || cells[index] == null) return [];
-    const color = cells[index],
-      seen = new Set(),
-      queue = [index];
-    while (queue.length) {
-      const i = queue.pop();
-      if (seen.has(i) || cells[i] !== color) continue;
-      seen.add(i);
-      if (i % 8 > 0) queue.push(i - 1);
-      if (i % 8 < 7) queue.push(i + 1);
-      if (i >= 8) queue.push(i - 8);
-      if (i < 72) queue.push(i + 8);
-    }
-    return [...seen];
-  }
-  function action(s, index) {
-    if (s.ended) return false;
-    if (s.kind === "runner") return jump(s);
-    if (s.kind === "stack") {
-      if (s.cooldown > 0) return false;
-      const top = s.layers[s.layers.length - 1],
-        next = s.moving;
-      const perfect = Math.abs(next.x - top.x) <= 4;
-      const left = perfect ? top.x : Math.max(top.x, next.x);
-      const right = perfect
-        ? top.x + top.w
-        : Math.min(top.x + top.w, next.x + next.w);
-      if (right <= left) {
-        s.ended = true;
-        s.event = "没有接住这一层";
-        return true;
-      }
-      const layer = { x: left, w: right - left };
-      s.layers.push(layer);
-      s.score += perfect ? 15 : 10;
-      s.event = perfect
-        ? "完美对齐！+15"
-        : "第 " + (s.layers.length - 1) + " 层";
-      s.direction = s.layers.length % 2 ? 1 : -1;
-      s.moving = { x: s.direction === 1 ? 0 : s.width - layer.w, w: layer.w };
-      s.cooldown = 0.2;
-      return true;
-    }
-    if (s.kind === "colors") {
-      const group = colorGroup(s.cells, index);
-      if (group.length < 2) {
-        s.event = "点至少两个相连的同色方块";
-        return false;
-      }
-      const points = group.length * group.length * 5;
-      group.forEach((i) => (s.cells[i] = null));
-      s.score += points;
-      const columns = [];
-      for (let x = 0; x < 8; x++) {
-        const column = Array.from(
-          { length: 10 },
-          (_, y) => s.cells[y * 8 + x],
-        ).filter((c) => c != null);
-        if (column.length)
-          columns.push(
-            Array(10 - column.length)
-              .fill(null)
-              .concat(column),
-          );
-      }
-      s.cells = Array.from(
-        { length: 80 },
-        (_, i) => columns[i % 8]?.[Math.floor(i / 8)] ?? null,
-      );
-      s.event = "消除 " + group.length + " 块，+" + points;
-      s.won = s.cells.every((c) => c == null);
-      s.ended =
-        s.won ||
-        !s.cells.some(
-          (c, i) =>
-            c != null &&
-            ((i % 8 < 7 && s.cells[i + 1] === c) ||
-              (i < 72 && s.cells[i + 8] === c)),
-        );
-      if (s.won) {
-        s.score += 1000;
-        s.event = "全部消除！奖励 1000 分";
-      }
-      return true;
-    }
-    return false;
+  function action(s) {
+    return jump(s);
   }
   function resize(s, width, height) {
     const sx = width / s.width,
@@ -408,13 +304,6 @@
       o.x *= sx;
       o.y += dy;
     }
-    for (const layer of [
-      ...(s.layers || []),
-      ...(s.moving ? [s.moving] : []),
-    ]) {
-      layer.x *= sx;
-      layer.w *= sx;
-    }
     s.width = width;
     s.height = height;
   }
@@ -427,7 +316,6 @@
     step,
     jump,
     action,
-    colorGroup,
     resize,
   };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
