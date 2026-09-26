@@ -184,6 +184,54 @@
     "color": "#8d443d"
   },
   {
+    "id": "google-ent",
+    "name": "Google 新闻·中文娱乐",
+    "url": "https://news.google.com/rss/headlines/section/topic/ENTERTAINMENT?hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+    "home": "https://news.google.com/topics/CAAqKggKIiRDQkFTRlFvSUwyMHZNREpxYW5RU0JYcG9MVU5PR2dKRFRpZ0FQAQ?hl=zh-CN&gl=CN&ceid=CN:zh-Hans",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "mpweekly-ent",
+    "name": "明周娱乐",
+    "url": "https://www.mpweekly.com/entertainment/feed",
+    "home": "https://www.mpweekly.com/entertainment/",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "mirrormedia-ent",
+    "name": "镜周刊·娱乐",
+    "url": "https://www.mirrormedia.mg/rss/entertainment.xml",
+    "home": "https://www.mirrormedia.mg/section/entertainment",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "ksd",
+    "name": "KSD 韩星网",
+    "url": "http://feed.koreastardaily.com/tc",
+    "home": "https://www.koreastardaily.com/tc",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "hollywood-reporter",
+    "name": "The Hollywood Reporter",
+    "url": "https://www.hollywoodreporter.com/feed/",
+    "home": "https://www.hollywoodreporter.com/",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
+    "id": "billboard",
+    "name": "Billboard",
+    "url": "https://www.billboard.com/feed/",
+    "home": "https://www.billboard.com/",
+    "category": "entertainment",
+    "color": "#8d443d"
+  },
+  {
     "id": "chinanews-sports",
     "name": "中新网体育",
     "url": "https://www.chinanews.com.cn/rss/sports.xml",
