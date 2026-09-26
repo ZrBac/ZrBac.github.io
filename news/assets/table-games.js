@@ -130,10 +130,9 @@
         if (card.up) {
           el.dataset.col = col;
           el.dataset.index = index;
-          el.append(
-            span(rank + " " + pip, "card-corner"),
-            span(pip, "card-center"),
-          );
+          const corner = span("", "card-corner");
+          corner.append(span(rank, "card-rank"), span(pip, "card-suit"));
+          el.append(corner, span(pip, "card-center"));
           el.classList.toggle("red", red);
           const selected = selection?.col === col && index >= selection.index;
           el.classList.toggle("selected", selected);
@@ -296,7 +295,7 @@
     render();
     message(
       kind === "spider"
-        ? "点选牌，再点目标列移动。左右滑动牌桌可查看全部 10 列。"
+        ? "十列已全部显示。点选牌，再点目标列移动。"
         : "点一个空格，再点下方数字。需要记候选数时打开“笔记”。",
     );
   }
@@ -412,7 +411,7 @@
     $("#help-title").textContent = $("#table-title").textContent + " · 玩法";
     $("#help-text").textContent =
       kind === "spider"
-        ? "共 104 张牌，收齐八组同花色 K 到 A 即获胜。点一张牌选中它及下方同花色递减的牌，再点目标列：目标牌必须大一点，花色可以不同；空列可放任意合法牌组。有空列时不能发牌。手机可左右滑动查看十列，横屏能看到更多。提示只展示合法走法，随机牌局不保证有解。支持撤销最近 30 步。"
+        ? "共 104 张牌，收齐八组同花色 K 到 A 即获胜。点一张牌选中它及下方同花色递减的牌，再点目标列：目标牌必须大一点，花色可以不同；空列可放任意合法牌组。有空列时不能发牌。手机竖屏可看全十列，横屏牌面更大。提示只展示合法走法，随机牌局不保证有解。支持撤销最近 30 步。"
         : "每一行、每一列、每个 3×3 宫内填入 1 到 9，不能重复。点格子后用下方数字填写；笔记用于记录候选数。红色表示行、列或宫内重复，不代表所有错误都会标红。提示会直接填入一格答案。支持撤销最近 30 步；电脑可用方向键选格、数字键填数、N 切换笔记、Delete 擦除。";
     $("#help-dialog").lastElementChild.hidden = true;
     $("#help-dialog").showModal();

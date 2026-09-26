@@ -36,15 +36,45 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
       await page.evaluate(() => document.documentElement.scrollWidth),
       390,
     );
-    const cardBox = await page.locator(".spider-card").first().boundingBox();
-    assert(cardBox.width >= 54);
+    for (const width of [320, 375, 390, 430, 600, 844]) {
+      await page.setViewportSize({ width, height: 664 });
+      const layout = await page.evaluate(() => {
+        const scroll = document.querySelector("#spider-scroll");
+        const bounds = scroll.getBoundingClientRect();
+        return {
+          overflow: scroll.scrollWidth - scroll.clientWidth,
+          cardsFit: [...document.querySelectorAll(".spider-card")].every(
+            (card) => {
+              const box = card.getBoundingClientRect();
+              const corner = card
+                .querySelector(".card-corner")
+                ?.getBoundingClientRect();
+              return (
+                box.left >= bounds.left &&
+                box.right <= bounds.right &&
+                (!corner ||
+                  (corner.left >= box.left &&
+                    corner.right <= box.right &&
+                    corner.bottom <= box.top + 40))
+              );
+            },
+          ),
+        };
+      });
+      assert(layout.overflow <= 1, `all ten columns must fit at ${width}px`);
+      assert(
+        layout.cardsFit,
+        `cards and corner marks must stay visible at ${width}px`,
+      );
+    }
+    await page.setViewportSize({ width: 390, height: 664 });
     await page.screenshot({ path: "/tmp/news-spider-phone.png" });
     const initial = await saved("spider");
     await page.locator("#spider-deal").tap();
     assert.equal((await saved("spider")).state.stock.length, 40);
     await page.locator("#table-undo").tap();
     assert.deepEqual((await saved("spider")).state, initial.state);
-    // Use a guaranteed legal move, exercising the actual two-tap controller and scrollable table.
+    // Use a guaranteed legal move, exercising the actual two-tap controller on the fitted table.
     let hint = await page.evaluate(
       () =>
         TableGamesCore.spiderHints(
