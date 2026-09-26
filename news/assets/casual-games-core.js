@@ -35,6 +35,26 @@
       r: Math.max(25, 39 - s.jumps * 0.45),
     };
   }
+  // Keep actual future platforms in the save; previews become the next targets.
+  // Missing arrays are the original two-platform save format.
+  function jumpPrepare(s) {
+    if (!s.trail) s.trail = [];
+    if (!s.upcoming) s.upcoming = [];
+    while (s.upcoming.length < 2) {
+      const count = s.upcoming.length,
+        from = count ? s.upcoming[count - 1] : s.target,
+        previous =
+          count > 1 ? s.upcoming[count - 2] : count ? s.target : s.current,
+        direction = from.x > previous.x ? -1 : 1,
+        distance = 130 + random(s) * 95;
+      s.upcoming.push({
+        x: from.x + direction * distance * 0.8,
+        y: from.y - distance * 0.6,
+        r: Math.max(25, 39 - (s.jumps + count + 1) * 0.45),
+      });
+    }
+    return s;
+  }
   function jumpCreate(seed) {
     const s = {
       ...base("jump", seed),
@@ -51,10 +71,11 @@
       message: "长按蓄力，松手跳向下一座台。",
     };
     s.target = jumpTarget(s);
-    return s;
+    return jumpPrepare(s);
   }
   function jumpPress(s) {
     if (s.phase !== "ready") return false;
+    jumpPrepare(s);
     s.phase = "charging";
     s.charge = 0;
     return true;
@@ -105,9 +126,18 @@
     s.score += gain;
     s.jumps++;
     s.message = centered ? `正中圆心！+${gain} 分` : "稳稳落地，+1 分";
+    jumpPrepare(s);
+    const translate = (p) => ({
+      ...p,
+      x: p.x - s.target.x,
+      y: p.y - s.target.y,
+    });
+    s.trail = [...s.trail, s.current].slice(-2).map(translate);
+    s.upcoming = s.upcoming.map(translate);
     s.player = { x: s.player.x - s.target.x, y: s.player.y - s.target.y };
     s.current = { x: 0, y: 0, r: s.target.r };
-    s.target = jumpTarget(s);
+    s.target = s.upcoming.shift();
+    jumpPrepare(s);
     s.phase = "ready";
     s.charge = 0;
     s.elapsed = 0;
@@ -131,6 +161,13 @@
       finite(s.elapsed, 0, 0.65) &&
       platform(s.current) &&
       platform(s.target) &&
+      ((s.trail === undefined && s.upcoming === undefined) ||
+        (Array.isArray(s.trail) &&
+          s.trail.length <= 2 &&
+          s.trail.every(platform) &&
+          Array.isArray(s.upcoming) &&
+          s.upcoming.length === 2 &&
+          s.upcoming.every(platform))) &&
       point(s.player) &&
       typeof s.message === "string" &&
       s.message.length < 150 &&
@@ -471,6 +508,7 @@
   return {
     clone,
     jumpCreate,
+    jumpPrepare,
     jumpPress,
     jumpCancel,
     jumpRelease,

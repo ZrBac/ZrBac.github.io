@@ -4,7 +4,7 @@
     $ = (s) => document.querySelector(s);
   const titles = { jump: "跳一跳", match: "消消乐", mines: "扫雷" };
   const help = {
-    jump: "按住画面或下方按钮蓄力，松手跳向下一座台；按得越久，跳得越远。落在台上得 1 分，正中圆心有额外加分，连续命中加分更多。蓄力条满后保持最大力度，不会自动起跳。电脑长按空格再松开。P 或 Escape 暂停，切换页面也会暂停；未完成的蓄力会取消。",
+    jump: "按住画面或下方按钮蓄力，松手跳向下一座台；按得越久，跳得越远。落在台上得 1 分，正中圆心有额外加分，连续命中加分更多。画面会显示前后平台，“下一台”是本次目标；后面两座台会依次成为目标。蓄力条满后保持最大力度，不会自动起跳。电脑长按空格再松开。P 或 Escape 暂停，切换页面也会暂停；未完成的蓄力会取消。",
     match:
       "先点一个方块，再点相邻方块交换；也可向相邻格滑动。横向或纵向至少三个同色方块会消除，掉落后可连续消除。每格基础 10 分，连续消除有倍数奖励。每关 28 步，达到目标即可进入下一关；无效交换不扣步。提示免费，主动重排扣 2 步；没有合法交换时自动免费重排。形状不同也能帮助区分颜色。",
     mines:
@@ -27,6 +27,7 @@
     width = 0,
     height = 0,
     ratio = 1,
+    camera = null,
     chargePointer = null,
     selected = -1,
     focusCell = 0,
@@ -78,7 +79,10 @@
       if (Number.isSafeInteger(record) && record >= 0) best = record;
     } catch {}
     state = validators[kind](value) ? C.clone(value) : fresh();
-    if (kind === "jump") C.jumpCancel(state);
+    if (kind === "jump") {
+      C.jumpPrepare(state);
+      C.jumpCancel(state);
+    }
     save();
   }
   function hud() {
@@ -151,14 +155,14 @@
     }
   }
   const shapes = [
-    '<circle cx="20" cy="20" r="13"/>',
-    '<path d="M20 4 36 20 20 36 4 20Z"/>',
+    '<circle cx="20" cy="20" r="16"/>',
+    '<path d="m20 2 5.5 11.5L38 15.5l-9 9 2 13-11-6-11 6 2-13-9-9 12.5-2Z"/>',
     '<path d="m20 5 16 29H4Z"/>',
-    '<rect x="7" y="7" width="26" height="26" rx="4"/>',
-    '<path d="M13 5h14l10 15-10 15H13L3 20Z"/>',
-    '<path d="m20 3 5 11 12 2-9 8 2 13-10-6-10 6 2-13-9-8 12-2Z"/>',
+    '<rect x="5" y="5" width="30" height="30" rx="1"/>',
+    '<path d="M14 3h12v11h11v12H26v11H14V26H3V14h11Z"/>',
+    '<path d="M20 36C15 31 3 23 3 13 3 3 16 1 20 10 24 1 37 3 37 13c0 10-12 18-17 23Z"/>',
   ];
-  const shapeNames = ["圆形", "菱形", "三角", "方形", "六角", "星形"];
+  const shapeNames = ["圆形", "星形", "三角", "方形", "十字", "心形"];
   function renderGrid(board = state.board, removed = []) {
     const count = state.board.length;
     if (grid.children.length !== count) {
@@ -263,17 +267,21 @@
     hud();
     const token = ++animation;
     const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-    for (const step of result.frames) {
-      if (token !== animation || kind !== "match") return;
-      renderGrid(step.board, step.removed);
-      say(`${step.combo > 1 ? step.combo + " 连消 · " : ""}+${step.gain} 分`);
-      await wait(reduced ? 0 : 190);
+    const first = result.frames[0],
+      gain = result.frames.reduce((total, step) => total + step.gain, 0);
+    // Mark the first match without fading or resizing any tile. Apply the
+    // settled cascade once instead of flashing through every intermediate board.
+    if (!reduced) {
+      renderGrid(first.board, first.removed);
+      await wait(320);
     }
     if (token !== animation || kind !== "match") return;
     busy = false;
     renderGrid();
     hud();
-    if (result.reshuffled) say("没有可走步，已自动免费重排。");
+    say(
+      `${result.frames.length > 1 ? result.frames.length + " 连消 · " : ""}+${gain} 分${result.reshuffled ? "，已自动免费重排。" : ""}`,
+    );
   }
   function matchAct(i) {
     if (kind !== "match" || busy || over()) return;
@@ -324,42 +332,108 @@
           : "开始游戏",
     );
   }
+  function jumpView() {
+    const platforms = [
+      ...state.trail,
+      state.current,
+      state.target,
+      ...state.upcoming,
+    ];
+    const minX = Math.min(...platforms.map((p) => p.x - p.r)) - 18,
+      maxX = Math.max(...platforms.map((p) => p.x + p.r)) + 18,
+      minY = Math.min(...platforms.map((p) => (p.y - p.r) * 0.54)) - 55,
+      maxY = Math.max(...platforms.map((p) => (p.y + p.r) * 0.54)) + 32;
+    return {
+      x: (minX + maxX) / 2,
+      y: (minY + maxY) / 2 / 0.54,
+      scale: Math.min(width / (maxX - minX), height / (maxY - minY), 1.45),
+    };
+  }
+  function moveCamera(dt) {
+    const next = jumpView();
+    if (!camera) {
+      camera = next;
+      return;
+    }
+    const amount = 1 - Math.exp(-dt * 5);
+    for (const key of ["x", "y", "scale"])
+      camera[key] += (next[key] - camera[key]) * amount;
+  }
   function draw() {
     if (kind !== "jump" || !ctx || !width || !height) return;
+    if (!camera) camera = jumpView();
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     ctx.clearRect(0, 0, width, height);
     ctx.fillStyle = "#edf0e6";
     ctx.fillRect(0, 0, width, height);
-    const scale = Math.min(width / 360, height / 340),
-      center = { x: state.target.x / 2, y: state.target.y / 2 };
+    const scale = camera.scale;
     const project = (p) => ({
-      x: width / 2 + (p.x - center.x) * scale,
-      y: height * 0.53 + (p.y - center.y) * scale * 0.54,
+      x: width / 2 + (p.x - camera.x) * scale,
+      y: height / 2 + (p.y - camera.y) * scale * 0.54,
     });
-    function platform(p, next) {
-      const q = project(p),
-        r = p.r * scale;
-      ctx.fillStyle = next ? "#839784" : "#9ca78e";
-      ctx.beginPath();
-      ctx.ellipse(q.x, q.y + 17 * scale, r, r * 0.54, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillRect(q.x - r, q.y, 2 * r, 17 * scale);
-      ctx.fillStyle = next ? "#d7dfb9" : "#e2dec1";
-      ctx.beginPath();
-      ctx.ellipse(q.x, q.y, r, r * 0.54, 0, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = next ? "#71876a" : "#9a9b7c";
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      if (next) {
-        ctx.fillStyle = "#a6ba86";
+    const platforms = [
+      ...state.trail.map((p, i) => ({
+        ...p,
+        role: "past",
+        number: state.jumps - state.trail.length + i + 1,
+      })),
+      { ...state.current, role: "current", number: state.jumps + 1 },
+      { ...state.target, role: "next", number: state.jumps + 2 },
+      ...state.upcoming.map((p, i) => ({
+        ...p,
+        role: "future",
+        number: state.jumps + i + 3,
+      })),
+    ];
+    // A quiet path shows the order; future platforms are actual saved targets.
+    ctx.strokeStyle = "#c5ceba";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([3 * scale, 7 * scale]);
+    ctx.beginPath();
+    platforms.forEach((p, i) => {
+      const q = project(p);
+      if (i === 0) ctx.moveTo(q.x, q.y);
+      else ctx.lineTo(q.x, q.y);
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+    platforms
+      .slice()
+      .sort((a, b) => a.y - b.y)
+      .forEach((p) => {
+        const q = project(p),
+          r = p.r * scale,
+          next = p.role === "next",
+          past = p.role === "past";
+        ctx.fillStyle = next ? "#788f73" : past ? "#b9c1af" : "#9ca78e";
         ctx.beginPath();
-        ctx.ellipse(q.x, q.y, r * 0.24, r * 0.13, 0, 0, Math.PI * 2);
+        ctx.ellipse(q.x, q.y + 17 * scale, r, r * 0.54, 0, 0, Math.PI * 2);
         ctx.fill();
-      }
-    }
-    platform(state.target, true);
-    platform(state.current, false);
+        ctx.fillRect(q.x - r, q.y, 2 * r, 17 * scale);
+        ctx.fillStyle = next
+          ? "#c9d9a4"
+          : past
+            ? "#e1e5d8"
+            : p.role === "current"
+              ? "#e2dec1"
+              : "#dbe2cb";
+        ctx.beginPath();
+        ctx.ellipse(q.x, q.y, r, r * 0.54, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = next ? "#657f54" : past ? "#c4cbb9" : "#a1ae8e";
+        ctx.lineWidth = next ? 2 : 1;
+        ctx.stroke();
+        if (next) {
+          ctx.fillStyle = "#839e5c";
+          ctx.beginPath();
+          ctx.ellipse(q.x, q.y, r * 0.24, r * 0.13, 0, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.font = `${Math.max(10, 11 * scale)}px sans-serif`;
+        ctx.textAlign = "center";
+        ctx.fillStyle = past ? "#778570" : "#f8faef";
+        ctx.fillText(String(p.number), q.x, q.y + r * 0.4 + 13 * scale);
+      });
     const p = project(state.player),
       t = state.phase === "flying" ? state.elapsed / 0.65 : 0,
       lift = Math.sin(t * Math.PI) * 95 * scale;
@@ -389,7 +463,7 @@
     ctx.textAlign = "center";
     const target = project(state.target);
     ctx.fillText(
-      "下一台",
+      "下一台 · " + (state.jumps + 2),
       target.x,
       target.y - state.target.r * 0.54 * scale - 15 * scale,
     );
@@ -416,13 +490,20 @@
     ratio = Math.min(devicePixelRatio || 1, 2);
     canvas.width = Math.round(w * ratio);
     canvas.height = Math.round(h * ratio);
+    camera = jumpView();
     draw();
   }
   function tick(time) {
     if (kind !== "jump" || paused) return;
     const dt = last ? Math.min(0.1, (time - last) / 1000) : 0;
     last = time;
+    const previousTarget = { ...state.target };
     const landed = C.jumpStep(state, dt);
+    if (landed && state.phase === "ready" && camera) {
+      camera.x -= previousTarget.x;
+      camera.y -= previousTarget.y;
+    }
+    moveCamera(dt);
     if (landed) {
       save();
       say(state.message);
@@ -455,6 +536,7 @@
     if (kind !== "jump") return;
     if (over()) {
       state = C.jumpCreate();
+      camera = null;
       save();
     }
     paused = false;
@@ -499,6 +581,7 @@
     paused = true;
     width = 0;
     height = 0;
+    camera = null;
     $("#casual-play").hidden = false;
     $("#casual-play").dataset.game = kind;
     text("#casual-title", titles[kind]);
@@ -723,6 +806,7 @@
     animation++;
     busy = false;
     state = fresh();
+    camera = null;
     save();
     $("#casual-new-dialog").close();
     selected = -1;

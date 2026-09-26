@@ -215,3 +215,64 @@ test("Invalid or mismatched stored states are rejected", () => {
   s.board[s.board.findIndex((n) => n > 0)] = 8;
   assert(!C.validMines(s));
 });
+
+test("Jump previews become real targets and the last two platforms remain in the route", () => {
+  const s = C.jumpCreate(71);
+  for (let i = 0; i < 70; i++) {
+    const target = { ...s.target },
+      preview = { ...s.upcoming[0] };
+    fly(
+      s,
+      (Math.hypot(target.x - s.player.x, target.y - s.player.y) - 65) / 170,
+    );
+    assert.equal(s.phase, "ready");
+    assert.deepEqual(s.target, {
+      x: preview.x - target.x,
+      y: preview.y - target.y,
+      r: preview.r,
+    });
+    assert.equal(s.upcoming.length, 2);
+    assert.equal(s.trail.length, Math.min(i + 1, 2));
+    assert.equal(s.trail[s.trail.length - 1].x, -target.x);
+    assert(s.trail.every((p) => p.y > 0));
+    assert(s.upcoming[0].y < s.target.y && s.upcoming[1].y < s.upcoming[0].y);
+    assert(C.validJump(C.clone(s)));
+  }
+});
+test("Original jump saves upgrade without replacing scores, landing targets or in-flight progress", () => {
+  const s = C.jumpCreate(12);
+  fly(s, (Math.hypot(s.target.x, s.target.y) - 65) / 170);
+  C.jumpPress(s);
+  C.jumpStep(s, 0.1);
+  C.jumpRelease(s);
+  C.jumpStep(s, 0.1);
+  delete s.trail;
+  delete s.upcoming;
+  assert(C.validJump(s));
+  const before = C.clone(s);
+  C.jumpPrepare(s);
+  for (const key of [
+    "score",
+    "jumps",
+    "streak",
+    "phase",
+    "charge",
+    "elapsed",
+    "current",
+    "target",
+    "player",
+    "flight",
+  ])
+    assert.deepEqual(s[key], before[key]);
+  assert.equal(s.upcoming.length, 2);
+  assert(C.validJump(s));
+  const prepared = C.clone(s);
+  C.jumpPrepare(s);
+  assert.deepEqual(s, prepared);
+  const bad = C.clone(s);
+  bad.upcoming[0].x = Infinity;
+  assert(!C.validJump(bad));
+  const partial = C.clone(s);
+  delete partial.trail;
+  assert(!C.validJump(partial));
+});
