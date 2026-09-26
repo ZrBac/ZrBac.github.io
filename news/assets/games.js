@@ -5,18 +5,32 @@
   const games = {
     breakout: {
       title: "打砖块",
-      instructions: "左右拖动挡板接球；电脑用 ← →。打完五关获胜。",
+      instructions:
+        "在画面任意位置左右滑动，挡板跟随移动；电脑用 ← →。打完五关获胜。",
       note: "接住弹球，别让它落下。",
     },
     shooter: {
       title: "飞机大战",
-      instructions: "按住画面拖动飞机，自动开火。别让敌机飞出底部。",
+      instructions:
+        "在画面任意位置拖动，飞机跟随手指的位移，自动开火。别让敌机飞出底部。",
       note: "躲开敌机，守住三次机会。",
     },
     runner: {
       title: "跳跃跑酷",
       instructions: "点画面或按空格跳跃，空中可再跳一次。",
       note: "看准障碍，点一下就起跳。",
+    },
+    stack: {
+      title: "叠高楼",
+      instructions:
+        "点一下画面或按空格，让移动方块落下。只保留与下面重叠的部分，完美对齐额外加分。",
+      note: "瞄准下面那一层，点击落块。",
+    },
+    colors: {
+      title: "连色消除",
+      instructions:
+        "点击至少两个上下左右相连的同色方块，连得越多得分越高。清空全盘奖励 1000 分。电脑用方向键选格、空格或回车消除。",
+      note: "没有倒计时，先想想下一步。",
     },
   };
   const canvas = $("#game-canvas"),
@@ -30,6 +44,11 @@
   let input = {},
     keys = new Set(),
     pointer = null;
+  let world = { width: C.W, height: C.H },
+    renderScale = 2,
+    dragStart = null,
+    selected = 0,
+    keyboardSelection = false;
   const recordsKey = "zacai-arcade-records-v1";
   let records = {};
   try {
@@ -80,7 +99,7 @@
   }
   function start(fresh = false) {
     if (!state || !ctx) return;
-    if (fresh || phase === "over") state = C.create(kind);
+    if (fresh || phase === "over") state = C.create(kind, world);
     phase = "running";
     input = {};
     keys.clear();
@@ -104,7 +123,12 @@
     phase = "ready";
     state = null;
     if (!game) return;
-    state = C.create(kind);
+    sizeCanvas();
+    state = C.create(kind, world);
+    selected = 0;
+    keyboardSelection = false;
+    $("#help-title").textContent = game.title + " · 玩法";
+    $("#help-text").textContent = game.instructions;
     $("#game-title").textContent = game.title;
     $("#instructions").textContent = game.instructions;
     canvas.setAttribute(
@@ -114,10 +138,53 @@
     $("#game-status").textContent = "";
     showOverlay(
       ctx ? "准备好了吗？" : "暂不支持游戏画面",
-      ctx ? game.note : "请使用支持 Canvas 的浏览器。",
+      ctx ? game.instructions : "请使用支持 Canvas 的浏览器。",
       "开始游戏",
     );
     $("#start-game").disabled = !ctx;
+    hud();
+    draw();
+  }
+  function sizeCanvas() {
+    if ($("#play").hidden) return;
+    document.documentElement.style.setProperty(
+      "--play-height",
+      (window.visualViewport?.height || innerHeight) + "px",
+    );
+    const box = canvas.getBoundingClientRect();
+    if (!box.width || !box.height) return;
+    const scale = Math.min(box.width / C.W, box.height / C.H);
+    const next = { width: box.width / scale, height: box.height / scale };
+    if (
+      state &&
+      (Math.abs(next.width - world.width) > 1 ||
+        Math.abs(next.height - world.height) > 1)
+    ) {
+      pause();
+      C.resize(state, next.width, next.height);
+    }
+    world = next;
+    const ratio = Math.min(devicePixelRatio || 1, 3);
+    renderScale = ratio * scale;
+    const width = Math.round(box.width * ratio),
+      height = Math.round(box.height * ratio);
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+    draw();
+  }
+  function colorLayout() {
+    const tile = Math.min((world.width - 24) / 8, (world.height - 85) / 10);
+    return {
+      tile,
+      x: (world.width - tile * 8) / 2,
+      y: (world.height - tile * 10) / 2 + 12,
+    };
+  }
+  function act(index) {
+    C.action(state, index);
+    if (state.event) $("#game-status").textContent = state.event;
     hud();
     draw();
   }
@@ -144,7 +211,11 @@
       stop();
       saveRecord();
       showOverlay(
-        state.won ? "五关全通！" : "这一局结束了",
+        state.won
+          ? kind === "colors"
+            ? "全部消除！"
+            : "五关全通！"
+          : "这一局结束了",
         "得分 " + state.score + " · 最高 " + records[kind],
         "再玩一次",
       );
@@ -181,36 +252,39 @@
   }
   function draw() {
     if (!ctx || !state) return;
-    ctx.setTransform(2, 0, 0, 2, 0, 0);
-    const s = state;
+    ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+    const s = state,
+      W = s.width,
+      H = s.height,
+      ground = H - 90;
     if (kind === "breakout") {
-      rect(0, 0, 360, 460, "#f2eadc");
+      rect(0, 0, W, H, "#f2eadc");
       text("第 " + s.level + " / 5 关", 16, 24, "#7f6d57");
-      text("机会 " + s.lives, 287, 24, "#7f6d57");
+      text("机会 " + s.lives, W - 73, 24, "#7f6d57");
       const colors = ["#b86e58", "#cc8561", "#d69b6d", "#d5b27e", "#a6b198"];
       for (const b of s.bricks)
         if (b.hp) {
           rect(b.x, b.y, b.w, b.h, colors[b.row]);
           if (b.hp > 1) rect(b.x + 3, b.y + 3, b.w - 6, 2, "#fff8");
         }
-      rect(s.paddle - 38, 399, 76, 9, "#65584b");
+      rect(s.paddle - 38, H - 61, 76, 9, "#65584b");
       ctx.fillStyle = "#65584b";
       ctx.beginPath();
       ctx.arc(s.ball.x, s.ball.y, s.ball.r, 0, Math.PI * 2);
       ctx.fill();
-      rect(16, 440, 328, 1, "#ded3c0");
+      rect(16, H - 20, W - 32, 1, "#ded3c0");
     } else if (kind === "shooter") {
-      rect(0, 0, 360, 460, "#14232d");
-      for (let i = 0; i < 45; i++)
+      rect(0, 0, W, H, "#14232d");
+      for (let i = 0; i < Math.ceil((W * H) / 3680); i++)
         rect(
-          (i * 79 + 31) % 360,
-          (i * 47 + s.time * (12 + (i % 3) * 8)) % 460,
+          (i * 79 + 31) % W,
+          (i * 47 + s.time * (12 + (i % 3) * 8)) % H,
           i % 3 ? 1 : 2,
           2,
           i % 3 ? "#405562" : "#799aab",
         );
       text("第 " + s.level + " 波", 16, 24, "#9cb1bd");
-      text("防线 " + Math.max(0, s.lives), 287, 24, "#9cb1bd");
+      text("防线 " + Math.max(0, s.lives), W - 73, 24, "#9cb1bd");
       for (const b of s.bullets) rect(b.x, b.y, b.w, b.h, "#d1eee2");
       for (const e of s.enemies) {
         plane(e.x, e.y, true);
@@ -224,27 +298,27 @@
         ctx.arc(s.player.x + 12, s.player.y + 14, 23, 0, Math.PI * 2);
         ctx.stroke();
       }
-    } else {
-      rect(0, 0, 360, 460, "#f3e5c9");
+    } else if (kind === "runner") {
+      rect(0, 0, W, H, "#f3e5c9");
       ctx.fillStyle = "#e2bd81";
       ctx.beginPath();
-      ctx.arc(285, 90, 30, 0, Math.PI * 2);
+      ctx.arc(W - 75, 90, 30, 0, Math.PI * 2);
       ctx.fill();
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < Math.ceil(W / 130) + 2; i++) {
         const x = ((((i * 130 - s.distance * 0.15) % 650) + 650) % 650) - 130;
         ctx.fillStyle = "#e6cfaa";
         ctx.beginPath();
-        ctx.moveTo(x - 90, 370);
-        ctx.lineTo(x + 40, 245 + (i % 2) * 25);
-        ctx.lineTo(x + 170, 370);
+        ctx.moveTo(x - 90, ground);
+        ctx.lineTo(x + 40, ground - 125 + (i % 2) * 25);
+        ctx.lineTo(x + 170, ground);
         ctx.fill();
       }
-      rect(0, 370, 360, 90, "#d6b48b");
-      rect(0, 370, 360, 3, "#a77c54");
+      rect(0, ground, W, 90, "#d6b48b");
+      rect(0, ground, W, 3, "#a77c54");
       for (let i = 0; i < 15; i++)
         rect(
           ((((i * 41 - s.distance) % 615) + 615) % 615) - 30,
-          390 + (i % 3) * 15,
+          ground + 20 + (i % 3) * 15,
           10,
           2,
           "#c09b70",
@@ -262,11 +336,59 @@
       text("距离 " + Math.floor(s.distance / 10) + " m", 16, 24, "#947b58");
       text(
         s.jumps === 1 ? "还能再跳" : s.jumps === 2 ? "等待落地" : "二段跳就绪",
-        270,
+        W - 90,
         24,
         "#947b58",
         11,
       );
+    } else if (kind === "stack") {
+      rect(0, 0, W, H, "#1d2b3d");
+      text("已叠 " + (s.layers.length - 1) + " 层", 16, 28, "#becbd8", 14);
+      const camera = Math.max(0, (s.layers.length - 1) * 24 - (H - 190));
+      const palette = ["#78999f", "#8eb1ad", "#b3c4a8", "#d2c5a4", "#dcaf90"];
+      for (let i = 0; i < s.layers.length; i++) {
+        const y = H - 80 - i * 24 + camera;
+        if (y > H || y < 35) continue;
+        const layer = s.layers[i];
+        rect(layer.x, y, layer.w, 22, palette[i % palette.length]);
+        rect(layer.x, y + 17, layer.w, 5, "#0002");
+      }
+      const m = s.moving,
+        y = H - 80 - s.layers.length * 24 + camera;
+      rect(m.x, y, m.w, 22, "#f1dac0");
+      rect(m.x, y + 17, m.w, 5, "#0002");
+      text("点击画面落块", 16, H - 28, "#a4b3c4");
+    } else if (kind === "colors") {
+      rect(0, 0, W, H, "#f1ece2");
+      const { tile, x, y } = colorLayout();
+      const palette = ["#cc7c63", "#679697", "#b49a50", "#9280aa"];
+      text(
+        "剩余 " + s.cells.filter((c) => c != null).length + " 块",
+        16,
+        28,
+        "#786c5d",
+        14,
+      );
+      for (let i = 0; i < 80; i++) {
+        const color = s.cells[i],
+          px = x + (i % 8) * tile,
+          py = y + Math.floor(i / 8) * tile;
+        if (color != null) {
+          rect(px + 2, py + 2, tile - 4, tile - 4, palette[color]);
+          text(
+            String(color + 1),
+            px + tile * 0.4,
+            py + tile * 0.65,
+            "#fff",
+            tile * 0.4,
+          );
+        }
+        if (keyboardSelection && i === selected) {
+          ctx.strokeStyle = "#273a49";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(px + 1, py + 1, tile - 2, tile - 2);
+        }
+      }
     }
     for (const p of s.particles) {
       ctx.globalAlpha = p.life / 0.4;
@@ -277,8 +399,8 @@
   function point(e) {
     const r = canvas.getBoundingClientRect();
     return {
-      x: ((e.clientX - r.left) * C.W) / r.width,
-      y: ((e.clientY - r.top) * C.H) / r.height,
+      x: ((e.clientX - r.left) * world.width) / r.width,
+      y: ((e.clientY - r.top) * world.height) / r.height,
     };
   }
   canvas.addEventListener("pointerdown", (e) => {
@@ -287,19 +409,50 @@
     canvas.focus({ preventScroll: true });
     pointer = e.pointerId;
     canvas.setPointerCapture(e.pointerId);
-    if (kind === "runner") C.jump(state);
-    else {
-      const p = point(e);
-      input.x = p.x;
-      if (kind === "shooter") input.y = p.y - 35;
+    const p = point(e);
+    keyboardSelection = false;
+    if (kind === "runner" || kind === "stack") act();
+    else if (kind === "colors") {
+      const { tile, x, y } = colorLayout();
+      const col = Math.floor((p.x - x) / tile),
+        row = Math.floor((p.y - y) / tile);
+      if (col >= 0 && col < 8 && row >= 0 && row < 10) act(row * 8 + col);
+    } else {
+      dragStart = {
+        x: p.x,
+        y: p.y,
+        playerX:
+          kind === "breakout"
+            ? state.paddle
+            : state.player.x + state.player.w / 2,
+        playerY: state.player ? state.player.y + state.player.h / 2 : 0,
+      };
+      input.x = dragStart.playerX;
+      if (kind === "shooter") input.y = dragStart.playerY;
     }
   });
   canvas.addEventListener("pointermove", (e) => {
-    if (phase !== "running" || pointer !== e.pointerId || kind === "runner")
+    if (
+      phase !== "running" ||
+      pointer !== e.pointerId ||
+      !["breakout", "shooter"].includes(kind) ||
+      !dragStart
+    )
       return;
     const p = point(e);
-    input.x = p.x;
-    if (kind === "shooter") input.y = p.y - 35;
+    input.x = C.clamp(
+      dragStart.playerX + p.x - dragStart.x,
+      kind === "breakout" ? 39 : 16,
+      world.width - (kind === "breakout" ? 39 : 16),
+    );
+    if (kind === "shooter")
+      input.y = C.clamp(
+        dragStart.playerY + p.y - dragStart.y,
+        179,
+        world.height - 22,
+      );
+    // Rebase after each movement so dragging back from an edge responds immediately.
+    dragStart = { x: p.x, y: p.y, playerX: input.x, playerY: input.y || 0 };
   });
   for (const type of ["pointerup", "pointercancel", "lostpointercapture"])
     canvas.addEventListener(type, (e) => {
@@ -310,6 +463,7 @@
     if (
       !state ||
       $("#info-dialog").open ||
+      $("#help-dialog").open ||
       /^(INPUT|TEXTAREA|BUTTON|A)$/.test(e.target.tagName)
     )
       return;
@@ -327,6 +481,7 @@
         " ",
         "p",
         "Escape",
+        "Enter",
       ].includes(key)
     )
       return;
@@ -339,11 +494,32 @@
       return;
     }
     if (phase !== "running") return;
+    if (kind === "colors") {
+      keyboardSelection = true;
+      const moves = {
+        ArrowLeft: -1,
+        a: -1,
+        ArrowRight: 1,
+        d: 1,
+        ArrowUp: -8,
+        w: -8,
+        ArrowDown: 8,
+        s: 8,
+      };
+      if (moves[key]) selected = C.clamp(selected + moves[key], 0, 79);
+      if ([" ", "Enter"].includes(key) && !e.repeat) act(selected);
+      draw();
+      return;
+    }
     delete input.x;
     delete input.y;
     keys.add(key);
-    if (kind === "runner" && [" ", "ArrowUp", "w"].includes(key) && !e.repeat)
-      C.jump(state);
+    if (
+      ["runner", "stack"].includes(kind) &&
+      [" ", "ArrowUp", "w", "Enter"].includes(key) &&
+      !e.repeat
+    )
+      act();
   });
   document.addEventListener("keyup", (e) =>
     keys.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key),
@@ -361,6 +537,14 @@
     pause();
     saveRecord();
   });
+  $("#help-game").addEventListener("click", () => {
+    pause();
+    $("#help-dialog").showModal();
+  });
+  $("#close-help").addEventListener("click", () => $("#help-dialog").close());
+  new ResizeObserver(sizeCanvas).observe($("#stage"));
+  window.visualViewport?.addEventListener("resize", sizeCanvas);
+  window.addEventListener("resize", sizeCanvas);
   window.addEventListener("hashchange", route);
   route();
 })();

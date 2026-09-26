@@ -19,17 +19,23 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await context.setOffline(true);
     await page.goto(base + "/games/");
     await page.locator("#offline-status.ready").waitFor();
-    assert.equal(await page.locator(".game-card").count(), 3);
+    assert.equal(await page.locator(".game-card").count(), 5);
     await page.screenshot({
       path: "/tmp/news-games-library.png",
       fullPage: true,
     });
-    for (const kind of ["breakout", "shooter", "runner"]) {
+    for (const kind of ["breakout", "shooter", "runner", "stack", "colors"]) {
       await page.locator(`a[href="#${kind}"]`).tap();
       await page.locator("#start-game").tap();
       await page.waitForTimeout(250);
       assert(await page.locator("#game-overlay").isHidden());
       const box = await page.locator("canvas").boundingBox();
+      const viewport = page.viewportSize();
+      assert(box.width >= viewport.width * 0.96, "game must fill phone width");
+      assert(
+        box.height >= viewport.height * 0.8,
+        "game must use at least 80% of phone height",
+      );
       const scroll = await page.evaluate(() => scrollY);
       await page.touchscreen.tap(
         box.x + box.width * 0.6,
@@ -41,6 +47,52 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
         scroll,
         "tapping the game must not scroll",
       );
+      if (kind === "breakout" || kind === "shooter") {
+        // Inspect controller calls at the engine boundary, then send real touch gestures.
+        await page.evaluate(() => {
+          const original = GamesCore.step;
+          GamesCore.step = (state, dt, input, ...rest) => {
+            window.lastControl = {
+              kind: state.kind,
+              x: state.paddle ?? state.player.x + 12,
+              y: state.player?.y,
+              input: { ...input },
+              width: state.width,
+            };
+            return original(state, dt, input, ...rest);
+          };
+        });
+        const session = await context.newCDPSession(page);
+        const x = box.x + box.width * 0.25,
+          y = box.y + box.height * 0.8;
+        await page.waitForTimeout(50);
+        const initial = await page.evaluate(() => window.lastControl.x);
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [{ x, y }],
+        });
+        await page.waitForTimeout(70);
+        assert(
+          Math.abs(
+            (await page.evaluate(() => window.lastControl.x)) - initial,
+          ) < 2,
+          "touch down must not teleport the player",
+        );
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchMove",
+          touchPoints: [{ x: x + 50, y }],
+        });
+        await page.waitForTimeout(70);
+        assert(
+          (await page.evaluate(() => window.lastControl.x)) > initial + 20,
+          "relative drag must move the player",
+        );
+        await session.send("Input.dispatchTouchEvent", {
+          type: "touchEnd",
+          touchPoints: [],
+        });
+        await session.detach();
+      }
       await page.locator("#pause-game").tap();
       assert.equal(
         await page.locator("#overlay-title").innerText(),
@@ -97,6 +149,24 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
         false,
       );
     }
+    await page.goto(base + "/games/#shooter");
+    await page.locator("#start-game").tap();
+    await page.setViewportSize({ width: 844, height: 390 });
+    await page.waitForFunction(
+      () => document.querySelector("#overlay-title").textContent === "休息一下",
+    );
+    const landscape = await page.locator("canvas").boundingBox();
+    assert(
+      landscape.width >= 820 && landscape.height >= 300,
+      "landscape also fills the screen",
+    );
+    await page.locator("#help-game").tap();
+    assert(await page.locator("#help-dialog").isVisible());
+    await page.locator("#close-help").tap();
+    await page.locator(".back").tap();
+    assert(
+      !(await page.evaluate(() => document.body.classList.contains("playing"))),
+    );
     const keyboard = await browser.newPage();
     await keyboard.goto(base + "/games/#runner");
     await keyboard.locator("#start-game").click();
@@ -122,9 +192,16 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await privatePage.locator("#start-game").click();
     assert(await privatePage.locator("#game-overlay").isHidden());
     assert(await privatePage.locator("#storage-notice").isVisible());
+    const colorsPage = await context.newPage();
+    await colorsPage.addInitScript(() => { Math.random = () => 0; });
+    await colorsPage.goto(base + "/games/#colors");
+    await colorsPage.locator("#start-game").tap();
+    await colorsPage.locator("canvas").tap();
+    await colorsPage.waitForFunction(() => document.querySelector("#overlay-title").textContent === "全部消除！");
+    assert.equal(await colorsPage.locator("#score").innerText(), "得分 33000");
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: mobile entry, first offline game visit, all three games offline, touch, keyboard, pause/resume, visibility pause, restart, saved records, route aliases, five widths, denied storage.",
+      "PASS: mobile entry, first offline game visit, all five games offline, immersive portrait/landscape, relative drag without teleporting, touch, keyboard, pause/resume, visibility pause, restart, saved records, route aliases, five widths, denied storage.",
     );
   } finally {
     await browser.close();

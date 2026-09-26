@@ -6,23 +6,35 @@
   const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
   const overlaps = (a, b) =>
     a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
-  function bricks(level) {
-    return Array.from({ length: 35 }, (_, i) => ({
-      x: 16 + (i % 7) * 47,
-      y: 60 + Math.floor(i / 7) * 23,
+  function bricks(level, width = W) {
+    const cols = Math.max(7, Math.floor((width - 32) / 47));
+    const left = (width - cols * 47 + 4) / 2;
+    return Array.from({ length: cols * 5 }, (_, i) => ({
+      x: left + (i % cols) * 47,
+      y: 60 + Math.floor(i / cols) * 23,
       w: 43,
       h: 17,
       hp: level >= 3 && i < 14 ? 2 : 1,
-      row: Math.floor(i / 7),
+      row: Math.floor(i / cols),
     }));
   }
   function resetBall(s) {
-    s.ball = { x: s.paddle, y: 375, vx: 95, vy: -(205 + s.level * 15), r: 6 };
+    s.ball = {
+      x: s.paddle,
+      y: s.height - 85,
+      vx: 95,
+      vy: -(205 + s.level * 15),
+      r: 6,
+    };
     s.wait = 0.8;
   }
-  function create(kind) {
+  function create(kind, size = {}, random = Math.random) {
+    const width = size.width || W,
+      height = size.height || H;
     const s = {
       kind,
+      width,
+      height,
       score: 0,
       level: 1,
       lives: 3,
@@ -33,13 +45,13 @@
       particles: [],
     };
     if (kind === "breakout") {
-      s.paddle = W / 2;
-      s.bricks = bricks(1);
+      s.paddle = width / 2;
+      s.bricks = bricks(1, width);
       resetBall(s);
     }
     if (kind === "shooter")
       Object.assign(s, {
-        player: { x: 168, y: 380, w: 24, h: 28 },
+        player: { x: width / 2 - 12, y: height - 80, w: 24, h: 28 },
         bullets: [],
         enemies: [],
         spawn: 0.5,
@@ -48,13 +60,25 @@
       });
     if (kind === "runner")
       Object.assign(s, {
-        player: { x: 65, y: 342, w: 24, h: 28 },
+        player: { x: 65, y: height - 118, w: 24, h: 28 },
         vy: 0,
         jumps: 0,
         obstacles: [],
         spawn: 1.4,
         distance: 0,
       });
+    if (kind === "stack")
+      Object.assign(s, {
+        layers: [{ x: width / 2 - 75, w: 150 }],
+        moving: { x: 0, w: 150 },
+        direction: 1,
+        cooldown: 0,
+      });
+    if (kind === "colors") {
+      s.cells = Array.from({ length: 80 }, () => Math.floor(random() * 4));
+      // Every new board offers at least one legal opening move.
+      s.cells[1] = s.cells[0];
+    }
     return s;
   }
   function burst(s, x, y, color) {
@@ -76,6 +100,8 @@
   }
   function step(s, dt, input = {}, random = Math.random) {
     if (s.ended) return;
+    const W = s.width,
+      H = s.height;
     s.time += dt;
     s.event = "";
     for (const p of s.particles) {
@@ -110,8 +136,8 @@
       }
       if (
         b.vy > 0 &&
-        oldY + b.r <= 399 &&
-        b.y + b.r >= 399 &&
+        oldY + b.r <= H - 61 &&
+        b.y + b.r >= H - 61 &&
         b.x + b.r >= s.paddle - 38 &&
         b.x - b.r <= s.paddle + 38
       ) {
@@ -119,7 +145,7 @@
         const speed = Math.min(370, Math.hypot(b.vx, b.vy) + 2);
         b.vx = Math.sin(angle) * speed;
         b.vy = -Math.cos(angle) * speed;
-        b.y = 399 - b.r;
+        b.y = H - 61 - b.r;
       }
       for (const brick of s.bricks) {
         if (
@@ -154,7 +180,7 @@
           s.won = true;
         } else {
           s.level++;
-          s.bricks = bricks(s.level);
+          s.bricks = bricks(s.level, W);
           resetBall(s);
           s.event = "进入第 " + s.level + " 关";
         }
@@ -185,7 +211,7 @@
       }
       if (s.spawn <= 0) {
         s.enemies.push({
-          x: 12 + random() * 304,
+          x: 12 + random() * (W - 56),
           y: -32,
           w: 26,
           h: 28,
@@ -232,8 +258,8 @@
       s.level = 1 + Math.floor(s.score / 100);
       s.vy += 950 * dt;
       p.y += s.vy * dt;
-      if (p.y >= 342) {
-        p.y = 342;
+      if (p.y >= H - 118) {
+        p.y = H - 118;
         s.vy = 0;
         s.jumps = 0;
       }
@@ -242,7 +268,7 @@
         const height = random() < 0.55 ? 30 : 52;
         s.obstacles.push({
           x: W + 12,
-          y: 370 - height,
+          y: H - 90 - height,
           w: 22 + random() * 15,
           h: height,
         });
@@ -256,9 +282,154 @@
         }
       }
       s.obstacles = s.obstacles.filter((o) => o.x + o.w > 0);
+    } else if (s.kind === "stack") {
+      s.cooldown = Math.max(0, s.cooldown - dt);
+      s.moving.x += s.direction * Math.min(260, 90 + s.layers.length * 7) * dt;
+      if (s.moving.x < 0 || s.moving.x + s.moving.w > W) {
+        s.moving.x = clamp(s.moving.x, 0, W - s.moving.w);
+        s.direction *= -1;
+      }
     }
   }
-  const api = { W, H, clamp, overlaps, create, step, jump };
+  function colorGroup(cells, index) {
+    if (index < 0 || index >= 80 || cells[index] == null) return [];
+    const color = cells[index],
+      seen = new Set(),
+      queue = [index];
+    while (queue.length) {
+      const i = queue.pop();
+      if (seen.has(i) || cells[i] !== color) continue;
+      seen.add(i);
+      if (i % 8 > 0) queue.push(i - 1);
+      if (i % 8 < 7) queue.push(i + 1);
+      if (i >= 8) queue.push(i - 8);
+      if (i < 72) queue.push(i + 8);
+    }
+    return [...seen];
+  }
+  function action(s, index) {
+    if (s.ended) return false;
+    if (s.kind === "runner") return jump(s);
+    if (s.kind === "stack") {
+      if (s.cooldown > 0) return false;
+      const top = s.layers[s.layers.length - 1],
+        next = s.moving;
+      const perfect = Math.abs(next.x - top.x) <= 4;
+      const left = perfect ? top.x : Math.max(top.x, next.x);
+      const right = perfect
+        ? top.x + top.w
+        : Math.min(top.x + top.w, next.x + next.w);
+      if (right <= left) {
+        s.ended = true;
+        s.event = "没有接住这一层";
+        return true;
+      }
+      const layer = { x: left, w: right - left };
+      s.layers.push(layer);
+      s.score += perfect ? 15 : 10;
+      s.event = perfect
+        ? "完美对齐！+15"
+        : "第 " + (s.layers.length - 1) + " 层";
+      s.direction = s.layers.length % 2 ? 1 : -1;
+      s.moving = { x: s.direction === 1 ? 0 : s.width - layer.w, w: layer.w };
+      s.cooldown = 0.2;
+      return true;
+    }
+    if (s.kind === "colors") {
+      const group = colorGroup(s.cells, index);
+      if (group.length < 2) {
+        s.event = "点至少两个相连的同色方块";
+        return false;
+      }
+      const points = group.length * group.length * 5;
+      group.forEach((i) => (s.cells[i] = null));
+      s.score += points;
+      const columns = [];
+      for (let x = 0; x < 8; x++) {
+        const column = Array.from(
+          { length: 10 },
+          (_, y) => s.cells[y * 8 + x],
+        ).filter((c) => c != null);
+        if (column.length)
+          columns.push(
+            Array(10 - column.length)
+              .fill(null)
+              .concat(column),
+          );
+      }
+      s.cells = Array.from(
+        { length: 80 },
+        (_, i) => columns[i % 8]?.[Math.floor(i / 8)] ?? null,
+      );
+      s.event = "消除 " + group.length + " 块，+" + points;
+      s.won = s.cells.every((c) => c == null);
+      s.ended =
+        s.won ||
+        !s.cells.some(
+          (c, i) =>
+            c != null &&
+            ((i % 8 < 7 && s.cells[i + 1] === c) ||
+              (i < 72 && s.cells[i + 8] === c)),
+        );
+      if (s.won) {
+        s.score += 1000;
+        s.event = "全部消除！奖励 1000 分";
+      }
+      return true;
+    }
+    return false;
+  }
+  function resize(s, width, height) {
+    const sx = width / s.width,
+      sy = height / s.height,
+      dy = height - s.height;
+    if (s.paddle !== undefined) s.paddle *= sx;
+    if (s.ball) {
+      s.ball.x *= sx;
+      s.ball.y *= sy;
+    }
+    for (const b of s.bricks || []) {
+      b.x *= sx;
+      b.w *= sx;
+    }
+    if (s.player) {
+      s.player.x *= sx;
+      s.player.y += dy;
+      if (s.kind === "shooter") {
+        s.player.x = clamp(s.player.x, 4, width - s.player.w - 4);
+        s.player.y = clamp(s.player.y, 165, height - s.player.h - 8);
+      }
+    }
+    for (const b of [...(s.bullets || []), ...(s.enemies || [])]) {
+      b.x *= sx;
+      b.y *= sy;
+    }
+    for (const o of s.obstacles || []) {
+      o.x *= sx;
+      o.y += dy;
+    }
+    for (const layer of [
+      ...(s.layers || []),
+      ...(s.moving ? [s.moving] : []),
+    ]) {
+      layer.x *= sx;
+      layer.w *= sx;
+    }
+    s.width = width;
+    s.height = height;
+  }
+  const api = {
+    W,
+    H,
+    clamp,
+    overlaps,
+    create,
+    step,
+    jump,
+    action,
+    colorGroup,
+    resize,
+  };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   else root.GamesCore = api;
 })(globalThis);

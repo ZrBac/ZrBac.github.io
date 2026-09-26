@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#ffffff" />
     <meta
       name="description"
-      content="打砖块、飞机大战、跳跃跑酷。为手机触屏设计，准备好后可离线游玩。"
+      content="打砖块、飞机大战、跳跃跑酷、叠高楼、连色消除。为手机触屏设计，准备好后可离线游玩。"
     />
     <link rel="canonical" href="https://news.zacai.fun/games/" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -67,15 +67,34 @@
               ><em>点击跳跃 · 支持二段跳</em></span
             ><span aria-hidden="true">↗</span></a
           >
+          <a class="game-card" href="#stack"
+            ><span class="cover stack-cover" aria-hidden="true"
+              ><i></i><b></b><em></em></span
+            ><span
+              ><strong>叠高楼</strong
+              ><small>看准时机落下方块，越整齐越高。</small
+              ><em>点击落块 · 完美对齐加分</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
+          <a class="game-card" href="#colors"
+            ><span class="cover colors-cover" aria-hidden="true"
+              ><i></i><i></i><i></i><i></i></span
+            ><span
+              ><strong>连色消除</strong
+              ><small>连成一片再消除，留意下一步。</small
+              ><em>无倒计时 · 清空奖励</em></span
+            ><span aria-hidden="true">↗</span></a
+          >
         </div>
         <p class="footnote">
           显示“已准备好，可离线玩”后，断网也能打开。没有广告，最高分保存在这台设备上。
         </p>
       </section>
       <section id="play" hidden aria-labelledby="game-title">
-        <a class="back" href="#">← 换个游戏</a>
         <div class="game-heading">
+          <a class="back" href="#" aria-label="返回游戏列表">← 返回</a>
           <h1 id="game-title" tabindex="-1"></h1>
+          <button id="help-game">玩法</button>
           <button id="pause-game" disabled>暂停</button>
         </div>
         <p id="instructions" class="intro"></p>
@@ -89,7 +108,7 @@
             height="920"
             tabindex="0"
             role="img"
-            aria-label="游戏画面。操作方法见上方说明。"
+            aria-label="游戏画面。可点击“玩法”查看操作方法。"
             >浏览器需要支持 Canvas 才能运行游戏。</canvas
           >
           <div id="game-overlay" class="game-overlay">
@@ -118,6 +137,14 @@
       >
     </main>
     <footer>随时停下，下次再来。</footer>
+    <dialog id="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-heading">
+        <h2 id="help-title">玩法</h2>
+        <button id="close-help" aria-label="关闭玩法">×</button>
+      </div>
+      <p id="help-text"></p>
+      <p>切换页面会自动暂停。电脑按 P 或 Escape 暂停，回来后点“继续游戏”。</p>
+    </dialog>
     <dialog id="info-dialog" aria-labelledby="dialog-title">
       <div class="dialog-heading">
         <h2 id="dialog-title">安装到桌面</h2>

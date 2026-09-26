@@ -403,18 +403,158 @@ dialog p {
     font-size: 12px;
   }
 }
-@media (max-height: 800px) {
-  body.playing .connection {
-    margin-bottom: 8px;
-  }
-  body.playing main {
-    padding-top: 10px;
-  }
-  body.playing .stage {
-    width: min(100%, calc((100svh - 290px) * 360 / 460));
-    min-width: 180px;
-  }
-  body.playing footer {
-    padding-top: 15px;
+
+.stack-cover {
+  background: #253345;
+}
+.stack-cover i,
+.stack-cover b,
+.stack-cover em {
+  position: absolute;
+  height: 13px;
+  background: #89b4ae;
+  left: 14px;
+  width: 50px;
+  bottom: 12px;
+}
+.stack-cover b {
+  bottom: 27px;
+  width: 41px;
+  left: 23px;
+  background: #b6cbaa;
+}
+.stack-cover em {
+  bottom: 42px;
+  width: 32px;
+  left: 17px;
+  background: #e6cfa2;
+}
+.colors-cover {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 9px;
+  background: #eee9df;
+}
+.colors-cover i {
+  background: #cf7d62;
+  border-radius: 4px;
+}
+.colors-cover i:nth-child(2) {
+  background: #6b9c9d;
+}
+.colors-cover i:nth-child(3) {
+  background: #ccb263;
+}
+body.playing {
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+}
+body.playing > header,
+body.playing > footer,
+body.playing .connection,
+body.playing #pwa-update {
+  display: none;
+}
+body.playing main {
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  max-width: none;
+}
+body.playing #play {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  height: var(--play-height, 100dvh);
+  display: flex;
+  flex-direction: column;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background: #14232d;
+  color: #eef3f4;
+}
+body.playing .game-heading {
+  flex: none;
+  gap: 8px;
+  padding: 2px 10px;
+  min-height: 50px;
+}
+body.playing .game-heading h1 {
+  flex: 1;
+  font-size: 16px;
+  text-align: center;
+  white-space: nowrap;
+}
+body.playing .game-heading button {
+  padding: 7px 10px;
+  color: #eef3f4;
+  background: #243643;
+  border-color: #405362;
+}
+body.playing .back {
+  margin: 0;
+  padding: 10px 2px;
+  min-height: 44px;
+  color: #d0dce1;
+}
+body.playing .scorebar {
+  flex: none;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0 16px 6px;
+  color: #a7bbc6;
+  font-size: 12px;
+}
+body.playing .stage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  aspect-ratio: auto;
+}
+body.playing .intro,
+body.playing .play-note {
+  display: none;
+}
+body.playing .game-status {
+  position: absolute;
+  bottom: max(8px, env(safe-area-inset-bottom));
+  left: 12px;
+  right: 12px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  color: #fff;
+  background: #14232dc9;
+  padding: 3px 8px;
+  border-radius: 4px;
+  pointer-events: none;
+  font-size: 12px;
+  min-height: 0;
+}
+body.playing .game-status:empty {
+  display: none;
+}
+body.playing #storage-notice {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  top: 75px;
+  z-index: 5;
+}
+.game-overlay {
+  padding: 20px;
+}
+.game-overlay > div {
+  max-width: 340px;
+}
+@media (min-width: 1100px) and (min-height: 600px) {
+  body.playing #play {
+    max-width: 1000px;
+    margin: auto;
   }
 }
