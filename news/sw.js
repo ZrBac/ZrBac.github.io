@@ -9,6 +9,30 @@ const PAGES = {
   "/games/index.html": "/games/",
 };
 
+async function validateShell(read) {
+  const html = (
+    await Promise.all(
+      ["/", "/games/"].map(async (path) => {
+        const response = await read(path);
+        if (!response) throw new Error("Incomplete offline pages");
+        return response.clone().text();
+      }),
+    )
+  ).join("\n");
+  for (const asset of html.match(
+    /\/assets\/news\/[\w.-]+\.[a-f0-9]{12}\.(?:js|css|svg)/g,
+  ) || []) {
+    if (!SHELL.includes(asset))
+      throw new Error("Page assets belong to another deployment");
+  }
+  for (const asset of SHELL.filter((url) =>
+    /\.[a-f0-9]{12}\.(js|css|svg)$/.test(url),
+  )) {
+    if (!html.includes(asset))
+      throw new Error("Deployment changed during installation");
+  }
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     (async () => {
@@ -17,26 +41,7 @@ self.addEventListener("install", (event) => {
         await cache.addAll(
           SHELL.map((url) => new Request(url, { cache: "reload" })),
         );
-        // A deployment crossing the installation window must not mix HTML and assets.
-        const html = (
-          await Promise.all(
-            ["/", "/games/"].map(async (path) =>
-              (await cache.match(path)).text(),
-            ),
-          )
-        ).join("\n");
-        for (const asset of html.match(
-          /\/assets\/news\/[\w.-]+\.[a-f0-9]{12}\.(?:js|css|svg)/g,
-        ) || []) {
-          if (!SHELL.includes(asset))
-            throw new Error("Page assets belong to another deployment");
-        }
-        for (const asset of SHELL.filter((url) =>
-          /\.[a-f0-9]{12}\.(js|css|svg)$/.test(url),
-        )) {
-          if (!html.includes(asset))
-            throw new Error("Deployment changed during installation");
-        }
+        await validateShell((path) => cache.match(path));
       } catch (error) {
         await caches.delete(CACHE);
         throw error;
@@ -44,6 +49,46 @@ self.addEventListener("install", (event) => {
     })(),
   );
 });
+
+// Repair evicted files without clearing saves, registrations, or working cache entries.
+let repairing;
+function repairShell() {
+  if (repairing) return repairing;
+  repairing = (async () => {
+    const cache = await caches.open(CACHE),
+      staged = new Map();
+    const missing = [];
+    for (const path of SHELL)
+      if (!(await cache.match(path))) missing.push(path);
+    let cursor = 0;
+    await Promise.all(
+      Array.from({ length: Math.min(4, missing.length) }, async () => {
+        while (cursor < missing.length) {
+          const path = missing[cursor++],
+            controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), 12000);
+          try {
+            const response = await fetch(
+              new Request(path, { cache: "reload", signal: controller.signal }),
+            );
+            if (!response.ok) throw new Error("Offline download failed");
+            // Read the complete body while the timeout is active.
+            await response.clone().arrayBuffer();
+            staged.set(path, response);
+          } finally {
+            clearTimeout(timer);
+          }
+        }
+      }),
+    );
+    // Do not put newer HTML into an older worker's shell during repair.
+    await validateShell((path) => staged.get(path) || cache.match(path));
+    for (const [path, response] of staged) await cache.put(path, response);
+  })().finally(() => {
+    repairing = null;
+  });
+  return repairing;
+}
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(
@@ -60,49 +105,66 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("message", (event) => {
-  if (event.data?.type === "ACTIVATE_UPDATE") self.skipWaiting();
-  if (event.data?.type === "CHECK_OFFLINE" && event.ports[0]) {
-    event.waitUntil(
-      (async () => {
-        try {
-          const cache = await caches.open(CACHE);
-          const paths = Array.isArray(event.data.paths) ? event.data.paths : [];
-          const ready =
-            paths.length > 0 &&
-            paths.length <= 20 &&
-            (
-              await Promise.all(
-                paths.map(
-                  async (path) =>
-                    SHELL.includes(path) && !!(await cache.match(path)),
-                ),
-              )
-            ).every(Boolean);
-          event.ports[0].postMessage({ ready });
-        } catch {
-          event.ports[0].postMessage({ ready: false });
+  if (event.data?.type === "ACTIVATE_UPDATE")
+    event.waitUntil(self.skipWaiting());
+  if (
+    !["CHECK_OFFLINE", "PREPARE_OFFLINE"].includes(event.data?.type) ||
+    !event.ports[0]
+  )
+    return;
+  event.waitUntil(
+    (async () => {
+      try {
+        const paths = Array.isArray(event.data.paths) ? event.data.paths : [];
+        if (
+          !paths.length ||
+          paths.length > 64 ||
+          !paths.every((path) => SHELL.includes(path))
+        ) {
+          event.ports[0].postMessage({ ready: false, reason: "version" });
+          return;
         }
-      })(),
-    );
-  }
+        let repairFailed = false;
+        if (event.data.type === "PREPARE_OFFLINE") {
+          try {
+            await repairShell();
+          } catch {
+            repairFailed = true;
+          }
+        }
+        const cache = await caches.open(CACHE),
+          missing = [];
+        // The Home Screen start URL is '/', even when installation starts in /games/.
+        // Check the entire launch shell, not just assets of the currently open page.
+        for (const path of SHELL)
+          if (!(await cache.match(path))) missing.push(path);
+        event.ports[0].postMessage({
+          ready: !missing.length,
+          missing: missing.length,
+          total: SHELL.length,
+          reason: repairFailed
+            ? "download"
+            : missing.length
+              ? "missing"
+              : "ready",
+        });
+      } catch {
+        event.ports[0].postMessage({ ready: false, reason: "storage" });
+      }
+    })(),
+  );
 });
 
 async function navigation(request, page) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 4000);
+  // Launch the installed version directly, including after a cold offline start.
+  // HTML and its hashed assets switch together through the update button.
   try {
-    const response = await fetch(request, {
-      signal: controller.signal,
-      cache: "no-cache",
-    });
-    if (!response.ok) throw new Error("Page unavailable");
-    return response;
+    const cached = await (await caches.open(CACHE)).match(page);
+    if (cached) return cached;
   } catch {
-    // Keep the precached HTML paired with its own assets until a new worker installs.
-    return (await (await caches.open(CACHE)).match(page)) || Response.error();
-  } finally {
-    clearTimeout(timer);
+    /* Online browsing remains available when cache access is denied. */
   }
+  return fetch(request);
 }
 
 self.addEventListener("fetch", (event) => {

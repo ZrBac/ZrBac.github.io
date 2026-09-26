@@ -805,3 +805,13 @@ dialog::backdrop {
     transition: none !important;
   }
 }
+
+.offline-hint {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+#offline-secure-link {
+  display: block;
+  margin-top: 5px;
+}

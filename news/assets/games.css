@@ -454,7 +454,8 @@ body.playing {
 body.playing > header,
 body.playing > footer,
 body.playing .connection,
-body.playing #pwa-update {
+body.playing #pwa-update,
+body.playing #offline-tools {
   display: none;
 }
 body.playing main {
@@ -557,4 +558,28 @@ body.playing #storage-notice {
     max-width: 1000px;
     margin: auto;
   }
+}
+
+.offline-tools {
+  margin-bottom: 18px;
+}
+.offline-tools .connection {
+  margin-bottom: 6px;
+}
+.offline-tools button {
+  min-height: 36px;
+  padding: 4px 9px;
+  font-size: 12px;
+}
+.offline-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+#offline-secure-link {
+  display: block;
+  margin-top: 6px;
+  color: var(--accent);
+  font-size: 13px;
 }

@@ -2,6 +2,19 @@
 <html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
+    <script>
+      if (
+        location.protocol === "http:" &&
+        location.hostname === "news.zacai.fun"
+      ) {
+        location.replace(
+          "https://news.zacai.fun" +
+            location.pathname +
+            location.search +
+            location.hash,
+        );
+      }
+    </script>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#ffffff" />
@@ -138,6 +151,19 @@
               更新页面
             </button>
           </p>
+          <div id="offline-tools" class="view-note" hidden>
+            <span id="offline-status" role="status">正在准备离线使用…</span>
+            <button id="prepare-offline" class="text-button">
+              准备离线使用
+            </button>
+            <span id="offline-hint" class="offline-hint"></span>
+            <a
+              id="offline-secure-link"
+              href="https://news.zacai.fun/games/"
+              hidden
+              >使用 HTTPS 打开小游戏</a
+            >
+          </div>
           <div
             id="articles"
             class="article-list"
