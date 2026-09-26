@@ -23,7 +23,7 @@ python -m http.server 8080 --directory _site
 - 来源缺少明确带时区的日期、日期过旧/过于超前、无安全 HTTP(S) 链接的条目不发布。
 - 收藏将文章快照保存到当前浏览器的 localStorage，不会跨设备同步；浏览器拒绝持久化时会提示。
 - 支持分类、来源筛选、关键词搜索、日期筛选、分页加载、深色模式、键盘搜索与 RSS。
-- 读取新闻超时放宽到 30 秒，失败自动重试一次；兼容不支持 `AbortSignal.timeout` 的浏览器。请求仍失败时，可显示本浏览器最近一次成功读取的数据，并明确标记缓存状态。浏览器存储不可用时不影响正常在线读取。
+- 打开页面先显示本浏览器上次成功保存的资讯，后台检查更新。已有数据时先读很小的 `status.json`，时间戳一致则不再下载完整归档或重绘列表；有变化才下载新闻，并保留当前分类、搜索和分页。状态文件不可用时回退直接读取新闻。首次无缓存的新闻请求最多等 30 秒并自动重试一次，已有内容时后台请求最多等 15 秒，失败保留当前列表并提供重试。兼容不支持 `AbortSignal.timeout` 的浏览器，存储不可用也不影响在线读取。
 - “刷新资讯”通过 Cloudflare Worker 请求抓取和发布，完成后重新读取数据并保留当前筛选。全站共享至少 15 分钟触发间隔，已运行的任务会被复用；接口不可用时仍尝试读取 GitHub Pages 上已发布的数据。
 
 ## 安装与离线阅读（PWA）
@@ -32,7 +32,7 @@ python -m http.server 8080 --directory _site
 
 - `/manifest.webmanifest` 提供名称、图标、启动路径和每日速览/收藏快捷入口。PNG 图标直接由现有 SVG 站点图标导出。
 - `/sw.js` 缓存新闻首页、小游戏页及其静态资源，首次联网加载并完成缓存后才能离线重新打开。文章、搜索和收藏使用本浏览器已保存的数据；不缓存或代理原文网站。小游戏页 `/games/` 与首页分别回退到各自匹配版本的缓存页面。
-- 新闻 JSON 与刷新 API 不进入 Service Worker 缓存，联网时始终请求当前发布版本。请求失败才显示明确标记的上次数据；离线时不触发抓取，恢复联网会重新读取资讯。
+- 新闻 JSON、版本检查与刷新 API 不进入 Service Worker 缓存。联网时检查当前发布版本，检查期间先显示明确标记的本地数据；离线时直接阅读上次数据，恢复联网会重新检查资讯。手动刷新直接读取完整数据。首页完成首轮新闻请求后再注册离线资源，避免初次准备与新闻下载竞争网络；小游戏页仍立即准备。
 - 首页与游戏导航优先返回已安装版本的缓存页面，避免离线启动等待网络、或在线 HTML 与旧脚本版本混用。安装阶段验证资源与 HTML 属于同一版本；不会将不存在的页面替换成新闻首页。
 - 程序版本由 HTML、静态资源和 Service Worker 内容计算。只更新新闻不会更换程序缓存；程序改动安装完成后显示“更新页面”，用户点击后切换并清理本站旧缓存，保留收藏和其他应用缓存。
 - 离线数据保存在本机，清除浏览器存储或浏览器回收空间后可能丢失；新闻更新和原文链接需要联网。PWA 本身不需要常驻服务器，也没有额外的后台抓取任务。
@@ -47,8 +47,8 @@ PLAYWRIGHT_MODULE=/path/to/playwright NEWS_TEST_SITE=_site node tests/pwa-browse
 
 - GitHub Pages 必须开启 `https_enforced`。2026-09-26 排查发现该设置原为 false，HTTP 地址直接返回页面，因不满足安全上下文条件而无法使用 Service Worker；现已开启，线上应验证 HTTP 返回 301 到 HTTPS。页面也为 `news.zacai.fun` 提供 HTTPS 跳转兜底，本地预览不受影响。
 - iPhone 从桌面图标联网打开后，需要在这个入口完成离线准备。Safari 和桌面入口不能假定共享缓存；添加图标不等于已下载离线文件。旧 HTTP 图标若仍不可用，在 Safari 普通标签页用 `https://news.zacai.fun/games/` 重新添加图标，不要求清理浏览器数据。HTTP 与 HTTPS 是不同存储来源，不能保证旧 HTTP 存档自动迁移。
-- 游戏列表新增“准备离线使用／重新检查”。首页在桌面模式或未准备完成时也显示状态。安全连接缺失、离线接口不可用、缓存缺失、下载失败和等待更新分别提示，不再统称浏览器不支持。
-- Service Worker 的 `CHECK_OFFLINE` 检查完整启动资源；`PREPARE_OFFLINE` 只补缺失文件，先核对 HTML 的哈希引用再写入，禁止把新 HTML 混入旧离线版本。不会清空 localStorage、注销 worker 或删除仍能使用的文件。前台恢复或重新联网会再次检查。
+- 游戏列表新增“准备离线使用／重新检查”。资讯首页不显示游戏离线状态，也不主动执行游戏缓存检查或修复。安全连接缺失、离线接口不可用、缓存缺失、下载失败和等待更新分别提示，不再统称浏览器不支持。
+- Service Worker 的 `CHECK_OFFLINE` 检查完整启动资源；`PREPARE_OFFLINE` 只补缺失文件，先核对 HTML 的哈希引用再写入，禁止把新 HTML 混入旧离线版本。不会清空 localStorage、注销 worker 或删除仍能使用的文件。游戏页前台恢复或重新联网会再次检查。
 - 自动修复不等于永久保存；若系统已删除整个站点数据，仍需联网重新准备。未实际取得设备日志时，不把 HTTP 入口这一可复现配置缺陷断言为用户设备的唯一原因。
 
 本地构建后的恢复测试（独立浏览器进程关闭后断网重开、完整性检查、缺失文件修复、存档保留、不安全／无接口环境提示）：
@@ -91,6 +91,7 @@ Safari 15.3 缺少原生 `<dialog>` 的 `showModal()` / `close()` 和 `Object.ha
 规则测试随发布执行：`node --test tests/games-core.cjs tests/table-games-core.cjs tests/extra-games-core.cjs tests/casual-games-core.cjs tests/sw-compat.cjs`。本地构建并启动预览后，可运行触屏、暂停、成绩保存和离线打开检查：
 
 ```sh
+PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/news-loading-browser.cjs
 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/games-browser.cjs
 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/table-games-browser.cjs
 NEWS_LEGACY_SAFARI=1 PLAYWRIGHT_MODULE=/path/to/playwright NEWS_BASE_URL=http://127.0.0.1:8765 node tests/extra-games-browser.cjs

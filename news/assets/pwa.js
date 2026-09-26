@@ -74,8 +74,7 @@
     offlineStatus.textContent = messages[reason] || messages.registration;
     offlineStatus.classList.toggle("ready", reason === "ready");
     offlineStatus.dataset.state = reason;
-    if (offlineTools)
-      offlineTools.hidden = !isGames && reason === "ready" && !isInstalled();
+    if (offlineTools) offlineTools.hidden = !isGames;
     if (prepareButton) {
       prepareButton.textContent =
         reason === "ready" || reason === "timeout"
@@ -147,7 +146,7 @@
     });
   }
   async function checkOffline(repair = false) {
-    if (!support()) return;
+    if (!isGames || !support()) return;
     if (checking) return checking;
     checking = (async () => {
       const controller = navigator.serviceWorker.controller;
@@ -192,6 +191,8 @@
     return checking;
   }
   async function start() {
+    // News gets the network first. Games still prepare immediately on entry.
+    if (!isGames) await window.newsInitialLoad;
     if (!support()) return;
     if (starting) return starting;
     starting = (async () => {
@@ -209,7 +210,6 @@
           .then(() => checkOffline())
           .catch(() => status("registration"));
         await checkOffline();
-        if (navigator.onLine) registration.update().catch(() => {});
       } catch (error) {
         // A cold offline launch may reject register() while a saved controller
         // and its cache are already usable. Check that installed version first.
@@ -257,8 +257,7 @@
       if (applyingUpdate) window.location.reload();
       else Promise.resolve(checking).then(() => checkOffline());
     });
-    // Deferred scripts can register as soon as the DOM is available; no need to
-    // wait for load, which can be delayed by unrelated page resources.
+    // News waits for its first data check; the games page starts immediately.
     start();
     document.addEventListener("visibilitychange", () => {
       if (!document.hidden) {

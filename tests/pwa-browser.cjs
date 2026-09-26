@@ -27,7 +27,10 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
         );
       if (pathname === "/sw.js" && process.env.NEWS_LEGACY_SAFARI)
         body = Buffer.from("Object.hasOwn = undefined;\n" + body.toString());
-      if (pathname === "/data/news.json" && dataTime) {
+      if (
+        ["/data/news.json", "/data/status.json"].includes(pathname) &&
+        dataTime
+      ) {
         const data = JSON.parse(body);
         data.updatedAt = dataTime;
         body = Buffer.from(JSON.stringify(data));

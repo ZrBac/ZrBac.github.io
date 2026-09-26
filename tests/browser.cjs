@@ -234,6 +234,9 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     fixture.articles[0].excerpt = "<script>window.injected=true</script>";
     fixture.articles[1].url = "javascript:window.injected=true";
     fixture.updatedAt = new Date(Date.now() - 3 * 3600 * 1000).toISOString();
+    await page.route("**/data/status.json", (route) =>
+      route.fulfill({ json: { updatedAt: "fixture-new-version" } }),
+    );
     await page.route("**/data/news.json", (route) =>
       route.fulfill({ json: fixture }),
     );
@@ -246,6 +249,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     assert.equal(await page.locator('a[href^="javascript:"]').count(), 0);
     assert.equal(await page.evaluate(() => window.injected), undefined);
 
+    await page.unroute("**/data/status.json");
     await page.unroute("**/data/news.json");
     await page.route("**/data/news.json", (route) =>
       route.fulfill({ status: 503, body: "unavailable" }),

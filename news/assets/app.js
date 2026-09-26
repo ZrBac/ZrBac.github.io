@@ -68,28 +68,28 @@
     limit: 12,
     saved: new Map(),
   };
-  const dateParts = (date) =>
-    new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Shanghai",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).formatToParts(new Date(date));
+  const dayFormatter = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  const dateParts = (date) => dayFormatter.formatToParts(new Date(date));
   const dayOf = (date) => {
     const parts = Object.fromEntries(
       dateParts(date).map((p) => [p.type, p.value]),
     );
     return `${parts.year}-${parts.month}-${parts.day}`;
   };
-  const formatTime = (date) =>
-    new Intl.DateTimeFormat("zh-CN", {
-      timeZone: "Asia/Shanghai",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    }).format(new Date(date));
+  const timeFormatter = new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const formatTime = (date) => timeFormatter.format(new Date(date));
   const relativeTime = (date) => {
     const minutes = Math.max(
       0,
@@ -573,18 +573,36 @@
       clearTimeout(timer);
     }
   }
-  async function fetchData() {
+  async function fetchData(checkVersion = false) {
     if (!navigator.onLine) throw new Error("Offline");
+    if (checkVersion && state.data) {
+      try {
+        const version = await requestJSON(
+          "/data/status.json",
+          { cache: "no-cache" },
+          4000,
+        );
+        if (version.updatedAt === state.data.updatedAt) return state.data;
+      } catch {
+        // A missing or unavailable status file must not prevent a data refresh.
+      }
+    }
     return validateData(
-      await requestJSON("/data/news.json", { cache: "no-cache" }),
+      await requestJSON(
+        "/data/news.json",
+        { cache: "no-cache" },
+        state.data ? 15000 : 30000,
+      ),
     );
   }
-  function showData(data, preserveFilters = false) {
+  function showData(data, preserveFilters = false, persist = true) {
     const hadData = !!state.data;
     state.data = data;
-    try {
-      localStorage.setItem(cacheKey, JSON.stringify(data));
-    } catch {}
+    if (persist) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(data));
+      } catch {}
+    }
     renderSidebar();
     if (preserveFilters && hadData) {
       if (
@@ -596,34 +614,42 @@
       render();
     } else route();
   }
-  async function load(preserveFilters = false) {
+  async function load(preserveFilters = false, checkVersion = false) {
     if (loading) return;
     loading = true;
     $("#refresh-news").disabled = true;
     $("#load-notice").hidden = true;
-    $("#articles").setAttribute("aria-busy", "true");
+    if (!state.data) {
+      try {
+        const cached = validateData(JSON.parse(localStorage.getItem(cacheKey)));
+        showData(cached, false, false);
+      } catch {}
+    }
+    if (state.data) {
+      $("#load-notice").textContent = navigator.onLine
+        ? "正在显示上次成功获取的资讯，后台检查更新中…"
+        : "当前离线，正在显示上次成功获取的资讯。";
+      $("#load-notice").hidden = false;
+    }
+    $("#articles").setAttribute("aria-busy", String(!state.data));
     try {
       let data;
       for (let attempt = 0; attempt < 2; attempt++) {
         try {
-          data = await fetchData();
+          data = await fetchData(checkVersion && attempt === 0);
           break;
         } catch (error) {
-          if (attempt === 1) throw error;
+          if (attempt === 1 || !navigator.onLine || state.data) throw error;
           $("#update-status").textContent = "连接暂时不畅，正在重试…";
           await new Promise((resolve) => setTimeout(resolve, 1000));
         }
       }
-      showData(data, preserveFilters);
+      // The reader may have changed tab, search, date or pagination while fetching.
+      if (data !== state.data) showData(data, preserveFilters || !!state.data);
+      $("#load-notice").hidden = true;
       return true;
     } catch (error) {
-      if (!state.data) {
-        try {
-          state.data = validateData(JSON.parse(localStorage.getItem(cacheKey)));
-        } catch {}
-      }
       if (state.data) {
-        showData(state.data, preserveFilters);
         $("#load-notice").innerHTML =
           `连接暂时失败，当前显示上次成功获取的资讯（${escape(formatTime(state.data.updatedAt))}）。<button class="text-button" data-retry>重新连接</button>`;
         $("#load-notice").hidden = false;
@@ -729,7 +755,7 @@
   window.addEventListener("online", () => {
     if ($("#refresh-notice").textContent.includes("当前离线"))
       $("#refresh-notice").hidden = true;
-    load(true);
+    load(true, true);
   });
   window.addEventListener("offline", () => {
     if (state.data) {
@@ -737,5 +763,5 @@
       $("#load-notice").hidden = false;
     }
   });
-  load();
+  window.newsInitialLoad = load(false, true);
 })();
