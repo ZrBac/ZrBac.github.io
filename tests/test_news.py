@@ -86,8 +86,8 @@ class FeedTests(unittest.TestCase):
         self.assertEqual(items[0]['category'], 'general')
 
 
-class ArchiveTests(unittest.TestCase):
-    def test_build_preserves_blog_article_urls_and_assets(self):
+class BuildTests(unittest.TestCase):
+    def test_build_news_only_removes_stale_blog_files(self):
         data = ROOT / 'news/data/news.json'
         existed = data.exists()
         original = data.read_bytes() if existed else None
@@ -95,22 +95,21 @@ class ArchiveTests(unittest.TestCase):
             data.parent.mkdir(parents=True, exist_ok=True)
             data.write_text(json.dumps({'articles': [], 'updatedAt': '2026-09-24T06:00:00Z'}))
             with tempfile.TemporaryDirectory() as tmp:
-                legacy = Path(tmp) / 'old'
-                legacy.mkdir()
-                (legacy / 'index.html').write_text('<a href="/">Blog</a>')
-                article = legacy / '2020/story'
-                article.mkdir(parents=True)
-                (article / 'index.html').write_text('<a href="/">首页</a><p>原文保留</p>')
-                (legacy / 'asset.css').write_text('body{}')
-                (legacy / 'CNAME').write_text('obsolete.example.com')
                 output = Path(tmp) / 'out'
-                subprocess.run([sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)], check=True, capture_output=True)
+                # Rebuilding an old output must remove previously published blog files.
+                stale_paths = ('blog/index.html', '2020/story/index.html', 'asset.css', 'atom.xml', 'CNAME')
+                for path in stale_paths:
+                    target = output / path
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_text('old blog content')
+                subprocess.run([sys.executable, str(ROOT / 'scripts/build_news.py'), '--output', str(output)], check=True, capture_output=True)
                 self.assertIn('id="news-content"', (output / 'index.html').read_text())
-                self.assertIn('Blog', (output / 'blog/index.html').read_text())
-                self.assertIn('href="/blog/"', (output / '2020/story/index.html').read_text())
-                self.assertIn('原文保留', (output / '2020/story/index.html').read_text())
-                self.assertTrue((output / 'asset.css').exists())
-                self.assertFalse((output / 'CNAME').exists())
+                for path in stale_paths:
+                    self.assertFalse((output / path).exists())
+                self.assertNotIn('/blog/', (output / 'index.html').read_text())
+                self.assertNotIn('/blog/', (output / 'assets/news/app.js').read_text())
+                self.assertEqual(re.findall(r'<loc>(.*?)</loc>', (output / 'sitemap.xml').read_text()),
+                                 ['https://news.zacai.fun/'])
                 self.assertEqual(json.loads((output / 'data/status.json').read_text()),
                                  {'updatedAt': '2026-09-24T06:00:00Z'})
                 manifest = json.loads((output / 'manifest.webmanifest').read_text())
@@ -142,11 +141,11 @@ class ArchiveTests(unittest.TestCase):
                     self.assertEqual((output / match.group(0).lstrip('/')).read_bytes(), (ROOT / 'news/assets' / f'{name}.{extension}').read_bytes())
                 # Hourly news publications must not force a new application-shell update.
                 data.write_text(json.dumps({'articles': [], 'updatedAt': '2026-09-24T07:00:00Z'}))
-                subprocess.run([sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)], check=True, capture_output=True)
+                subprocess.run([sys.executable, str(ROOT / 'scripts/build_news.py'), '--output', str(output)], check=True, capture_output=True)
                 self.assertEqual((output / 'sw.js').read_text(), worker)
                 cloud_endpoint = 'https://news-api.zacai.fun/api/news-refresh'
                 env = dict(os.environ, NEWS_REFRESH_ENDPOINT=cloud_endpoint)
-                command = [sys.executable, str(ROOT / 'scripts/build_news.py'), '--legacy', str(legacy), '--output', str(output)]
+                command = [sys.executable, str(ROOT / 'scripts/build_news.py'), '--output', str(output)]
                 subprocess.run(command, check=True, capture_output=True, env=env)
                 self.assertIn(f'name="news-refresh-endpoint" content="{cloud_endpoint}"',
                               re.sub(r'\s+', ' ', (output / 'index.html').read_text()))

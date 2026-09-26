@@ -21,11 +21,6 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v6
-      - name: Check out the original published blog
-        uses: actions/checkout@v6
-        with:
-          ref: 82b36364655d6fee8e148b8082dac22ef222e6e5 # Original published blog snapshot
-          path: _legacy
       - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
@@ -38,10 +33,10 @@ jobs:
           node --check news/sw.js
       - name: Collect news and retain the previous archive
         run: python scripts/collect_news.py --previous-url https://news.zacai.fun/data/news.json
-      - name: Build portal and preserve blog URLs
+      - name: Build news portal
         env:
           NEWS_REFRESH_ENDPOINT: ${{ vars.NEWS_REFRESH_ENDPOINT }}
-        run: python scripts/build_news.py --legacy _legacy
+        run: python scripts/build_news.py
       - uses: actions/upload-pages-artifact@v4
         with:
           path: _site

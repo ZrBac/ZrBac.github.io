@@ -1,15 +1,13 @@
 # 资讯
 
-综合热点 + AI/科技 + 文娱 + 体育资讯门户。界面为原生 HTML/CSS/JavaScript；采集与构建仅需 Python 3.11+ 标准库，不依赖旧 Hexo 的运行环境，也不需要模型 API 密钥。
+综合热点 + AI/科技 + 文娱 + 体育资讯门户。界面为原生 HTML/CSS/JavaScript；采集与构建仅需 Python 3.11+ 标准库，不需要模型 API 密钥。
 
 ## 本地运行
 
 ```sh
 python -m unittest discover -s tests -v
 python scripts/collect_news.py
-git fetch origin 82b36364655d6fee8e148b8082dac22ef222e6e5
-git worktree add --detach ../zrbac-legacy FETCH_HEAD
-python scripts/build_news.py --legacy ../zrbac-legacy
+python scripts/build_news.py
 python -m http.server 8080 --directory _site
 ```
 
@@ -35,7 +33,7 @@ python -m http.server 8080 --directory _site
 - `/manifest.webmanifest` 提供名称、图标、启动路径和每日速览/收藏快捷入口。PNG 图标直接由现有 SVG 站点图标导出。
 - `/sw.js` 只缓存新闻首页及其静态资源，首次联网加载并完成缓存后才能离线重新打开。文章、搜索和收藏使用本浏览器已保存的数据；不缓存或代理原文网站。
 - 新闻 JSON 与刷新 API 不进入 Service Worker 缓存，联网时始终请求当前发布版本。请求失败才显示明确标记的上次数据；离线时不触发抓取，恢复联网会重新读取资讯。
-- 首页使用有超时的网络优先策略，失败时返回与已缓存脚本配套的首页。安装阶段验证资源与 HTML 属于同一版本；不会将博客归档或 404 页面替换成新闻首页。
+- 首页使用有超时的网络优先策略，失败时返回与已缓存脚本配套的首页。安装阶段验证资源与 HTML 属于同一版本；不会将不存在的页面替换成新闻首页。
 - 程序版本由 HTML、静态资源和 Service Worker 内容计算。只更新新闻不会更换程序缓存；程序改动安装完成后显示“更新页面”，用户点击后切换并清理本站旧缓存，保留收藏和其他应用缓存。
 - 离线数据保存在本机，清除浏览器存储或浏览器回收空间后可能丢失；新闻更新和原文链接需要联网。PWA 本身不需要常驻服务器，也没有额外的后台抓取任务。
 
@@ -49,7 +47,7 @@ PLAYWRIGHT_MODULE=/path/to/playwright NEWS_TEST_SITE=_site node tests/pwa-browse
 
 `.github/workflows/news.yml` 在 `hexo` 分支相关文件更新、手动执行以及每小时第 17 分钟运行。GitHub Pages 发布方式使用 GitHub Actions。
 
-构建拉取固定提交 `82b36364655d6fee8e148b8082dac22ef222e6e5` 的原博客成品，将旧首页放到 `/blog/`，保留历史文章、分页、分类、图片等 URL；旧博客的首页链接改为 `/blog/`。不依赖已删除的 `master` 分支。`source` 下的 Hexo Markdown 也不修改。
+构建从空目录生成资讯站，只发布资讯页面、数据、RSS、站点地图和 PWA 资源。博客归档、历史文章和旧博客资源已下线，不再拉取旧博客快照；历史源码仍可从 Git 仓库中查阅。
 
 采集时读取上次发布的 `/data/news.json`，合并去重，保留最近 30 天、最多 6000 条，历史随运行积累。单来源失败时保留其历史并显示不可用状态；所有来源失败则终止部署，线上保留上一个成功版本。页面分别显示最近检查时间和最新文章发布时间，超过两小时未检查会显示延迟提示。
 
@@ -59,7 +57,7 @@ GitHub 的计划任务不是严格实时调度，可能延迟或被跳过；公�
 
 ## 回滚
 
-资讯代码回滚使用 Git revert 后重新运行工作流。仓库现为 `ZrBac/news`，站点为 `https://news.zacai.fun`；不要回滚到依赖已删除的 `master` 分支或旧域名读取归档的配置。原博客快照仍固定为上述提交。
+资讯代码回滚使用 Git revert 后重新运行工作流。仓库现为 `ZrBac/news`，站点为 `https://news.zacai.fun`；不要回滚到依赖已删除的 `master` 分支或旧域名读取归档的配置。
 
 ## 维护
 
@@ -68,4 +66,4 @@ GitHub 的计划任务不是严格实时调度，可能延迟或被跳过；公�
 - 修改采集：`scripts/collect_news.py`；修改构建：`scripts/build_news.py`。
 - 页面展示“资讯来源”中有每轮来源状态；更详细的错误见 GitHub Actions 日志。
 - 不要把 GitHub token、API key 或后台凭据写进静态资源。
-- 不要运行旧 Hexo 的 `hexo deploy` 来发布此门户，它会覆盖旧成品分支。后续如需重新生成博客，先检查归档与主页的兼容性。
+- 通过上述 GitHub Actions 工作流发布，不要运行旧 Hexo 的 `hexo deploy`。

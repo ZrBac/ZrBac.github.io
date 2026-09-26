@@ -1,4 +1,4 @@
-// Optional end-to-end checks. Install Playwright outside the legacy Hexo dependencies.
+// Optional end-to-end checks. Set PLAYWRIGHT_MODULE to the installed Playwright module.
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || "playwright");
 const assert = require("node:assert/strict");
 const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
@@ -216,13 +216,12 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
       fullPage: true,
     });
     const blog = await page.request.get(base + "/blog/");
-    assert.equal(blog.status(), 200);
-    assert.match(await blog.text(), /Java-8-HashMap/);
+    assert.equal(blog.status(), 404);
+    assert.equal(await page.locator('a[href="/blog/"]').count(), 0);
     const article = await page.request.get(
       base + "/2020/09/25/Java-8-HashMap/",
     );
-    assert.equal(article.status(), 200);
-    assert.match(await article.text(), /href="\/blog\/"/);
+    assert.equal(article.status(), 404);
     const feed = await page.request.get(base + "/news.xml");
     assert.equal(feed.status(), 200);
     assert.match(await feed.text(), /<rss/);
@@ -301,7 +300,7 @@ const base = process.env.NEWS_BASE_URL || "http://127.0.0.1:8765";
     await compatibility.close();
     assert.deepEqual(errors, []);
     console.log(
-      "PASS: filters, search, pagination, saved persistence, brief/date, source dialog, theme, keyboard, 4 viewports, blog preservation, RSS, XSS safety, failure/retry.",
+      "PASS: filters, search, pagination, saved persistence, brief/date, source dialog, theme, keyboard, 4 viewports, blog removal, RSS, XSS safety, failure/retry.",
     );
   } finally {
     await browser.close();

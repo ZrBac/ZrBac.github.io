@@ -83,5 +83,5 @@ self.addEventListener("fetch", (event) => {
     );
   }
   // News data and refresh APIs always use the network. app.js handles its explicit
-  // last-successful-data fallback. Blog archives and other paths are not intercepted.
+  // last-successful-data fallback. Other paths are not intercepted.
 });

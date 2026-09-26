@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Overlay the news portal on the original published blog without rebuilding old Hexo."""
+"""Build the standalone static news portal and its PWA assets."""
 import argparse
 import hashlib
 import json
@@ -17,7 +17,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument('--legacy', type=Path, required=True)
     p.add_argument('--output', type=Path, default=ROOT / '_site')
     args = p.parse_args()
     refresh_endpoint = os.environ.get('NEWS_REFRESH_ENDPOINT', '').strip() or 'https://zacai.fun/api/news-refresh'
@@ -25,27 +24,12 @@ def main():
     if (endpoint.scheme != 'https' or not endpoint.hostname or endpoint.username or endpoint.password
             or endpoint.query or endpoint.fragment or endpoint.path != '/api/news-refresh'):
         raise SystemExit('NEWS_REFRESH_ENDPOINT must be an HTTPS /api/news-refresh URL without credentials or query parameters')
-    legacy = args.legacy.resolve()
     output = args.output.resolve()
-    if not (legacy / 'index.html').is_file():
-        raise SystemExit('Published blog snapshot missing. Refusing to drop the existing blog.')
-    if output == ROOT or output == legacy or output in legacy.parents or output in ROOT.parents:
+    if output == ROOT or output in ROOT.parents:
         raise SystemExit('Unsafe output directory')
     if output.exists():
         shutil.rmtree(output)
-    shutil.copytree(legacy, output, ignore=shutil.ignore_patterns('.git', '.github', 'CNAME'))
-    # Original article URLs and assets stay in place; move only the old home page.
-    (output / 'blog').mkdir(exist_ok=True)
-    shutil.copy2(output / 'index.html', output / 'blog/index.html')
-    for page in output.rglob('*.html'):
-        text = page.read_text(errors='replace')
-        text = text.replace('href="/"', 'href="/blog/"')
-        text = text.replace('http://yoursite.com', 'https://news.zacai.fun')
-        page.write_text(text)
-    for filename in ('atom.xml', 'sitemap.xml'):
-        path = output / filename
-        if path.exists():
-            path.write_text(path.read_text().replace('http://yoursite.com', 'https://news.zacai.fun'))
+    output.mkdir(parents=True)
     shutil.copy2(ROOT / 'news/index.html', output / 'index.html')
     shutil.copytree(ROOT / 'news/assets', output / 'assets/news', dirs_exist_ok=True)
     # New HTML always requests the matching assets, even with cached older releases.
@@ -80,12 +64,10 @@ def main():
     (output / 'data/status.json').write_text(json.dumps({'updatedAt': updated_at}) + '\n')
     items = ''.join(f'<item><title>{escape(a["title"])}</title><link>{escape(a["url"])}</link><guid>{escape(a["url"])}</guid><pubDate>{format_datetime(datetime.fromisoformat(a["publishedAt"].replace("Z", "+00:00")))}</pubDate><description>{escape(a["excerpt"])}</description></item>' for a in data['articles'][:50])
     (output / 'news.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>资讯</title><link>https://news.zacai.fun/</link><description>综合热点与 AI 科技资讯。摘要来自原始资讯源。</description>' + items + '</channel></rss>')
-    # A compact sitemap of the portal and preserved article URLs.
-    urls = ['https://news.zacai.fun/', 'https://news.zacai.fun/blog/']
-    urls += ['https://news.zacai.fun/' + str(f.relative_to(output).parent) + '/' for f in output.glob('20*/**/index.html')]
+    urls = ['https://news.zacai.fun/']
     (output / 'sitemap.xml').write_text('<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join(f'<url><loc>{escape(u)}</loc></url>' for u in urls) + '</urlset>')
     (output / 'robots.txt').write_text('User-agent: *\nAllow: /\nSitemap: https://news.zacai.fun/sitemap.xml\n')
-    print(f'Built {output}; {len(data["articles"])} news items; original blog preserved at /blog/.')
+    print(f'Built {output}; {len(data["articles"])} news items.')
 
 
 if __name__ == '__main__':

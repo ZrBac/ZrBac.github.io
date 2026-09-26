@@ -165,14 +165,16 @@ const root = path.resolve(process.env.NEWS_TEST_SITE || "_site");
     );
     assert(keys.includes("unrelated-test-cache"));
     assert(await page.locator("#pwa-update").isHidden());
-    const missing = await page.goto(base + "/not-a-news-page", {
-      waitUntil: "domcontentloaded",
-    });
-    assert.equal(
-      missing.status(),
-      404,
-      "service worker must not rewrite blog/missing pages into the news app",
-    );
+    for (const path of ["/blog/", "/2020/09/25/Java-8-HashMap/", "/not-a-news-page"]) {
+      const missing = await page.goto(base + path, {
+        waitUntil: "domcontentloaded",
+      });
+      assert.equal(
+        missing.status(),
+        404,
+        "service worker must not rewrite removed or missing pages into the news app",
+      );
+    }
     await context.setOffline(true);
     await page.goto(base + "/#saved", { waitUntil: "networkidle" });
     await page.locator(".article").first().waitFor();
